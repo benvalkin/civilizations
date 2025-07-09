@@ -1,0 +1,176 @@
+package com.uncreated.civilized.core.villagerinfo;
+
+import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
+
+import java.util.Random;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import com.uncreated.civilized.core.StoreOperation;
+import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.entity.VillagerOccupation;
+import com.mojang.datafixers.util.Pair;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+
+@Getter
+@Builder
+public class VillagerInfo {
+
+   public static StreamCodec<FriendlyByteBuf, VillagerInfo> CODEC =
+         StreamCodec.ofMember(VillagerInfo::encode, VillagerInfo::decode);
+
+   // The stream decoder reference
+   public static VillagerInfo decode(FriendlyByteBuf buffer) {
+      VillagerInfoBuilder builder =
+            VillagerInfo.builder()
+                  .villagerId(buffer.readUUID())
+                  .isDeceased(buffer.readBoolean())
+                  .firstName(buffer.readUtf())
+                  .lastName(buffer.readUtf())
+                  .occupation(buffer.readEnum(VillagerOccupation.class));
+
+      if (buffer.readBoolean())
+         builder.settlementId(buffer.readUUID());
+      if (buffer.readBoolean())
+         builder.homeBuildingId(buffer.readUUID());
+
+      return builder.build();
+   }
+
+   // The stream encoder reference
+   public void encode(FriendlyByteBuf buffer) {
+      buffer.writeUUID(villagerId);
+      buffer.writeBoolean(isDeceased);
+      buffer.writeUtf(firstName);
+      buffer.writeUtf(lastName);
+      buffer.writeEnum(occupation);
+      buffer.writeBoolean(settlementId != null);
+      if (settlementId != null)
+         buffer.writeUUID(settlementId);
+      buffer.writeBoolean(homeBuildingId != null);
+      if (homeBuildingId != null)
+         buffer.writeUUID(homeBuildingId);
+   }
+
+   public static final String FIELD_VILLAGER_ID = "villager_id";
+   public static final String FIELD_IS_DECEASED = "is_deceased";
+   public static final String FIELD_SETTLEMENT_ID = "settlement_id";
+   public static final String FIELD_HOME_BUILDING_ID = "home_building_id";
+   public static final String FIELD_FIRST_NAME = "first_name";
+   public static final String FIELD_LAST_NAME = "last_name";
+   public static final String FIELD_VILLAGER_OCCUPATION = "field_villager_occupation";
+
+   private @Nullable Integer entityId;
+   private UUID villagerId;
+   @Setter
+   private boolean isDeceased;
+   @Setter
+   @Builder.Default
+   private String firstName = "";
+   @Setter
+   @Builder.Default
+   private String lastName = "";
+   @Setter
+   @Builder.Default
+   private VillagerOccupation occupation = VillagerOccupation.UNEMPLOYED;
+   @Setter
+   private @Nullable UUID settlementId;
+   @Setter
+   private @Nullable UUID homeBuildingId;
+   @Setter
+   private @Nullable UUID primaryWorksiteId;
+
+   public int getEntityId() {
+      if (entityId == null)
+         throw new IllegalStateException(
+               "VillagerInfo's entityId has not been set yet. Ensure that this field is set correctly.");
+
+      return entityId;
+   }
+
+   public boolean hasName() {
+      return !firstName.isEmpty() && !lastName.isEmpty();
+   }
+
+   public String getFullName() {
+
+      if (!hasName()) {
+         return "Unnamed Villager";
+      }
+
+      return firstName + " " + lastName;
+   }
+
+   public static Pair<String, String> generateRandomName() {
+      return switch (new Random().nextInt(6)) {
+      case 0 -> Pair.of("Ryaan", "van Reynoldus");
+      case 1 -> Pair.of("Koos", "Evans");
+      case 2 -> Pair.of("Brad", "Pietermaritzberg");
+      case 3 -> Pair.of("Daaniel", "Rooikloof");
+      case 4 -> Pair.of("Keanu", "van Riebeeck");
+      default -> Pair.of("Cornelius", "Hemsworth");
+      };
+   }
+
+   public Packet toPacket() {
+      return new Packet(this, StoreOperation.UPDATE);
+   }
+
+   public Packet toPacket(StoreOperation operation) {
+      return new Packet(this, operation);
+   }
+
+   public void copyFrom(VillagerInfo other) {
+      isDeceased = other.isDeceased;
+      firstName = other.firstName;
+      lastName = other.lastName;
+      occupation = other.occupation;
+      settlementId = other.settlementId;
+      homeBuildingId = other.homeBuildingId;
+   }
+
+   public String toStringLite() {
+      return String.format(
+            "{name: %s %s - entityId: %s entityUuid: %s settlementId: %s, occupation: %s}",
+            firstName,
+            lastName,
+            entityId,
+            villagerId,
+            settlementId,
+            occupation);
+   }
+
+   public boolean isOccupantOf(Building building) {
+      return building.getBuildingId().equals(homeBuildingId);
+   }
+
+   public record Packet(VillagerInfo villager, StoreOperation storeOperation) implements CustomPacketPayload {
+
+      public static final Type<Packet> SYNC_TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_villagerinfo"));
+
+      public static StreamCodec<FriendlyByteBuf, Packet> CODEC = StreamCodec.ofMember(Packet::encode, Packet::decode);
+
+      public static Packet decode(FriendlyByteBuf buffer) {
+         return new Packet(VillagerInfo.decode(buffer), buffer.readEnum(StoreOperation.class));
+      }
+
+      public void encode(FriendlyByteBuf buffer) {
+         villager.encode(buffer);
+         buffer.writeEnum(storeOperation);
+      }
+
+      @Override
+      public Type<? extends CustomPacketPayload> type() {
+         return SYNC_TYPE;
+      }
+   }
+}
