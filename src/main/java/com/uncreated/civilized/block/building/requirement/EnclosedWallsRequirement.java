@@ -35,7 +35,7 @@ public class EnclosedWallsRequirement implements IBuildingRequirement {
       return new Result(faults.size(), allowedFaults);
    }
 
-   private static boolean findFaultsInWall(
+   private static void findFaultsInWall(
          BlockPos airBlockAboveFloor,
          Level level,
          BuildingBounds bounds,
@@ -47,16 +47,14 @@ public class EnclosedWallsRequirement implements IBuildingRequirement {
 
          if (level.canSeeSky(current)) {
             problematicFloors.add(current.immutable());
-
-            return false;
+            return;
          }
 
          if (isWall(current, level))
-            return true;
+            return;
       }
 
       problematicFloors.add(current.immutable());
-      return false;
    }
 
    private static boolean isWall(BlockPos airBlockAboveFloor, Level level) {
