@@ -109,7 +109,7 @@ public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
       }
 
       Optional<Building> home = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
-      if (home.isPresent() && home.get().getBuildingType() == BuildingType.INN) {
+      if (home.isPresent() && home.get().getBuildingType() == BuildingType.TRADING_POST) {
          // try to move villager out of the inn if a better home is available
          Optional<Building> betterHome =
                BuildingUtil.findUnoccupiedHome(

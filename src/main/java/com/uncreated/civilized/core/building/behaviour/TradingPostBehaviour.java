@@ -16,11 +16,11 @@ import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 
-public class InnBehaviour extends BuildingBehaviour {
+public class TradingPostBehaviour extends BuildingBehaviour {
 
    private Random random = new Random();
 
-   protected InnBehaviour(Building building) {
+   protected TradingPostBehaviour(Building building) {
       super(building);
    }
 
@@ -79,7 +79,7 @@ public class InnBehaviour extends BuildingBehaviour {
 
       if (villager == null) {
          LOGGER.error(
-               "Tried to spawn traveller villager at an Inn, but something went wrong during the entity spawning process.");
+               "Tried to spawn traveller villager at a Trading Post, but something went wrong during the entity spawning process.");
          return;
       }
 
@@ -88,6 +88,6 @@ public class InnBehaviour extends BuildingBehaviour {
       ServerVillagerStore.INSTANCE.setDirty();
       ServerVillagerStore.INSTANCE.replicateChange(villager.getInfo(), StoreOperation.UPDATE);
 
-      LOGGER.debug("Villager spawned at Inn: {}", villager.getUUID());
+      LOGGER.debug("Villager spawned at Trading Post: {}", villager.getUUID());
    }
 }

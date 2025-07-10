@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "civilized:item/inn"
+    "layer0": "civilized:item/trading_post"
   }
 }

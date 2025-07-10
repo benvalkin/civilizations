@@ -10,7 +10,7 @@ public enum BuildingType {
    NONE,
    TOWN_HALL,
    STOREHOUSE,
-   INN,
+   TRADING_POST,
    TAVERN,
    FARMER_HOUSE,
    RANCHER_HOUSE,
