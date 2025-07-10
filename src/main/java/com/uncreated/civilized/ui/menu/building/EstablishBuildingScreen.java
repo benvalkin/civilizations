@@ -6,6 +6,9 @@ import java.util.List;
 
 import com.uncreated.civilized.block.building.requirement.IBuildingRequirementResult;
 import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.bounds.BuildingBounds;
+import com.uncreated.civilized.item.BuildingDeedItem;
+import com.uncreated.civilized.networking.packets.CreateNewBuilding;
 import com.uncreated.civilized.ui.components.multiline.ImprovedMultiLineTextWidget;
 import com.uncreated.civilized.ui.menu.building.widgets.BuildingRequirementWidget;
 import com.uncreated.civilized.ui.style.Colors;
@@ -16,9 +19,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Screen that shows when placing and upgrading buildings.
@@ -29,7 +36,7 @@ public class EstablishBuildingScreen extends Screen {
 
    private final int imageWidth;
    private final int imageHeight;
-   private final List<IBuildingRequirementResult> requirements;
+   @org.jetbrains.annotations.NotNull
    private int leftPos;
    private int topPos;
    private int contentWidth;
@@ -43,8 +50,17 @@ public class EstablishBuildingScreen extends Screen {
    private Button cancel;
    private Button confirm;
 
-   public EstablishBuildingScreen(BuildingType buildingType, List<IBuildingRequirementResult> requirements) {
+   private final BuildingType buildingType;
+   private final BuildingBounds bounds;
+   private final List<IBuildingRequirementResult> requirements;
+
+   public EstablishBuildingScreen(
+         BuildingType buildingType,
+         BuildingBounds bounds,
+         List<IBuildingRequirementResult> requirements) {
       super(Component.translatable("menu.building.management.create.heading", buildingType.translationDark()));
+      this.buildingType = buildingType;
+      this.bounds = bounds;
       this.requirements = requirements;
       isPauseScreen();
       imageWidth = 256;
@@ -75,16 +91,17 @@ public class EstablishBuildingScreen extends Screen {
       final int buttonMargin = 2;
       final int buttonHeight = 20;
       cancel =
-            Button.builder(Component.translatable("gui.misc.button.cancel"), EstablishBuildingScreen::onPressCancel)
+            Button.builder(Component.translatable("gui.misc.button.cancel"), this::onPressCancel)
                   .pos(leftPos + buttonMargin, topPos + contentHeight - buttonMargin)
                   .size(contentWidth / 2 - buttonMargin * 2, buttonHeight)
                   .build();
 
       confirm =
-            Button.builder(Component.translatable("gui.misc.button.confirm"), EstablishBuildingScreen::onPressConfirm)
+            Button.builder(Component.translatable("gui.misc.button.confirm"), this::onPressConfirm)
                   .pos(leftPos + contentWidth / 2 + buttonMargin, topPos + contentHeight - buttonMargin)
                   .size(contentWidth / 2 - buttonMargin * 2, buttonHeight)
                   .build();
+
       boolean allSatisfied = requirements.stream().allMatch(IBuildingRequirementResult::isSatisfied);
       if (!allSatisfied) {
          confirm.active = false;
@@ -120,12 +137,23 @@ public class EstablishBuildingScreen extends Screen {
       }
    }
 
-   private static void onPressCancel(Button button) {
+   private void onPressCancel(Button button) {
       Minecraft.getInstance().setScreen(null);
    }
 
-   private static void onPressConfirm(Button button) {
+   private void onPressConfirm(Button button) {
 
+      Minecraft.getInstance().setScreen(null);
+
+      LocalPlayer player = Minecraft.getInstance().player;
+      if (player == null)
+         return;
+
+      ItemStack itemInHand = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND);
+      if (itemInHand.getItem() instanceof BuildingDeedItem buildingDeed && buildingDeed.getBuildingType() == buildingType) {
+         PacketDistributor.sendToServer(new CreateNewBuilding(buildingType, bounds));
+         itemInHand.consume(1, player);
+      }
    }
 
    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {

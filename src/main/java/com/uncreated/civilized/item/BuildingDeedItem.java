@@ -15,6 +15,7 @@ import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.ui.menu.building.EstablishBuildingScreen;
 import com.uncreated.civilized.ui.style.Colors;
 
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -28,6 +29,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public class BuildingDeedItem extends Item {
+
+   @Getter
    private final BuildingType buildingType;
 
    public BuildingDeedItem(Properties properties, BuildingType buildingType) {
@@ -122,13 +125,9 @@ public class BuildingDeedItem extends Item {
          List<IBuildingRequirementResult> requirementResults =
                List.of(spaceResult, enclosedWallsResult, blockTypeResult);
 
-         Minecraft.getInstance().setScreen(new EstablishBuildingScreen(buildingType, requirementResults));
-
-         // PacketDistributor.sendToServer(new CreateNewBuilding(buildingType, boundsResult.bounds()));
+         Minecraft.getInstance().setScreen(new EstablishBuildingScreen(buildingType, boundsResult.bounds(), requirementResults));
 
          return InteractionResult.SUCCESS;
-         // return InteractionResult.CONSUME
-         // .heldItemTransformedTo(context.getItemInHand().consumeAndReturn(1, context.getPlayer()));
       }
 
       return InteractionResult.SUCCESS;
