@@ -3,11 +3,13 @@ package com.uncreated.civilized.item;
 import java.util.List;
 import java.util.Optional;
 
-import com.uncreated.civilized.block.building.requirement.BlockTypeRequirement;
 import com.uncreated.civilized.block.building.requirement.EnclosedWallsRequirement;
 import com.uncreated.civilized.block.building.requirement.IBuildingRequirementResult;
 import com.uncreated.civilized.block.building.requirement.SpaceRequirement;
-import com.uncreated.civilized.block.building.requirement.blocktype.BuildingBlockTypes;
+import com.uncreated.civilized.block.building.requirement.blockcount.BlockCountRequirement;
+import com.uncreated.civilized.block.building.requirement.blockcount.BlockTypeRequirement;
+import com.uncreated.civilized.block.building.requirement.blockcount.BuildingBlockTypes;
+import com.uncreated.civilized.block.building.requirement.blockcount.validators.BlockClassValidator;
 import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingType;
@@ -22,12 +24,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -116,7 +116,7 @@ public class BuildingDeedItem extends Item {
             return InteractionResult.FAIL;
          }
 
-         BlockTypeRequirement.Result blockTypeResult =
+         BlockCountRequirement.BlockCountResult blockTypeResult =
                new BlockTypeRequirement(BuildingBlockTypes.WOOD)
                      .getResult(context.getLevel(), boundsResult.bounds(), 80);
          SpaceRequirement.Result spaceResult =
@@ -124,9 +124,14 @@ public class BuildingDeedItem extends Item {
          EnclosedWallsRequirement.Result enclosedWallsResult =
                new EnclosedWallsRequirement()
                      .getResult(context.getLevel(), boundsResult.bounds(), spaceResult.getValidFloorBlocks(), 0);
+         BlockCountRequirement.BlockCountResult signsCountResult =
+               new BlockCountRequirement(
+                     new BlockClassValidator(SignBlock.class),
+                     Component.translatable("menu.building.management.requirements.count.description.signs"),
+                     false).getResult(context.getLevel(), boundsResult.bounds(), 1);
 
          List<IBuildingRequirementResult> requirementResults =
-               List.of(spaceResult, enclosedWallsResult, blockTypeResult);
+               List.of(spaceResult, enclosedWallsResult, blockTypeResult, signsCountResult);
 
          Minecraft.getInstance()
                .setScreen(new EstablishBuildingScreen(buildingType, boundsResult.bounds(), requirementResults));

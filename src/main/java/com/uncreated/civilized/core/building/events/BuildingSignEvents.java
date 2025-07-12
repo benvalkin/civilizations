@@ -3,6 +3,7 @@ package com.uncreated.civilized.core.building.events;
 import java.util.List;
 
 import com.uncreated.civilized.CivilizedMod;
+import com.uncreated.civilized.block.building.signs.SignHelper;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
@@ -11,6 +12,7 @@ import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.neoforge.registration.attachments.DataAttachments;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -31,7 +33,7 @@ public class BuildingSignEvents {
 
       Building building = event.getBuilding();
 
-      List<SignBlockEntity> signEntities =
+      List<SignBlockEntity> signs =
             event.getBuilding()
                   .getBounds()
                   .getBlockEntitiesInsideBuilding(event.getLevel())
@@ -40,38 +42,30 @@ public class BuildingSignEvents {
                   .map(b -> (SignBlockEntity) b)
                   .toList();
 
-      if (signEntities.isEmpty())
+      if (signs.isEmpty())
          return;
 
-      SignBlockEntity primary = signEntities.getFirst();
+      SignBlockEntity primarySign = building.getPrimarySign(event.getLevel());
+      if (primarySign == null) {
 
-      SignText updatedSignText = getBuildingSignText(building);
-      primary.setText(updatedSignText, true);
-   }
+         // link primary sign if it has not been set yet (usually after creating a new building)
+         primarySign = signs.stream().min((s1, s2) -> {
+            if (SignHelper.signTextHasSpecialTag(s1.getFrontText()))
+               return -2;
+            if (SignHelper.signTextHasSpecialTag(s2.getFrontText()))
+               return 2;
+            if (SignHelper.signIsBlank(s1.getFrontText()))
+               return -1;
+            if (SignHelper.signIsBlank(s2.getFrontText()))
+               return 1;
+            return 0;
+         }).orElseThrow();
 
-   public static SignText getBuildingSignText(Building building) {
-      List<VillagerInfo> occupants = BuildingUtil.getOccupants(building, ServerVillagerStore.INSTANCE);
-      Settlement settlement = ServerSettlementsStore.INSTANCE.get(building.getSettlementId());
-
-      Component[] signTextComponents = getSignTextComponents(building, settlement, occupants);
-      return new SignText(signTextComponents, signTextComponents, DyeColor.BLACK, false);
-
-   }
-
-   private static Component[] getSignTextComponents(
-         Building building,
-         Settlement settlement,
-         List<VillagerInfo> occupants) {
-      if (building.getBuildingType() == BuildingType.TRADING_POST) {
-         return new Component[] { building.getBuildingType().translation(),
-               settlement.displayNameTranslation().withStyle(ChatFormatting.ITALIC), Component.empty(),
-               Component.empty() };
-      } else if (building.getBuildingType().isPermanentResidence()) {
-         return new Component[] { building.getBuildingType().translation(),
-               Component.translatable("menu.building.residence.residents.count", occupants.size()), Component.empty(),
-               Component.empty() };
+         building.setPrimarySignPos(primarySign.getBlockPos());
+         primarySign
+               .setData(DataAttachments.LINKED_BUILDING, new DataAttachments.LinkedBuilding(building.getBuildingId()));
       }
-      return new Component[] { building.getBuildingType().translation(), Component.empty(), Component.empty(),
-            Component.empty() };
+
+      primarySign.setText(SignHelper.SPECIAL_BUILDING_MARKER_SIGN_TEXT, true);
    }
 }

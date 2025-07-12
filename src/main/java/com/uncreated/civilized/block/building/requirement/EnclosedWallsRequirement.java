@@ -14,7 +14,7 @@ import net.minecraft.world.level.Level;
 public class EnclosedWallsRequirement implements IBuildingRequirement {
 
    public static final double VALID_WALL_HEIGHT = 3;
-   public static final float PERCENTAGE_VALID_SOLID_WALL = 0.7f;
+   public static final float PERCENTAGE_VALID_SOLID_WALL = 0.6f;
 
    public Result getResult(
          Level level,
