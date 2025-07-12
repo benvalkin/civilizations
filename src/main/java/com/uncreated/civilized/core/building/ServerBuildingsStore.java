@@ -7,11 +7,12 @@ import java.util.UUID;
 import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 
+import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
-import com.mojang.logging.LogUtils;
 
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +20,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -28,6 +30,9 @@ public class ServerBuildingsStore extends BuildingStore {
 
    protected static final Logger LOGGER = LogUtils.getLogger();
    public static ServerBuildingsStore INSTANCE;
+
+   @Getter
+   private Level level;
 
    protected ServerBuildingsStore() {
       super();
@@ -134,7 +139,7 @@ public class ServerBuildingsStore extends BuildingStore {
    public void replicateChange(Building building, StoreOperation operation) {
       assert buildings.containsKey(building.getBuildingId());
       PacketDistributor.sendToAllPlayers(building.toPacket(operation));
-      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, false));
+      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, level, false));
    }
 
    public void replicateFullToNewClient(ServerPlayer player) {

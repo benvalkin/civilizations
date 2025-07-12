@@ -2,7 +2,7 @@ package com.uncreated.civilized.ui.events;
 
 import com.uncreated.civilized.CivilizedMod;
 import com.uncreated.civilized.core.villagerinfo.events.model.VillagerInfoUpdatedEvent;
-import com.uncreated.civilized.ui.menu.building.BuildingScreen;
+import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -20,7 +20,7 @@ public class UIUpdateEvents {
    }
 
    private static void updateScreen() {
-      if (Minecraft.getInstance().screen instanceof BuildingScreen buildingScreen) {
+      if (Minecraft.getInstance().screen instanceof ABuildingScreen buildingScreen) {
          buildingScreen.refresh();
       }
    }

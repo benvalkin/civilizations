@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.settlement.events.SettlementUpdatedEvent;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -22,10 +23,9 @@ public class ClientSettlementsStore extends SettlementsStore {
       super();
    }
 
-   public static void loadClient(Level level) {
-      // new instance in case the client is rejoining (the old instance might still have data in it)
-      INSTANCE = new ClientSettlementsStore();
-      INSTANCE.level = level;
+   @Override
+   public Level getLevel() {
+      return Minecraft.getInstance().level;
    }
 
    @Override

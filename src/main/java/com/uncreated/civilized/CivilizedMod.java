@@ -2,6 +2,7 @@ package com.uncreated.civilized;
 
 import org.slf4j.Logger;
 
+import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.events.BuildingStoreEvents;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
@@ -11,6 +12,7 @@ import com.uncreated.civilized.core.villagerinfo.events.VillagerStoreEvents;
 import com.uncreated.civilized.neoforge.registration.BlockRegistry;
 import com.uncreated.civilized.neoforge.registration.ItemRegistry;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
+import com.uncreated.civilized.neoforge.registration.attachments.DataAttachments;
 import com.uncreated.civilized.neoforge.registration.creativetab.CreativeTab;
 import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 import com.uncreated.civilized.neoforge.registration.entity.EntitySetupEventsClient;
@@ -19,7 +21,6 @@ import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
 import com.uncreated.civilized.neoforge.registration.gui.GuiSetupEvents;
 import com.uncreated.civilized.networking.PacketRegistry;
 import com.uncreated.civilized.ui.events.UIUpdateEvents;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -62,6 +63,7 @@ public class CivilizedMod {
       AIRegistry.MEMORY_MODULES.register(modEventBus);
       AIRegistry.SENSORS.register(modEventBus);
       AIRegistry.SCHEDULES.register(modEventBus);
+      DataAttachments.ATTACHMENTS.register(modEventBus);
 
       CreativeTab.CREATIVE_MODE_TABS.register(modEventBus);
 

@@ -160,7 +160,6 @@ public class EstablishBuildingScreen extends Screen {
       super.render(graphics, mouseX, mouseY, partialTicks);
       // this.renderBackground(graphics, mouseX, mouseY, partialTicks);
       this.renderLabels(graphics, mouseX, mouseY, partialTicks);
-
    }
 
    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {

@@ -17,8 +17,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 public abstract class SettlementsStore extends SavedData {
 
    protected static final Logger LOGGER = LogUtils.getLogger();
-   @Getter
-   protected Level level;
+
+   public abstract Level getLevel();
 
    protected Map<UUID, Settlement> settlements;
 
@@ -34,7 +34,7 @@ public abstract class SettlementsStore extends SavedData {
       Settlement settlement =
             new Settlement.SettlementBuilder().settlementId(UUID.randomUUID())
                   .ownerId(ownerUUID)
-                  .displayName("Default Settlement")
+                  .displayName(Settlement.generateRandomName())
                   .build();
 
       settlements.put(settlement.getSettlementId(), settlement);

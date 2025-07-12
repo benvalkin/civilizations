@@ -12,6 +12,7 @@ import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 
 import com.uncreated.civilized.networking.packets.CreateNewBuilding;
+import com.uncreated.civilized.networking.packets.ShowBuildingMenu;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
@@ -46,8 +47,13 @@ public class PacketRegistry {
                   ServerVillagerStore::receiveSyncFromClient));
 
       registrar.playToServer(
-              CreateNewBuilding.SYNC_TYPE,
+              CreateNewBuilding.TYPE,
               CreateNewBuilding.CODEC,
-              BuildingUtil::serverReceiveCreateNewBuilding);
+              CreateNewBuilding::serverReceiveCreateNewBuilding);
+
+      registrar.playToServer(
+              ShowBuildingMenu.TYPE,
+              ShowBuildingMenu.CODEC,
+              ShowBuildingMenu::serverReceiveShowBuildingMenu);
    }
 }

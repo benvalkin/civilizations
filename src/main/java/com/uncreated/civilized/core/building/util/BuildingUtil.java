@@ -37,36 +37,8 @@ public class BuildingUtil {
       return buildingStore.all()
             .stream()
             .filter(
-                  b -> b.getSettlementId().equals(settlementId) && b.getBuildingType().isProperHome()
+                  b -> b.getSettlementId().equals(settlementId) && b.getBuildingType().isPermanentResidence()
                         && !isBuildingFull(b, villagerStore))
             .findFirst();
-   }
-
-   public static void serverReceiveCreateNewBuilding(CreateNewBuilding createNewBuilding, IPayloadContext context) {
-
-      ServerPlayer placer = (ServerPlayer) context.player();
-      Optional<Settlement> settlement = ServerSettlementsStore.INSTANCE.findFromOwner(placer.getUUID());
-      if (settlement.isEmpty()) {
-         settlement = Optional.of(ServerSettlementsStore.INSTANCE.createNew(placer.getUUID()));
-         ServerSettlementsStore.INSTANCE.setDirty();
-         ServerSettlementsStore.INSTANCE.replicateChange(settlement.get(), StoreOperation.ADD_OR_OVERWRITE);
-      }
-
-      Building building =
-            ServerBuildingsStore.INSTANCE.createNew(
-                  settlement.get().getSettlementId(),
-                  placer.getUUID(),
-                  createNewBuilding.buildingType(),
-                  createNewBuilding.buildingBounds());
-      ServerBuildingsStore.INSTANCE.setDirty();
-      ServerBuildingsStore.INSTANCE.replicateChange(building, StoreOperation.ADD_OR_OVERWRITE);
-
-      placer.displayClientMessage(
-            Component
-                  .translatable(
-                        "message.building.placement.validation.success",
-                        building.getBuildingType().translation())
-                  .withColor(Colors.VALIDATION_SUCCESS),
-            false);
    }
 }

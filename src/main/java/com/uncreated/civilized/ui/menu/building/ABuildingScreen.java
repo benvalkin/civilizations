@@ -7,25 +7,20 @@ import java.util.List;
 import com.uncreated.civilized.ui.style.Colors;
 import com.uncreated.civilized.ui.tabs.AMenuScreenWithTabs;
 import com.uncreated.civilized.ui.tabs.ATab;
-import com.uncreated.civilized.ui.tabs.BlankTab;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-public class BuildingScreen extends AMenuScreenWithTabs<BuildingMenu> {
+public abstract class ABuildingScreen extends AMenuScreenWithTabs<BuildingMenu> {
    private static final ResourceLocation CONTAINER_LOCATION =
          ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_menu.png");
 
-   private Button tab1;
-   private Button tab2;
-   private Button tab3;
 
-   public BuildingScreen(BuildingMenu menu, Inventory playerInventory, Component title) {
+   public ABuildingScreen(BuildingMenu menu, Inventory playerInventory, Component title) {
       super(menu, playerInventory, title);
       this.imageWidth = 256;
       this.imageHeight = 256;
@@ -35,35 +30,13 @@ public class BuildingScreen extends AMenuScreenWithTabs<BuildingMenu> {
    private final int tabHeight = 140;
 
    @Override
-   protected List<ATab> createTabs() {
-      return List.of(
-            new InformationTab(
-                  0,
-                  getContentLeftPos(),
-                  getContentTopPos(),
-                  tabWidth,
-                  tabHeight,
-                  this.font,
-                  menu.getBuilding(),
-                  menu.getSettlement()),
-            new OccupantsTab(
-                  1,
-                  getContentLeftPos(),
-                  getContentTopPos(),
-                  tabWidth,
-                  tabHeight,
-                  this.font,
-                  menu.getBuilding(),
-                  menu.getSettlement()),
-            new BlankTab(
-                  2,
-                  getContentLeftPos(),
-                  getContentTopPos(),
-                  tabWidth,
-                  tabHeight,
-                  this.font,
-                  "This is Tab #3 :)"));
+   protected final List<ATab> createTabs() {
+      return createTabs(getContentLeftPos(), getContentTopPos(), tabWidth, tabHeight);
    }
+
+   protected abstract List<ATab> createTabs(int contentLeftPos, int contentTopPos, int tabWidth, int tabHeight);
+
+   protected abstract List<Button.Builder> createTabButtons();
 
    protected int centerAlignedX(Component component) {
       return (this.imageWidth - this.font.width(component)) / 2;
@@ -75,29 +48,7 @@ public class BuildingScreen extends AMenuScreenWithTabs<BuildingMenu> {
       this.titleLabelY = 30;
       // net.minecraft.client.gui.components.
 
-      tab1 =
-            addRenderableWidget(
-                  Button.builder(Component.literal("I"), this::onClickTab1)
-                        .pos(leftPos + 20, topPos + 20)
-                        .size(18, 18)
-                        .tooltip(Tooltip.create(Component.literal("Information")))
-                        .build());
-
-      tab2 =
-            addRenderableWidget(
-                  Button.builder(Component.literal("R"), this::onClickTab2)
-                        .pos(leftPos + 20, topPos + 40)
-                        .size(18, 18)
-                        .tooltip(Tooltip.create(Component.literal("Manage Residents")))
-                        .build());
-
-      tab3 =
-            addRenderableWidget(
-                  Button.builder(Component.literal("O"), this::onClickTab3)
-                        .pos(leftPos + 20, topPos + 60)
-                        .size(18, 18)
-                        .tooltip(Tooltip.create(Component.literal("Building Settings")))
-                        .build());
+      createTabButtons().forEach(builder -> addRenderableWidget(builder.build()));
 
       changeToDefaultTabIfNotSet();
 
@@ -107,18 +58,6 @@ public class BuildingScreen extends AMenuScreenWithTabs<BuildingMenu> {
       // .pos(leftPos + MARGIN_X, topPos + 160)
       // .selected(true)
       // .build());
-   }
-
-   private void onClickTab1(Button button) {
-      changeTab(0);
-   }
-
-   private void onClickTab2(Button button) {
-      changeTab(1);
-   }
-
-   private void onClickTab3(Button button) {
-      changeTab(2);
    }
 
    public void render(GuiGraphics graphics, int mouseX, int mouseY, float idkSomeNumber) {
@@ -152,7 +91,7 @@ public class BuildingScreen extends AMenuScreenWithTabs<BuildingMenu> {
    @Override
    public int getContentLeftPos() {
       return leftPos + 60;
-   }
+   } // BAD IMPLEMENTATION: we don't methods and an interface for this
 
    @Override
    public int getContentTopPos() {

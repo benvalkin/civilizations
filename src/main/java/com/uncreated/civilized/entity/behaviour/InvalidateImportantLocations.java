@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingType;
@@ -14,8 +16,6 @@ import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.VillagerOccupation;
-import com.google.common.collect.ImmutableMap;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -48,7 +48,7 @@ public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
 
       Optional<Building> newHome = invalidateHome(villagerInfo, level);
       if (newHome.isPresent()) {
-         newHome.get().refreshBlockEntities(level);
+         // TODO: find an alternative for newHome.get().refreshBlockEntities(level);
          villagerInfo.setOccupation(newHome.get().getBuildingType().toJobType());
       } else
          villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);

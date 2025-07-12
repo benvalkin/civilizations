@@ -1,6 +1,5 @@
 package com.uncreated.civilized.core.settlement.events;
 
-import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -14,8 +13,6 @@ public class SettlementStoreEvents {
    public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
       if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer serverPlayer)
          ServerSettlementsStore.INSTANCE.replicateFullToNewClient(serverPlayer);
-      else
-         ClientSettlementsStore.loadClient(event.getEntity().level());
    }
 
    @SubscribeEvent

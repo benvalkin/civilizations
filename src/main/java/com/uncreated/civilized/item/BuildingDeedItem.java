@@ -22,9 +22,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -125,7 +128,8 @@ public class BuildingDeedItem extends Item {
          List<IBuildingRequirementResult> requirementResults =
                List.of(spaceResult, enclosedWallsResult, blockTypeResult);
 
-         Minecraft.getInstance().setScreen(new EstablishBuildingScreen(buildingType, boundsResult.bounds(), requirementResults));
+         Minecraft.getInstance()
+               .setScreen(new EstablishBuildingScreen(buildingType, boundsResult.bounds(), requirementResults));
 
          return InteractionResult.SUCCESS;
       }

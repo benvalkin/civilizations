@@ -3,8 +3,10 @@ package com.uncreated.civilized.core.settlement;
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
+import com.uncreated.civilized.ui.style.Colors;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
@@ -13,6 +15,8 @@ import com.uncreated.civilized.networking.PacketHelper;
 import lombok.Builder;
 import lombok.Getter;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +33,7 @@ public class Settlement {
             .ownerId(buffer.readUUID())
             .displayName(buffer.readUtf())
             .citizenIds(PacketHelper.readPrefixedList(buffer, b -> b.readUUID()))
+            .settlementLevel(SettlementLevel.valueOf(buffer.readInt()))
             .build();
    }
 
@@ -38,24 +43,23 @@ public class Settlement {
       buffer.writeUUID(ownerId);
       buffer.writeUtf(displayName);
       PacketHelper.writePrefixedList(buffer, citizenIds, (b, i) -> b.writeUUID(i));
+      buffer.writeInt(settlementLevel.getLevel());
    }
 
    public static final String FIELD_SETTLEMENT_ID = "settlement_id";
    public static final String FIELD_OWNER_ID = "owner_id";
    public static final String FIELD_DISPLAY_NAME = "display_name";
-   public static final String FIELD_LIST_CITIZENS = "field_list_citizens";
-   public static final String FIELD_LIST_ITEM_CITIZEN_ID = "field_list_item_citizen_id";
+   public static final String FIELD_LIST_CITIZENS = "list_citizens";
+   public static final String FIELD_LIST_ITEM_CITIZEN_ID = "list_item_citizen_id";
+   public static final String FIELD_SETTLEMENT_LEVEL = "settlement_level";
 
    private UUID settlementId;
    private UUID ownerId;
    private String displayName;
    @Builder.Default
    private List<UUID> citizenIds = Lists.newArrayList();
-
-   public void updateInfo(String displayName) {
-
-      this.displayName = displayName;
-   }
+   @Builder.Default
+   public SettlementLevel settlementLevel = SettlementLevel.OUTPOST;
 
    public Settlement.Packet toPacket() {
       return new Settlement.Packet(this, StoreOperation.UPDATE);
@@ -70,6 +74,7 @@ public class Settlement {
       ownerId = other.ownerId;
       displayName = other.displayName;
       citizenIds = other.citizenIds; // TECHDEBT: this is sus if we are saving the list reference anywhere
+      settlementLevel = other.settlementLevel;
    }
 
    public void serverTick(ServerLevel level, long gameTime) {
@@ -78,6 +83,14 @@ public class Settlement {
 
    public String toStringLite() {
       return String.format("{settlementId: %s displayName: %s, pop: %s}", settlementId, displayName, citizenIds.size());
+   }
+
+   public MutableComponent displayNameTranslation() {
+      return Component.literal(displayName).withColor(Colors.SETTLEMENT_NAME);
+   }
+
+   public MutableComponent displayNameTranslationExtended() {
+      return Component.translatable("settlement.display_name_extended", displayName, settlementLevel.translation());
    }
 
    public record Packet(Settlement settlement, StoreOperation storeOperation) implements CustomPacketPayload {
@@ -101,5 +114,23 @@ public class Settlement {
       public Type<? extends CustomPacketPayload> type() {
          return SYNC_TYPE;
       }
+   }
+
+   public static String generateRandomName() {
+      return switch (new Random().nextInt(12)) {
+      case 0 -> "Blizzhollow";
+      case 1 -> "Chalbay";
+      case 2 -> "Dustcross";
+      case 3 -> "Relminster";
+      case 4 -> "Geldarch";
+      case 5 -> "Chimerket";
+      case 6 -> "Faergamble";
+      case 7 -> "Misthollow";
+      case 8 -> "Faunacre";
+      case 9 -> "Knightbridge";
+      case 10 -> "Emberham";
+      case 11 -> "Millmeadow";
+      default -> "Newhaven";
+      };
    }
 }

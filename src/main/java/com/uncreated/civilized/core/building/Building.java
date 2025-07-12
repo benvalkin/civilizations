@@ -1,8 +1,15 @@
 package com.uncreated.civilized.core.building;
 
+import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
+
 import java.util.List;
 import java.util.UUID;
 
+import lombok.Setter;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
@@ -18,10 +25,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
-import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
+import javax.annotation.Nullable;
 
 @Getter
 @Builder
@@ -69,9 +74,9 @@ public class Building {
    private BuildingBounds bounds;
    @Builder.Default
    private List<UUID> occupantIds = Lists.newArrayList();
-   @Builder.Default
-   private List<BlockEntity> blockEntitiesInside = Lists.newArrayList();
    private BuildingBehaviour behaviour;
+   @Setter
+   private @Nullable BlockPos primarySignPos;
 
    public Packet toPacket() {
       return new Packet(this, StoreOperation.UPDATE);
@@ -90,12 +95,18 @@ public class Building {
       occupantIds = other.occupantIds; // BAD IMPLEMENTATION: this is sus if we are saving the list reference anywhere
    }
 
-   public void refreshBlockEntities(Level level) {
-      blockEntitiesInside = bounds.getBlockEntitiesInsideBuilding(level);
-   }
-
    public BlockPos getBlockPos() {
       return bounds.getCenter();
+   }
+
+   public @Nullable SignBlockEntity getPrimarySign(Level level) {
+      if (primarySignPos == null)
+         return null;
+
+      if (level.getBlockEntity(primarySignPos) instanceof SignBlockEntity signBlockEntity)
+         return signBlockEntity;
+
+      return null;
    }
 
    public String toStringLite() {

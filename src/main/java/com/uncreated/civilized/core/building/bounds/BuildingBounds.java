@@ -12,6 +12,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 public class BuildingBounds {
@@ -82,7 +83,7 @@ public class BuildingBounds {
       }
    }
 
-   public List<BlockEntity> getBlockEntitiesInsideBuilding(Level level) {
+   public List<BlockEntity> getBlockEntitiesInsideBuilding(@NotNull Level level) {
       List<BlockEntity> entitiesInside = Lists.newArrayList();
       traverseBlocksWithin(blockPos -> {
          BlockEntity entity = level.getBlockEntity(blockPos);

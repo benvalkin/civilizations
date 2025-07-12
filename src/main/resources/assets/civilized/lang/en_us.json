@@ -43,5 +43,15 @@
   "menu.building.management.requirements.block_types.tooltip": "This building level needs at least %s %s blocks or better.",
   "menu.building.management.requirements.block_types.type.wood": "Wood",
   "menu.building.management.requirements.enclosed_walls.description": "Incomplete walls: %s",
-  "menu.building.management.requirements.enclosed_walls.tooltip": "This building has too many incomplete or irregular walls that are preventing its establishment."
+  "menu.building.management.requirements.enclosed_walls.tooltip": "This building has too many incomplete or irregular walls that are preventing its establishment.",
+  "settlement_level.outpost": "Outpost",
+  "settlement_level.hamlet": "Hamlet",
+  "settlement_level.village": "Village",
+  "settlement_level.town": "Town",
+  "settlement_level.city": "City",
+  "settlement.display_name_extended": "%s %s",
+  "menu.building.residence.residents.count": "Residents: %s",
+  "menu.building.trading_post.visitors.count": "Visitors: %s",
+  "menu.building.trading_post.visitors.count.heading": "Trading Post Visitors:",
+  "menu.building.trading_post.visitors.count.heading.empty": "There are currently no visitors at this trading post."
 }

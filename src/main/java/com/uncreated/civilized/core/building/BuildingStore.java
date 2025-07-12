@@ -5,15 +5,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.server.level.ServerLevel;
 import org.slf4j.Logger;
 
-import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 import com.google.common.collect.ImmutableList;
 import com.mojang.logging.LogUtils;
+import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 
-import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public abstract class BuildingStore extends SavedData {
@@ -21,8 +23,8 @@ public abstract class BuildingStore extends SavedData {
    protected static final Logger LOGGER = LogUtils.getLogger();
 
    protected Map<UUID, Building> buildings;
-   @Getter
-   protected Level level;
+
+   public abstract Level getLevel();
 
    protected BuildingStore() {
       buildings = new HashMap<>();
@@ -32,11 +34,7 @@ public abstract class BuildingStore extends SavedData {
       return ImmutableList.copyOf(buildings.values());
    }
 
-   public Building createNew(
-         UUID settlementId,
-         UUID placerId,
-         BuildingType buildingType,
-         BuildingBounds bounds) {
+   public Building createNew(UUID settlementId, UUID placerId, BuildingType buildingType, BuildingBounds bounds) {
       Building building =
             Building.builder()
                   .buildingId(UUID.randomUUID())
@@ -69,6 +67,10 @@ public abstract class BuildingStore extends SavedData {
 
    public Optional<Building> findEnclosingBuilding(BlockPos blockPos) {
       return all().stream().filter(b -> b.getBounds().contains(blockPos)).findFirst();
+   }
+
+   public Optional<Building> findFromPrimarySign(SignBlockEntity serverEntity) {
+      return all().stream().filter(b -> serverEntity == b.getPrimarySign((ServerLevel) serverEntity.getLevel())).findFirst();
    }
 
    public Optional<Building> findOverlappingBuilding(BuildingBounds bounds) {

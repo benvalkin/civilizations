@@ -5,13 +5,13 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.util.ContainerHelper;
-import com.google.common.collect.ImmutableMap;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -52,7 +52,8 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
 
       List<ChestBlockEntity> chestAtHome =
             home.get()
-                  .getBlockEntitiesInside()
+                  .getBounds()
+                  .getBlockEntitiesInsideBuilding(level)
                   .stream()
                   .filter(b -> b instanceof ChestBlockEntity)
                   .map(b -> (ChestBlockEntity) b)

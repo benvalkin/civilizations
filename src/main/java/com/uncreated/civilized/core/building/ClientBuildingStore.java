@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -22,10 +23,9 @@ public class ClientBuildingStore extends BuildingStore {
       super();
    }
 
-   public static void loadClient(Level level) {
-      // new instance in case the client is rejoining (the old instance might still have data in it)
-      INSTANCE = new ClientBuildingStore();
-      INSTANCE.level = level;
+   @Override
+   public Level getLevel() {
+      return Minecraft.getInstance().level;
    }
 
    @Override
@@ -45,7 +45,7 @@ public class ClientBuildingStore extends BuildingStore {
 
       assert buildings.containsKey(building.getBuildingId());
       PacketDistributor.sendToServer(building.toPacket());
-      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, true));
+      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, getLevel(), true));
    }
 
    public static void receiveSyncFromServer(Building.Packet packet, IPayloadContext context) {
@@ -63,7 +63,7 @@ public class ClientBuildingStore extends BuildingStore {
          else
             existing.get().copyFrom(fromPacket);
 
-         NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), true));
+         NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));
          return;
       }
 
@@ -83,6 +83,6 @@ public class ClientBuildingStore extends BuildingStore {
          existing.get().copyFrom(packet.building());
       }
 
-      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), true));
+      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));
    }
 }

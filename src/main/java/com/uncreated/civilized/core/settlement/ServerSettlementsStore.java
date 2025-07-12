@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.uncreated.civilized.core.settlement.events.SettlementUpdatedEvent;
-import net.neoforged.neoforge.common.NeoForge;
+import lombok.Getter;
+import net.minecraft.world.level.Level;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
+import com.uncreated.civilized.core.settlement.events.SettlementUpdatedEvent;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -17,12 +18,16 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ServerSettlementsStore extends SettlementsStore {
 
    public static ServerSettlementsStore INSTANCE;
+
+   @Getter
+   private Level level;
 
    public static void loadServer(MinecraftServer server) {
       INSTANCE =
@@ -61,6 +66,7 @@ public class ServerSettlementsStore extends SettlementsStore {
          item.putUUID(Settlement.FIELD_SETTLEMENT_ID, settlement.getSettlementId());
          item.putUUID(Settlement.FIELD_OWNER_ID, settlement.getOwnerId());
          item.putString(Settlement.FIELD_DISPLAY_NAME, settlement.getDisplayName());
+         item.putInt(Settlement.FIELD_SETTLEMENT_LEVEL, settlement.settlementLevel.getLevel());
          ListTag citizenIds = new ListTag();
          for (UUID citizenId : settlement.getCitizenIds()) {
             CompoundTag citizenTag = new CompoundTag();
@@ -87,7 +93,8 @@ public class ServerSettlementsStore extends SettlementsStore {
          Settlement.SettlementBuilder builder =
                new Settlement.SettlementBuilder().settlementId(itemTag.getUUID(Settlement.FIELD_SETTLEMENT_ID))
                      .ownerId(itemTag.getUUID(Settlement.FIELD_OWNER_ID))
-                     .displayName(itemTag.getString(Settlement.FIELD_DISPLAY_NAME));
+                     .displayName(itemTag.getString(Settlement.FIELD_DISPLAY_NAME))
+                     .settlementLevel(SettlementLevel.valueOf(itemTag.getInt(Settlement.FIELD_SETTLEMENT_LEVEL)));
 
          ListTag citizenIdsTag = itemTag.getList(Settlement.FIELD_LIST_CITIZENS, Tag.TAG_COMPOUND);
          List<UUID> citizenIds = Lists.newArrayList();

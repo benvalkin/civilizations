@@ -1,4 +1,4 @@
-package com.uncreated.civilized.ui.menu.building;
+package com.uncreated.civilized.ui.menu.building.residence.tabs;
 
 import java.util.List;
 
@@ -12,24 +12,20 @@ import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.entity.VillagerOccupation;
 import com.uncreated.civilized.ui.components.ScrollListView;
+import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.widgets.ManageOccupantWidget;
-import com.uncreated.civilized.ui.style.Colors;
-import com.uncreated.civilized.ui.tabs.ATab;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 
-public class OccupantsTab extends ATab {
+public class ManageResidentsTab extends ABuildingScreenTab {
 
    private ScrollListView scrollView;
-   private final Building building;
-   private final Settlement settlement;
 
-   public OccupantsTab(
+   public ManageResidentsTab(
          int index,
          int x,
          int y,
@@ -38,26 +34,15 @@ public class OccupantsTab extends ATab {
          Font font,
          Building building,
          Settlement settlement) {
-      super(index, x, y, width, height, font);
-      this.building = building;
-      this.settlement = settlement;
+      super(index, x, y, width, height, font, Component.literal("Manage Residents"), building, settlement);
 
       scrollView = createScrollView();
    }
 
    @Override
-   public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-
-      MutableComponent information = Component.literal("Manage Residents");
-      graphics.drawString(
-            font,
-            information,
-            getX() + (width - font.width(information)) / 2,
-            getY(),
-            Colors.MENU_TEXT_DARK,
-            false);
-
-      scrollView.render(graphics, mouseX, mouseY, partialTick);
+   public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+      super.renderWidget(graphics, mouseX, mouseY, partialTicks);
+      scrollView.render(graphics, mouseX, mouseY, partialTicks);
 
       // List<CivilizedVillager> occupants = getBuilding.get().getOccupants();
       // for (int i = 0; i < occupants.size(); i++) {
