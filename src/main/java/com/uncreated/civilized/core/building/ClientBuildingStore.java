@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.uncreated.civilized.core.StoreOperation;
+import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
 
 import net.minecraft.client.Minecraft;
@@ -40,12 +41,14 @@ public class ClientBuildingStore extends BuildingStore {
    }
 
    public void replicateChange(Building building, StoreOperation operation) {
-      if (operation != StoreOperation.UPDATE)
+      if (operation != StoreOperation.UPDATE && operation != StoreOperation.DELETE)
          throw new IllegalArgumentException("Sync store operation " + operation + " not supported on client");
 
       assert buildings.containsKey(building.getBuildingId());
-      PacketDistributor.sendToServer(building.toPacket());
+      PacketDistributor.sendToServer(building.toPacket(operation));
       NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, getLevel(), true));
+      if (operation == StoreOperation.DELETE)
+         NeoForge.EVENT_BUS.post(new BuildingDeletedEvent(building, getLevel(), true));
    }
 
    public static void receiveSyncFromServer(Building.Packet packet, IPayloadContext context) {
@@ -84,5 +87,7 @@ public class ClientBuildingStore extends BuildingStore {
       }
 
       NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));
+      if (packet.storeOperation() == StoreOperation.DELETE)
+         NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));
    }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 
@@ -140,6 +141,8 @@ public class ServerBuildingsStore extends BuildingStore {
       assert buildings.containsKey(building.getBuildingId());
       PacketDistributor.sendToAllPlayers(building.toPacket(operation));
       NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, level, false));
+      if (operation == StoreOperation.DELETE)
+         NeoForge.EVENT_BUS.post(new BuildingDeletedEvent(building, level, false));
    }
 
    public void replicateFullToNewClient(ServerPlayer player) {

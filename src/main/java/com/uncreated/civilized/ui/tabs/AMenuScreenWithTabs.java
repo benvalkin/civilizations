@@ -2,8 +2,9 @@ package com.uncreated.civilized.ui.tabs;
 
 import java.util.List;
 
-import com.uncreated.civilized.ui.components.IRefreshableUI;
 import org.jetbrains.annotations.Nullable;
+
+import com.uncreated.civilized.ui.components.IRefreshableUI;
 
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
@@ -61,7 +62,7 @@ public abstract class AMenuScreenWithTabs<T extends AbstractContainerMenu> exten
 
    @Override
    public void render(GuiGraphics graphics, int mouseX, int mouseY, float idkSomeNumber) {
-      this.renderBackground(graphics, mouseX, mouseY, idkSomeNumber);
+      // this.renderBackground(graphics, mouseX, mouseY, idkSomeNumber);
       super.render(graphics, mouseX, mouseY, idkSomeNumber);
       renderCurrentTabContents(graphics, mouseX, mouseY, idkSomeNumber);
       this.renderTooltip(graphics, mouseX, mouseY);

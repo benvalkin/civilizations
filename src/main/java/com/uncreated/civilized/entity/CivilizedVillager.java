@@ -1,20 +1,25 @@
 package com.uncreated.civilized.entity;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import com.uncreated.civilized.core.dialogue.traveler.quest.JoinSettlementContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import com.uncreated.civilized.core.StoreOperation;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
-import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.core.dialogue.DialoguePackage;
+import com.uncreated.civilized.core.dialogue.IVillageDialogue;
+import com.uncreated.civilized.core.dialogue.traveler.QuestStayAtVillage;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
@@ -25,18 +30,13 @@ import com.uncreated.civilized.entity.behaviour.UpdateActivityFromSchedule;
 import com.uncreated.civilized.entity.behaviour.farmer.HarvestCrops;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Dynamic;
+import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
 import lombok.Getter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -155,53 +155,14 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Override
    public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 
-      if (player.level().isClientSide)
-         return InteractionResult.SUCCESS;
-
-      if (info.getSettlementId() == null) {
-
-         Optional<Settlement> ownerSettlement = ServerSettlementsStore.INSTANCE.findFromOwner(player.getUUID());
-         if (ownerSettlement.isEmpty()) {
-            player.displayClientMessage(
-                  Component.literal("I'm looking for a village to spend the night. Are you in charge here?"),
-                  false);
-            return InteractionResult.FAIL;
-         }
-
-         Optional<Building> unoccupiedBuilding =
-               BuildingUtil.findUnoccupiedHome(
-                     ownerSettlement.get().getSettlementId(),
-                     ServerBuildingsStore.INSTANCE,
-                     ServerVillagerStore.INSTANCE);
-
-         if (unoccupiedBuilding.isEmpty()) {
-            player.displayClientMessage(
-                  Component.literal("I'd love to join this villager, but there is nowhere for me to stay."),
-                  false);
-            return InteractionResult.FAIL;
-         }
-
-         info.setSettlementId(ownerSettlement.get().getSettlementId());
-         ServerVillagerStore.INSTANCE.replicateChange(info, StoreOperation.UPDATE);
-         ServerVillagerStore.INSTANCE.setDirty();
-
-         player.displayClientMessage(Component.literal("I'd love to join this villager!"), false);
-         return InteractionResult.SUCCESS;
+      if (player.level().isClientSide) {
+         DialoguePackage dialoguePackage = QuestStayAtVillage.questStayAtVillage();
+         IVillageDialogue dialogue = dialoguePackage.chooseRandom();
+         VillagerDialogueScreen screen =
+               new VillagerDialogueScreen(this, dialogue, new JoinSettlementContext(dialogue, this, player));
+         Minecraft.getInstance().setScreen(screen);
       }
-
-      // if (farmerBuilding.isPresent()) {
-      // GlobalPos workPos = GlobalPos.of(level().dimension(), farmerBuilding.get().getBlockPos());
-      // getBrain().setMemory(MemoryModuleType.JOB_SITE, workPos);
-      // this.getBrain().setActiveActivityIfPossible(Activity.WORK);
-      // LOGGER.info("Set villager job site: {}", workPos);
-      // }
-
       return InteractionResult.SUCCESS;
-
-      // this.getEntityData().set(MOVE_TARGET, player.blockPosition().offset(50, 0, 50));
-      // this.getEntityData().set(HAS_MOVE_TARGET, true);
-      //
-      // LogUtils.getLogger().info("Civie move target set: {}", player.blockPosition());
    }
 
    public void invalidateHomeAndJobMemories() {
@@ -417,5 +378,4 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
                         Pair.of(SetEntityLookTarget.create(MobCategory.MONSTER, 8.0F), 1),
                         Pair.of(new DoNothing(30, 60), 2))));
    }
-
 }

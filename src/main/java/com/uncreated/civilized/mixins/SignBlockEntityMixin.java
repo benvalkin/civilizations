@@ -1,6 +1,6 @@
 package com.uncreated.civilized.mixins;
 
-import static com.uncreated.civilized.neoforge.registration.attachments.DataAttachments.LinkedBuilding.FIELD_BUILDING_ID;
+import static com.uncreated.civilized.neoforge.registration.attachments.DataAttachments.LinkedBuilding.FIELD_BUILDING_IS_BUILDING;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -49,8 +49,9 @@ public abstract class SignBlockEntityMixin extends BlockEntity {
       if (building.isEmpty())
          return;
 
-      CompoundTag tag = cir.getReturnValue(); // add building ID to packet to send to client
-      tag.putUUID(FIELD_BUILDING_ID, building.get().getBuildingId());
+      // add extra packet fields to send to client
+      CompoundTag tag = cir.getReturnValue();
+      tag.putUUID(FIELD_BUILDING_IS_BUILDING, building.get().getBuildingId());
    }
 
    @Inject(method = "loadAdditional", at = @At("TAIL"))
@@ -60,10 +61,14 @@ public abstract class SignBlockEntityMixin extends BlockEntity {
          return;
 
       // on client reading update packet from server
-      if (tag.hasUUID(FIELD_BUILDING_ID)) {
-         UUID buildingId = tag.getUUID(FIELD_BUILDING_ID);
+      if (tag.hasUUID(FIELD_BUILDING_IS_BUILDING)) {
+         UUID buildingId = tag.getUUID(FIELD_BUILDING_IS_BUILDING);
          setData(DataAttachments.LINKED_BUILDING, new DataAttachments.LinkedBuilding());
          civilizations$setClientText(buildingId);
+      } else if (getData(DataAttachments.LINKED_BUILDING).getBuildingId() != null) {
+         // if sign previously had a linked building but no longer does, unlink it/clear its text
+         frontText = new SignText();
+         setData(DataAttachments.LINKED_BUILDING, new DataAttachments.LinkedBuilding());
       }
    }
 

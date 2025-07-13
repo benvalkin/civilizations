@@ -31,8 +31,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * Screen that shows when placing and upgrading buildings.
  */
 public class EstablishBuildingScreen extends Screen {
-   private static final ResourceLocation CONTAINER_LOCATION =
-         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_menu.png");
+   private static final ResourceLocation BACKGROUND_TEXTURE =
+         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_deed.png");
 
    private final int imageWidth;
    private final int imageHeight;
@@ -41,8 +41,8 @@ public class EstablishBuildingScreen extends Screen {
    private int topPos;
    private int contentWidth;
    private int contentHeight;
-   private int contentMarginX = 60;
-   private int contentMarginY = 25;
+   private int contentMarginX = 65;
+   private int contentMarginY = 30;
    private int titleX;
    private int titleY;
 
@@ -62,7 +62,6 @@ public class EstablishBuildingScreen extends Screen {
       this.buildingType = buildingType;
       this.bounds = bounds;
       this.requirements = requirements;
-      isPauseScreen();
       imageWidth = 256;
       imageHeight = 256;
    }
@@ -77,7 +76,7 @@ public class EstablishBuildingScreen extends Screen {
       this.leftPos = (width - this.imageWidth) / 2 + contentMarginX;
       this.topPos = (height - this.imageHeight) / 2 + contentMarginY;
       this.contentWidth = imageWidth - contentMarginX * 2;
-      this.contentHeight = imageHeight - 100;
+      this.contentHeight = imageHeight - 125;
       this.titleX = leftPos;
       this.titleY = topPos;
 
@@ -150,7 +149,8 @@ public class EstablishBuildingScreen extends Screen {
          return;
 
       ItemStack itemInHand = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND);
-      if (itemInHand.getItem() instanceof BuildingDeedItem buildingDeed && buildingDeed.getBuildingType() == buildingType) {
+      if (itemInHand.getItem() instanceof BuildingDeedItem buildingDeed
+            && buildingDeed.getBuildingType() == buildingType) {
          PacketDistributor.sendToServer(new CreateNewBuilding(buildingType, bounds));
          itemInHand.consume(1, player);
       }
@@ -177,7 +177,7 @@ public class EstablishBuildingScreen extends Screen {
       int j = (this.height - this.imageHeight) / 2;
       graphics.blit(
             RenderType::guiTextured,
-            CONTAINER_LOCATION,
+            BACKGROUND_TEXTURE,
             i,
             j,
             0.0F,

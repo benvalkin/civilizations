@@ -4,12 +4,10 @@ import java.util.List;
 
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingMenu;
-import com.uncreated.civilized.ui.menu.building.residence.tabs.ManageResidentsTab;
-import com.uncreated.civilized.ui.menu.building.residence.tabs.ResidenceInfoTab;
+import com.uncreated.civilized.ui.menu.building.BuildingSettingsTab;
 import com.uncreated.civilized.ui.menu.building.tradingpost.tabs.TradingPostMainTab;
 import com.uncreated.civilized.ui.menu.building.tradingpost.tabs.TradingPostVisitorsTab;
 import com.uncreated.civilized.ui.tabs.ATab;
-import com.uncreated.civilized.ui.tabs.BlankTab;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -51,7 +49,15 @@ public class TradingPostBuildingScreen extends ABuildingScreen {
                   this.font,
                   menu.getBuilding(),
                   menu.getSettlement()),
-            new BlankTab(2, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, "This is Tab #3 :)"));
+            new BuildingSettingsTab(
+                  2,
+                  contentLeftPos,
+                  contentTopPos,
+                  tabWidth,
+                  tabHeight,
+                  this.font,
+                  menu.getBuilding(),
+                  menu.getSettlement()));
    }
 
    @Override
@@ -59,17 +65,17 @@ public class TradingPostBuildingScreen extends ABuildingScreen {
 
       return List.of(
             Button.builder(Component.literal("I"), this::onClickTab1)
-                  .pos(leftPos + 20, topPos + 20)
+                  .pos(leftPos + 60, topPos + 120)
                   .size(18, 18)
                   .tooltip(Tooltip.create(Component.literal("Information"))),
 
             Button.builder(Component.literal("R"), this::onClickTab2)
-                  .pos(leftPos + 20, topPos + 40)
+                  .pos(leftPos + 60, topPos + 140)
                   .size(18, 18)
                   .tooltip(Tooltip.create(Component.literal("Visitors"))),
 
             Button.builder(Component.literal("O"), this::onClickTab3)
-                  .pos(leftPos + 20, topPos + 60)
+                  .pos(leftPos + 60, topPos + 160)
                   .size(18, 18)
                   .tooltip(Tooltip.create(Component.literal("Building Settings"))));
    }

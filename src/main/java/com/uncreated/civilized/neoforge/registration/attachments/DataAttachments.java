@@ -52,7 +52,7 @@ public class DataAttachments {
    @Setter
    public static class LinkedBuilding {
 
-      public static final String FIELD_BUILDING_ID = "civilized_building_id";
+      public static final String FIELD_BUILDING_IS_BUILDING = "civilized_building_id";
 
       public LinkedBuilding() {
       }

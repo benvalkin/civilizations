@@ -28,17 +28,31 @@ public class ResidenceInfoTab extends ABuildingScreenTab {
          Font font,
          Building building,
          Settlement settlement) {
-      super(index, x, y, width, height, font, Component.literal("Information"), building, settlement);
+      super(
+            index,
+            x,
+            y,
+            width,
+            height,
+            font,
+            Component.translatable("menu.building.residence.info.tab.heading"),
+            building,
+            settlement);
       this.occupants = createOccupantsList();
    }
 
    @Override
    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
       super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-      graphics.drawString(font, Component.literal("Residents:"), getX(), getY() + 20, Colors.MENU_TEXT_DARK, false);
 
-      // todo: don't do this every frame. with live UI updates working, getOccupants can move to constructor
-      List<VillagerInfo> occupants = BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
+      graphics.drawString(
+            font,
+            Component.translatable("menu.building.residence.residents.count", occupants.size()),
+            getX(),
+            getY() + 20,
+            Colors.MENU_TEXT_DARK,
+            false);
+
       for (int i = 0; i < occupants.size(); i++) {
 
          VillagerInfo occupant = occupants.get(i);

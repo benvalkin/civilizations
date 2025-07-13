@@ -14,6 +14,7 @@ import com.uncreated.civilized.entity.VillagerOccupation;
 import com.uncreated.civilized.ui.components.ScrollListView;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.widgets.ManageOccupantWidget;
+import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,6 +25,7 @@ import net.minecraft.network.chat.Component;
 public class ManageResidentsTab extends ABuildingScreenTab {
 
    private ScrollListView scrollView;
+   private List<VillagerInfo> residents;
 
    public ManageResidentsTab(
          int index,
@@ -34,14 +36,35 @@ public class ManageResidentsTab extends ABuildingScreenTab {
          Font font,
          Building building,
          Settlement settlement) {
-      super(index, x, y, width, height, font, Component.literal("Manage Residents"), building, settlement);
-
-      scrollView = createScrollView();
+      super(
+            index,
+            x,
+            y,
+            width,
+            height,
+            font,
+            Component.translatable("menu.building.residence.residents.tab.heading"),
+            building,
+            settlement);
+      residents = BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
+      scrollView = createScrollView(residents);
    }
 
    @Override
    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
       super.renderWidget(graphics, mouseX, mouseY, partialTicks);
+
+      if (residents.isEmpty()) {
+         graphics.drawString(
+               font,
+               Component.translatable("menu.building.residence.residents.count.heading.empty"),
+               getX(),
+               getY() + 20,
+               Colors.MENU_TEXT_DARK,
+               false);
+         return;
+      }
+
       scrollView.render(graphics, mouseX, mouseY, partialTicks);
 
       // List<CivilizedVillager> occupants = getBuilding.get().getOccupants();
@@ -65,7 +88,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
       return children;
    }
 
-   private ScrollListView createScrollView() {
+   private ScrollListView createScrollView(List<VillagerInfo> residents) {
       return new ScrollListView(getX(), getY() + 15, width, height, (x_, y_, w, h) -> {
          List<AbstractWidget> elements = Lists.newArrayList();
          List<VillagerInfo> citizens =
@@ -81,8 +104,6 @@ public class ManageResidentsTab extends ABuildingScreenTab {
                      return 1;
                }).toList();
 
-         List<VillagerInfo> occupants = BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
-
          final int elementHeight = 25;
 
          int elementIndex = 0;
@@ -90,7 +111,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
 
             // Building home = ClientBuildingStore.INSTANCE.get(villager.getHomeBuildingId());
             boolean isUnemployed = villager.getOccupation() == VillagerOccupation.UNEMPLOYED;
-            boolean isBuildingFull = occupants.size() >= 2;
+            boolean isBuildingFull = residents.size() >= 2;
             // boolean isOccupantOfAnotherBuilding = !isOccupantOfThisBuilding && villager.getHomeBuildingId() != null;
 
             ManageOccupantWidget.EManagementOption mode;
@@ -121,6 +142,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
 
    @Override
    public void refresh() {
-      scrollView = createScrollView();
+      residents = BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
+      scrollView = createScrollView(residents);
    }
 }

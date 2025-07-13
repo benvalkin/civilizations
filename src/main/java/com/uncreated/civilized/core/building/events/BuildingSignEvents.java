@@ -5,18 +5,10 @@ import java.util.List;
 import com.uncreated.civilized.CivilizedMod;
 import com.uncreated.civilized.block.building.signs.SignHelper;
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
-import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
-import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
-import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.neoforge.registration.attachments.DataAttachments;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -67,5 +59,19 @@ public class BuildingSignEvents {
       }
 
       primarySign.setText(SignHelper.SPECIAL_BUILDING_MARKER_SIGN_TEXT, true);
+   }
+
+   @SubscribeEvent
+   private static void onBuildingDeleted(BuildingDeletedEvent event) {
+
+      if (event.isClientside() || event.getLevel() == null)
+         return;
+
+      SignBlockEntity sign = event.getBuilding().getPrimarySign(event.getLevel());
+      if (sign == null)
+         return;
+
+      sign.setData(DataAttachments.LINKED_BUILDING, new DataAttachments.LinkedBuilding());
+      sign.setText(new SignText(), true);
    }
 }

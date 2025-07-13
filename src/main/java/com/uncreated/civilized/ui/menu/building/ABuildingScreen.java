@@ -19,15 +19,14 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs<BuildingMenu> 
    private static final ResourceLocation CONTAINER_LOCATION =
          ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_menu.png");
 
-
    public ABuildingScreen(BuildingMenu menu, Inventory playerInventory, Component title) {
       super(menu, playerInventory, title);
-      this.imageWidth = 256;
-      this.imageHeight = 256;
+      this.imageWidth = 400;
+      this.imageHeight = 400;
    }
 
-   private final int tabWidth = 140;
-   private final int tabHeight = 140;
+   private final int tabWidth = 200;
+   private final int tabHeight = 170;
 
    @Override
    protected final List<ATab> createTabs() {
@@ -38,14 +37,10 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs<BuildingMenu> 
 
    protected abstract List<Button.Builder> createTabButtons();
 
-   protected int centerAlignedX(Component component) {
-      return (this.imageWidth - this.font.width(component)) / 2;
-   }
-
    protected void init() {
       super.init();
-      this.titleLabelX = centerAlignedX(this.title);
-      this.titleLabelY = 30;
+      this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
+      this.titleLabelY = 130;
       // net.minecraft.client.gui.components.
 
       createTabButtons().forEach(builder -> addRenderableWidget(builder.build()));
@@ -60,18 +55,12 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs<BuildingMenu> 
       // .build());
    }
 
-   public void render(GuiGraphics graphics, int mouseX, int mouseY, float idkSomeNumber) {
-      this.renderBackground(graphics, mouseX, mouseY, idkSomeNumber);
-      super.render(graphics, mouseX, mouseY, idkSomeNumber);
-      renderCurrentTabContents(graphics, mouseX, mouseY, idkSomeNumber);
-      this.renderTooltip(graphics, mouseX, mouseY);
-   }
-
    @Override
    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
       graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, Colors.MENU_TEXT_DARK, false);
    }
 
+   @Override
    protected void renderBg(GuiGraphics p_283137_, float p_282476_, int p_281600_, int p_283194_) {
       int i = (this.width - this.imageWidth) / 2;
       int j = (this.height - this.imageHeight) / 2;
@@ -84,27 +73,27 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs<BuildingMenu> 
             0.0F,
             this.imageWidth,
             this.imageHeight,
-            256,
-            256);
+            400,
+            400);
    }
 
    @Override
    public int getContentLeftPos() {
-      return leftPos + 60;
+      return leftPos + 100;
    } // BAD IMPLEMENTATION: we don't methods and an interface for this
 
    @Override
    public int getContentTopPos() {
-      return topPos + 50;
+      return topPos + 145;
    }
 
    @Override
    public int getContentWidth() {
-      return 140;
+      return tabWidth;
    }
 
    @Override
    public int getContentHeight() {
-      return 150;
+      return tabHeight;
    }
 }
