@@ -1,5 +1,11 @@
 package com.uncreated.civilized.entity;
 
+import net.minecraft.network.chat.Component;
+
 public enum VillagerOccupation {
-   UNEMPLOYED, FARMER, TRAVELLER
+   UNEMPLOYED, FARMER, RANCHER, WOODCUTTER, MINER, BAKER, BUTCHER, BEEKEEPER, TANNER, PRIEST, SOLDIER, TRAVELLER;
+
+   public Component translation() {
+      return Component.translatable("villager.occupation." + name().toLowerCase());
+   }
 }

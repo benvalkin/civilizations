@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.uncreated.civilized.core.dialogue.traveler.quest.JoinSettlementContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -20,6 +19,7 @@ import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.dialogue.DialoguePackage;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.core.dialogue.traveler.QuestStayAtVillage;
+import com.uncreated.civilized.core.dialogue.traveler.quest.JoinSettlementContext;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;

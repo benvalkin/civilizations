@@ -33,7 +33,7 @@ public enum BuildingType {
    GUARD_POST;
 
    public String translationKey() {
-      return "building.civilized." + this.name().toLowerCase();
+      return "building." + this.name().toLowerCase();
    }
 
    public MutableComponent translation() {
