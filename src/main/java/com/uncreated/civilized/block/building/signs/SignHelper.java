@@ -10,22 +10,26 @@ import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 
 public class SignHelper {
 
    public static final String MARKER_TAG = "#building";
 
-   private static final SignText createSpecialSignText() {
+   public static SignText createSpecialSignText() {
       Component[] components =
             { Component.literal(MARKER_TAG), Component.empty(), Component.empty(), Component.empty() };
       return new SignText(components, components, DyeColor.BLACK, false);
    }
 
-   public static final SignText SPECIAL_BUILDING_MARKER_SIGN_TEXT = createSpecialSignText();
+   public static void serverTriggerBuildingSignUpdate(SignBlockEntity entity) {
+      entity.setText(createSpecialSignText(), true);
+   }
 
    public static boolean signTextHasSpecialTag(SignText signText) {
 
@@ -58,19 +62,19 @@ public class SignHelper {
    }
 
    private static Component[] getSignTextComponents(
-           Building building,
-           Settlement settlement,
-           List<VillagerInfo> occupants) {
+         Building building,
+         Settlement settlement,
+         List<VillagerInfo> occupants) {
       if (building.getBuildingType() == BuildingType.TRADING_POST) {
          return new Component[] { building.getBuildingType().translation(),
-                 settlement.displayNameTranslation().withStyle(ChatFormatting.ITALIC), Component.empty(),
-                 Component.empty() };
+               settlement.displayNameTranslation().withStyle(ChatFormatting.ITALIC), Component.empty(),
+               Component.empty() };
       } else if (building.getBuildingType().isPermanentResidence()) {
          return new Component[] { building.getBuildingType().translation(),
-                 Component.translatable("menu.building.residence.residents.count", occupants.size()), Component.empty(),
-                 Component.empty() };
+               Component.translatable("menu.building.residence.residents.count", occupants.size()), Component.empty(),
+               Component.empty() };
       }
       return new Component[] { building.getBuildingType().translation(), Component.empty(), Component.empty(),
-              Component.empty() };
+            Component.empty() };
    }
 }

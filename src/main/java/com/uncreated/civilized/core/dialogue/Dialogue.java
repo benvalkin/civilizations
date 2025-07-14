@@ -3,35 +3,62 @@ package com.uncreated.civilized.core.dialogue;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Builder;
+import javax.annotation.Nullable;
+
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 
 @Getter
-@Builder
 public class Dialogue implements IVillageDialogue {
-   private final String key;
-   private Component villagerSpeech;
+   private @Nullable String key;
+   private final Component villagerSpeech;
    private List<ResponseOption> responseOptions;
+   @Nullable
+   private Dialogue nextPage;
 
-   public static DialogueBuilder create(String key) {
-      return new DialogueBuilder().key(key).responseOptions(new ArrayList<>());
+   protected Dialogue(Component villagerSpeech) {
+      this.villagerSpeech = villagerSpeech;
+      this.responseOptions = new ArrayList<>();
+      this.nextPage = null;
    }
 
-   public static class DialogueBuilder {
+   public static Dialogue dialogue(Component villagerSpeech) {
+      return new Dialogue(villagerSpeech);
+   }
 
-      private List<ResponseOption> responseOptions = new ArrayList<>();
+   public Dialogue key(String key) {
+      this.key = key;
+      return this;
+   }
 
-      public DialogueBuilder response(ResponseOption option) {
-         responseOptions.add(option);
-         return this;
-      }
+   public Dialogue response(ResponseOption option) {
+      responseOptions.add(option);
+      return this;
+   }
+
+   public Dialogue close() {
+      responseOptions.add(ResponseOption.closeDialogue());
+      return this;
+   }
+
+   public Dialogue nextPage(Dialogue next) {
+      this.nextPage = next;
+      return this;
+   }
+
+   public boolean hasNextPage() {
+      return this.nextPage != null;
    }
 
    public static Dialogue simplePage(Component villagerSpeech) {
-      return create("simple_page").villagerSpeech(villagerSpeech).response(ResponseOption.nextPage()).build();
+      return dialogue(villagerSpeech).response(ResponseOption.nextPage());
    }
+
    public static Dialogue simplePage(Component villagerSpeech, Component playerSpeech) {
-      return create("simple_page").villagerSpeech(villagerSpeech).response(ResponseOption.nextPage(playerSpeech)).build();
+      return dialogue(villagerSpeech).response(ResponseOption.nextPage(playerSpeech));
+   }
+
+   public static Dialogue finalPage(Component villagerSpeech) {
+      return dialogue(villagerSpeech).response(ResponseOption.closeDialogue());
    }
 }

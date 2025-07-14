@@ -10,4 +10,8 @@ public interface IVillageDialogue {
    Component getVillagerSpeech();
 
    List<ResponseOption> getResponseOptions();
+
+   Dialogue getNextPage();
+
+   boolean hasNextPage();
 }

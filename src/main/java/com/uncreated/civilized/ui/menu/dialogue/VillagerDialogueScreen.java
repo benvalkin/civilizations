@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.compress.utils.Lists;
 
-import com.uncreated.civilized.core.dialogue.DialogueWithPages;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.core.dialogue.ResponseOption;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
@@ -45,7 +44,7 @@ public class VillagerDialogueScreen extends Screen {
    private List<Button> responseButtons;
 
    private final CivilizedVillager villager;
-   private final IVillageDialogue dialogue;
+   private IVillageDialogue dialogue;
    private final DialogueContext context;
 
    public VillagerDialogueScreen(CivilizedVillager villager, IVillageDialogue dialogue, DialogueContext context) {
@@ -108,13 +107,21 @@ public class VillagerDialogueScreen extends Screen {
    }
 
    private void onResponseOptionPressed(Button button, ResponseOptionContext optionContext) {
-      ResponseOption.DialogueAction action =
+      ResponseOption.SelectedAction result =
             optionContext.getSelectedOption().getOnPress().onOptionSelected(optionContext);
-      if (action == ResponseOption.DialogueAction.CLOSE_DIALOGUE)
+      if (result == ResponseOption.SelectedAction.DO_NOTHING)
+         return;
+      if (result == ResponseOption.SelectedAction.CLOSE_DIALOGUE)
          Minecraft.getInstance().setScreen(null);
-      else if (action == ResponseOption.DialogueAction.NEXT_PAGE && dialogue instanceof DialogueWithPages withPages) {
-         withPages.goNextPage();
-         rebuildWidgets();
+      else if (result == ResponseOption.SelectedAction.GO_NEXT) {
+         if (optionContext.getSelectedOption().getNextDialogue() != null) {
+            dialogue = optionContext.getSelectedOption().getNextDialogue();
+            rebuildWidgets();
+         } else if (dialogue.hasNextPage()) {
+            dialogue = dialogue.getNextPage();
+            rebuildWidgets();
+         } else
+            Minecraft.getInstance().setScreen(null);
       }
    }
 

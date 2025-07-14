@@ -104,7 +104,7 @@ public abstract class SignBlockEntityMixin extends BlockEntity {
       } else {
          // blank signs will be given the special tag if there isn't another linked sign
          if (SignHelper.signIsBlank(frontText))
-            frontText = SignHelper.SPECIAL_BUILDING_MARKER_SIGN_TEXT;
+            frontText = SignHelper.createSpecialSignText(); // note: manually setting text does not trigger a block update
       }
 
       // at this point, the special tag should be set if this sign is intended to be linked.

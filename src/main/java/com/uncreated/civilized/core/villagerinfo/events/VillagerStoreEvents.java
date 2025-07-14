@@ -1,6 +1,7 @@
 package com.uncreated.civilized.core.villagerinfo.events;
 
 import com.uncreated.civilized.core.StoreOperation;
+import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
@@ -41,6 +42,10 @@ public class VillagerStoreEvents {
          ServerVillagerStore.INSTANCE.delete(villager).ifPresent(v -> v.setDeceased(true));
          ServerVillagerStore.INSTANCE.setDirty();
          ServerVillagerStore.INSTANCE.replicateChange(villager.getInfo(), StoreOperation.DELETE);
+
+         ServerBuildingsStore.INSTANCE.find(villager.getInfo().getHomeBuildingId()).ifPresent(b -> {
+            ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE);
+         });
       }
    }
 }

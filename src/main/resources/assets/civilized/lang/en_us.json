@@ -76,16 +76,20 @@
   "villager.occupation.priest": "Priest",
   "villager.occupation.soldier": "Soldier",
   "villager.occupation.traveler": "Traveler",
-  "villager.occupation.unemployed": "UNEMPLOYED",
+  "villager.occupation.unemployed": "Unemployed",
   "villager.dialogue.response.next_page": "next",
+  "villager.dialogue.response.close": "close",
+  "villager.dialogue.response.misc.greet.1": "Good day.",
+  "villager.dialogue.response.misc.greet.2": "Hello there.",
+  "villager.dialogue.response.misc.greet.3": "Hi there...",
   "villager.dialogue.traveller.1.page.1": "Greetings, lord!",
   "villager.dialogue.traveller.1.page.2": "I'm looking for a place to spend the night. I've come a long way on my travels, and I must say I'm rather tired.",
   "villager.dialogue.traveller.1.page.3": "Wouldn't you perhaps have a spare bed around here? You would have my many thanks.",
   "villager.dialogue.traveller.quest.stay_at_village.accept": "You are always welcome here.",
   "villager.dialogue.traveller.quest.stay_at_village.reject": "Sorry, but we don't have any beds.",
+  "villager.dialogue.traveller.quest.stay_at_village.reject.page.1": "That's a shame.",
   "villager.dialogue.traveller.quest.stay_at_village.complete": "%s has joined your settlement as a permanent resident.",
   "villager.dialogue.traveller.quest.validation.tooltip.player_no_settlement": "You don't have a settlement yet. Establish one by building a Trading Post",
   "villager.dialogue.traveller.quest.validation.tooltip.no_available_buildings": "You settlement has no available homes or beds.",
-  "villager.dialogue.traveller.quest.validation.tooltip.villager_already_has_settlement": "This villager is already part of a settlement.",
-  "villager.dialogue.response.misc.greet.1": "Good day."
+  "villager.dialogue.traveller.quest.validation.tooltip.villager_already_has_settlement": "This villager is already part of a settlement."
 }

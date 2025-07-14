@@ -5,6 +5,7 @@ import org.joml.Matrix4f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.uncreated.civilized.CivilizedMod;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.VillagerOccupation;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -37,7 +38,9 @@ public class CivilizedVillagerRenderer extends
    public void extractRenderState(CivilizedVillager villager, CivilizedVillagerRenderState state, float partialTick) {
       super.extractRenderState(villager, state, partialTick);
       state.villagerName = villager.getInfo().getFullNameComponent();
-      state.jobName = villager.getInfo().getOccupation().translation();
+
+      if (villager.getInfo().getOccupation() != VillagerOccupation.UNEMPLOYED)
+         state.jobName = villager.getInfo().getOccupation().translation();
    }
 
    @Override

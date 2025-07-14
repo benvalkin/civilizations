@@ -159,7 +159,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
          DialoguePackage dialoguePackage = QuestStayAtVillage.questStayAtVillage();
          IVillageDialogue dialogue = dialoguePackage.chooseRandom();
          VillagerDialogueScreen screen =
-               new VillagerDialogueScreen(this, dialogue, new JoinSettlementContext(dialogue, this, player));
+               new VillagerDialogueScreen(this, dialogue, new JoinSettlementContext(this, player));
          Minecraft.getInstance().setScreen(screen);
       }
       return InteractionResult.SUCCESS;

@@ -58,7 +58,7 @@ public class BuildingSignEvents {
                .setData(DataAttachments.LINKED_BUILDING, new DataAttachments.LinkedBuilding(building.getBuildingId()));
       }
 
-      primarySign.setText(SignHelper.SPECIAL_BUILDING_MARKER_SIGN_TEXT, true);
+      SignHelper.serverTriggerBuildingSignUpdate(primarySign);
    }
 
    @SubscribeEvent

@@ -1,19 +1,22 @@
 package com.uncreated.civilized.core.dialogue.context;
 
+import java.util.HashMap;
+
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.entity.CivilizedVillager;
 
 import lombok.Getter;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 @Getter
 public class DialogueContext {
-   protected final IVillageDialogue dialogue;
    protected final CivilizedVillager villager;
    protected final Player player;
 
-   public DialogueContext(IVillageDialogue dialogue, CivilizedVillager villager, Player player) {
-      this.dialogue = dialogue;
+   public DialogueContext(CivilizedVillager villager, Player player) {
       this.villager = villager;
       this.player = player;
    }

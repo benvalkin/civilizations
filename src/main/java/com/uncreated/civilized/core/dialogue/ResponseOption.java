@@ -3,6 +3,7 @@ package com.uncreated.civilized.core.dialogue;
 import javax.annotation.Nullable;
 
 import com.uncreated.civilized.core.dialogue.context.ResponseOptionContext;
+import com.uncreated.civilized.ui.style.Colors;
 
 import lombok.Getter;
 import net.minecraft.client.gui.components.Tooltip;
@@ -10,17 +11,22 @@ import net.minecraft.network.chat.Component;
 
 @Getter
 public class ResponseOption {
-   private String key;
+   private @Nullable String key;
    private Component playerSpeech;
    private IResponseOptionVisibleCheck visibleCheck;
    private IResponseOptionEnabledCheck enabledCheck;
    private IOnResponseSelectedAction onPress;
+   private @Nullable Dialogue nextDialogue;
 
-   private ResponseOption(String key, Component playerSpeech) {
-      this.key = key;
+   private ResponseOption(Component playerSpeech) {
       this.playerSpeech = playerSpeech;
       this.visibleCheck = IResponseOptionVisibleCheck.alwaysVisible();
       this.enabledCheck = IResponseOptionEnabledCheck.alwaysEnabled();
+   }
+
+   public ResponseOption key(String key) {
+      this.key = key;
+      return this;
    }
 
    public ResponseOption onSelect(IOnResponseSelectedAction onSelect) {
@@ -39,39 +45,57 @@ public class ResponseOption {
    }
 
    public ResponseOption onSelectDoNothing() {
-      this.onPress = context -> DialogueAction.DO_NOTHING;
+      this.onPress = context -> SelectedAction.DO_NOTHING;
       return this;
    }
 
    public ResponseOption onSelectCloseDialogue() {
-      this.onPress = context -> DialogueAction.CLOSE_DIALOGUE;
+      this.onPress = context -> SelectedAction.CLOSE_DIALOGUE;
       return this;
    }
 
    public ResponseOption onSelectGoNextPage() {
-      this.onPress = context -> DialogueAction.NEXT_PAGE;
+      this.onPress = context -> SelectedAction.GO_NEXT;
       return this;
    }
 
-   public static ResponseOption create(String key, Component playerSpeech) {
-      return new ResponseOption(key, playerSpeech).onSelectDoNothing();
+   public ResponseOption onSelectGoTo(Dialogue anotherDialogue) {
+      this.nextDialogue = anotherDialogue;
+      this.onPress = context -> SelectedAction.GO_NEXT;
+      return this;
    }
 
-   public enum DialogueAction {
-      DO_NOTHING, NEXT_PAGE, CLOSE_DIALOGUE
+   public static ResponseOption option(Component playerSpeech) {
+      return new ResponseOption(playerSpeech).onSelectDoNothing();
+   }
+
+   @Getter
+   public enum SelectedAction {
+      DO_NOTHING, GO_NEXT, CLOSE_DIALOGUE;
    }
 
    public static ResponseOption nextPage() {
-      return ResponseOption.create("next_page", Component.translatable("villager.dialogue.response.next_page"))
+      return ResponseOption
+            .option(
+                  Component.translatable("villager.dialogue.response.next_page")
+                        .withColor(Colors.MENU_TEXT_VILLAGER_DIALOGUE_ACTION))
             .onSelectGoNextPage();
    }
 
    public static ResponseOption nextPage(Component playerSpeech) {
-      return ResponseOption.create("next_page", playerSpeech).onSelectGoNextPage();
+      return ResponseOption.option(playerSpeech).onSelectGoNextPage();
+   }
+
+   public static ResponseOption closeDialogue() {
+      return ResponseOption
+            .option(
+                  Component.translatable("villager.dialogue.response.close")
+                        .withColor(Colors.MENU_TEXT_VILLAGER_DIALOGUE_ACTION))
+            .onSelectCloseDialogue();
    }
 
    public interface IOnResponseSelectedAction {
-      DialogueAction onOptionSelected(ResponseOptionContext context);
+      SelectedAction onOptionSelected(ResponseOptionContext context);
    }
 
    public interface IResponseOptionEnabledCheck {
@@ -103,9 +127,11 @@ public class ResponseOption {
       public static EnabledCheckResult success() {
          return new EnabledCheckResult(true, null);
       }
+
       public static EnabledCheckResult failed(Tooltip tooltip) {
          return new EnabledCheckResult(false, tooltip);
       }
+
       public static EnabledCheckResult failed() {
          return new EnabledCheckResult(false, null);
       }

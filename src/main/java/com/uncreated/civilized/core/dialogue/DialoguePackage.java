@@ -1,12 +1,9 @@
 package com.uncreated.civilized.core.dialogue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
-
-import lombok.Getter;
 
 public class DialoguePackage {
    private final List<Supplier<IVillageDialogue>> dialogues;
@@ -22,7 +19,7 @@ public class DialoguePackage {
       return dialogues.get(randomIndex).get();
    }
 
-   public static DialoguePackage create() {
+   public static DialoguePackage dialoguePackage() {
       return new DialoguePackage();
    }
    public DialoguePackage add(IVillageDialogue dialogue) {

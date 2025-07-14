@@ -17,7 +17,7 @@ public class JoinSettlementContext extends DialogueContext {
     private Settlement settlement;
     private Building unoccupiedBuilding;
 
-    public JoinSettlementContext(IVillageDialogue dialogue, CivilizedVillager villager, Player player) {
-        super(dialogue, villager, player);
+    public JoinSettlementContext(CivilizedVillager villager, Player player) {
+        super(villager, player);
     }
 }

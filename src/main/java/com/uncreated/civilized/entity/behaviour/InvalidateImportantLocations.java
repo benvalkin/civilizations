@@ -76,6 +76,8 @@ public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
                villagerInfo.getFullName(),
                oldHome.isPresent() ? oldHome.get().getBuildingType() : "none",
                newHome.isPresent() ? newHome.get().getBuildingType() : "none");
+         oldHome.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
+         newHome.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
       }
       if (jobChanged) {
          LOGGER.info(
@@ -102,10 +104,8 @@ public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
          if (newHome.isPresent()) {
             villagerInfo.setHomeBuildingId(newHome.get().getBuildingId());
             return newHome;
-         } else {
-            villagerInfo.setHomeBuildingId(null);
-            return Optional.empty();
          }
+         return Optional.empty();
       }
 
       Optional<Building> home = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());

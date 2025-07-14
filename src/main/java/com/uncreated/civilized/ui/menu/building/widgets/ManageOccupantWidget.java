@@ -4,11 +4,13 @@ import java.util.List;
 
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.ClientBuildingStore;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.entity.VillagerOccupation;
-
 import com.uncreated.civilized.ui.style.Colors;
+
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractContainerWidget;
@@ -83,14 +85,17 @@ public class ManageOccupantWidget extends AbstractContainerWidget {
    }
 
    private void onPress(Button b) {
+      ServerSettlementsStore ClientBuildingsStore;
       if (option == EManagementOption.ASSIGN) {
          villagerInfo.setHomeBuildingId(building.getBuildingId());
          villagerInfo.setOccupation(building.getBuildingType().toJobType());
          ClientVillagerStore.INSTANCE.replicateChange(villagerInfo, StoreOperation.UPDATE);
+         ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
       } else if (option == EManagementOption.EVICT) {
          villagerInfo.setHomeBuildingId(null);
          villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
          ClientVillagerStore.INSTANCE.replicateChange(villagerInfo, StoreOperation.UPDATE);
+         ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
       }
    }
 

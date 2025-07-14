@@ -1,69 +1,45 @@
 package com.uncreated.civilized.core.dialogue;
 
-import java.util.LinkedList;
-import java.util.List;
+import javax.annotation.Nullable;
 
-import lombok.Builder;
 import lombok.Getter;
-import net.minecraft.network.chat.Component;
 
-@Builder
-public class DialogueWithPages implements IVillageDialogue {
+public class DialogueWithPages {
 
    @Getter
-   private final String key;
+   private int pageCount;
+   private @Nullable Dialogue firstPage;
+   private @Nullable Dialogue currentPage;
 
-   private List<Dialogue> pages;
-   @Getter
-   private int pageIndex;
-   @Getter
-   private Dialogue currentPage;
-
-   @Override
-   public Component getVillagerSpeech() {
-      return currentPage.getVillagerSpeech();
+   protected DialogueWithPages() {
+      this.pageCount = 0;
    }
 
-   @Override
-   public List<ResponseOption> getResponseOptions() {
-      return currentPage.getResponseOptions();
-   }
+   public DialogueWithPages page(Dialogue page) {
+      if (firstPage == null)
+         firstPage = page;
 
-   public Dialogue goNextPage() {
-      if (!hasNextPage())
-         return currentPage;
+      if (currentPage != null)
+         currentPage.nextPage(page);
 
-      pageIndex++;
-      currentPage = pages.get(pageIndex);
-      return currentPage;
-   }
+      currentPage = page;
 
-   public boolean hasNextPage() {
-      return pageIndex < pages.size() - 1;
+      pageCount++;
+      return this;
    }
 
    public int pageCount() {
-      return pages.size();
+      return pageCount;
    }
 
-   public static DialogueWithPagesBuilder create(String key) {
-      return new DialogueWithPagesBuilder().key(key).pages(new LinkedList<>());
+   public static DialogueWithPages dialogueWithpages() {
+      return new DialogueWithPages();
    }
 
-   public static class DialogueWithPagesBuilder {
-      public DialogueWithPagesBuilder page(Dialogue page) {
-         pages.add(page);
-         return this;
-      }
+   public Dialogue create() {
+      if (firstPage == null)
+         throw new IllegalStateException("DialogueWithPages must be given at least one page.");
 
-      public DialogueWithPages build() {
-
-         if (pages.isEmpty())
-            throw new IllegalArgumentException("Dialogue with pages needs at least 1 page.");
-
-         pageIndex = 0;
-         currentPage = pages.getFirst();
-         return new DialogueWithPages(key, pages, pageIndex, currentPage);
-      }
+      return firstPage;
    }
 }
