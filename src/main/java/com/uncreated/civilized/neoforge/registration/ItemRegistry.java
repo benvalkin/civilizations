@@ -4,6 +4,7 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.item.BuildingDeedItem;
+import com.uncreated.civilized.item.CurrencyItem;
 import com.uncreated.civilized.item.SettlementMandateItem;
 import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 
@@ -26,6 +27,12 @@ public class ItemRegistry {
                properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.FARMER_HOUSE));
    public static final DeferredItem<Item> SETTLEMENT_MANDATE =
          ITEMS.registerItem("settlement_mandate", properties -> new SettlementMandateItem(properties.stacksTo(1)));
+
+   public static final DeferredItem<Item> COIN =
+         ITEMS.registerItem("coin", properties -> new CurrencyItem(properties.stacksTo(64), 1));
+
+   public static final DeferredItem<Item> COIN_STACK =
+         ITEMS.registerItem("coin_stack", properties -> new CurrencyItem(properties.stacksTo(64), 10));
 
    DeferredItem<SpawnEggItem> MY_ENTITY_SPAWN_EGG =
          ITEMS.registerItem(

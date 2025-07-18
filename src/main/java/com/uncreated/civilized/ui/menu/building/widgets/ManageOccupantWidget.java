@@ -8,7 +8,7 @@ import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-import com.uncreated.civilized.entity.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;

@@ -7,6 +7,9 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.Codec;
+import com.uncreated.civilized.core.quest.attachments.PlayerQuests;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -15,38 +18,24 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class DataAttachments {
 
-   // Create the DeferredRegister for attachment types
    public static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
          DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, CIVILIZED_MOD_ID);
 
-   // Serialization via codec
    public static final Supplier<AttachmentType<LinkedBuilding>> LINKED_BUILDING =
          ATTACHMENTS.register(
                "civilized_building_id",
                () -> AttachmentType.builder(() -> new LinkedBuilding())
-                     // .serialize(new IAttachmentSerializer<>() {
-                     // @Override
-                     // public LinkedBuilding read(
-                     // IAttachmentHolder attachmentHolder,
-                     // Tag tag,
-                     // HolderLookup.Provider provider) {
-                     //
-                     // LinkedBuilding result = new LinkedBuilding();
-                     // if (tag instanceof CompoundTag ct && ct.hasUUID("civilized_building_id"))
-                     // result.setBuildingId(ct.getUUID("civilized_building_id"));
-                     // return result;
-                     // }
-                     //
-                     // @Override
-                     // public @Nullable Tag write(LinkedBuilding linkedBuilding, HolderLookup.Provider provider) {
-                     // CompoundTag result = new CompoundTag();
-                     // if (linkedBuilding.getBuildingId() != null)
-                     // result.putUUID("civilized_building_id", linkedBuilding.getBuildingId());
-                     //
-                     // return result;
-                     // }
-                     // })
                      .build());
+
+   public static final Supplier<AttachmentType<PlayerQuests>> QUESTS =
+           ATTACHMENTS.register(
+                   "civilized_player_quests",
+                   () -> AttachmentType.serializable(() -> new PlayerQuests())
+                           .copyOnDeath()
+                           .build());
+
+   public static final Supplier<AttachmentType<Integer>> COIN_VALUE = ATTACHMENTS.register(
+           "coin_value", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).build());
 
    @Getter
    @Setter

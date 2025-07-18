@@ -10,7 +10,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.settlement.util.SettlementUtil;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-import com.uncreated.civilized.entity.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.ui.components.ScrollListView;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.widgets.ManageOccupantWidget;

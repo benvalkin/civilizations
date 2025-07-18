@@ -7,7 +7,6 @@ import java.util.UUID;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.villagerinfo.events.model.VillagerInfoUpdatedEvent;
 import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.entity.VillagerOccupation;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

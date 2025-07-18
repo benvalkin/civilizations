@@ -4,15 +4,19 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.List;
 
-import org.apache.commons.compress.utils.Lists;
+import javax.annotation.Nullable;
 
+import org.apache.commons.compress.utils.Lists;
+import org.jetbrains.annotations.NotNull;
+
+import com.uncreated.civilized.core.dialogue.Dialogue;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.core.dialogue.ResponseOption;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
 import com.uncreated.civilized.core.dialogue.context.ResponseOptionContext;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.ui.StringRenderHelper;
 import com.uncreated.civilized.ui.components.buttons.ModernButton;
-import com.uncreated.civilized.ui.components.multiline.ImprovedMultiLineTextWidget;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.ChatFormatting;
@@ -40,14 +44,18 @@ public class VillagerDialogueScreen extends Screen {
    private int titleX;
    private int titleY;
 
-   private ImprovedMultiLineTextWidget villagerSpeechBox;
    private List<Button> responseButtons;
 
    private final CivilizedVillager villager;
    private IVillageDialogue dialogue;
    private final DialogueContext context;
 
-   public VillagerDialogueScreen(CivilizedVillager villager, IVillageDialogue dialogue, DialogueContext context) {
+   MutableComponent villagerName;
+
+   public VillagerDialogueScreen(
+         CivilizedVillager villager,
+         @NotNull IVillageDialogue dialogue,
+         DialogueContext context) {
       super(Component.translatable(villager.getInfo().getFullName()));
       this.villager = villager;
       this.dialogue = dialogue;
@@ -70,18 +78,14 @@ public class VillagerDialogueScreen extends Screen {
       this.titleX = leftPos;
       this.titleY = topPos;
 
-      villagerSpeechBox = new ImprovedMultiLineTextWidget(leftPos, topPos + 20, dialogue.getVillagerSpeech(), font);
-      villagerSpeechBox.setCentered(true);
-      villagerSpeechBox.setMaxWidth(contentWidth);
-      villagerSpeechBox.setColor(Colors.MENU_TEXT_VILLAGER_DIALOGUE);
-      addRenderableOnly(villagerSpeechBox);
-
       final int buttonStartY = 100;
       final int buttonMarginX = 20;
-      final int buttonHeight = 16;
+      final int buttonHeight = 15;
+
+      villagerName = Component.literal(villager.getInfo().getFullName()).withStyle(ChatFormatting.UNDERLINE);
 
       responseButtons = Lists.newArrayList();
-      int index = 0;
+      int currentButtonHeight = topPos + buttonStartY;
       for (ResponseOption responseOption : dialogue.getResponseOptions()) {
          ResponseOptionContext optionContext = new ResponseOptionContext(responseOption, context);
 
@@ -92,17 +96,23 @@ public class VillagerDialogueScreen extends Screen {
          Button button =
                new ModernButton(
                      Button.builder(responseOption.getPlayerSpeech(), b -> onResponseOptionPressed(b, optionContext))
-                           .pos(leftPos + buttonMarginX, topPos + buttonStartY + index * buttonHeight)
+                           .pos(leftPos + buttonMarginX, currentButtonHeight)
                            .size(contentWidth - buttonMarginX * 2, buttonHeight));
+
+         currentButtonHeight += button.getHeight();
 
          ResponseOption.EnabledCheckResult enabledResult =
                responseOption.getEnabledCheck().isOptionEnabled(optionContext);
          button.active = enabledResult.isEnabled();
-         button.setTooltip(enabledResult.getTooltip());
+
+         // tooltip from option enabled check takes precedence over option's preset tooltip
+         if (enabledResult.getTooltip() != null)
+            button.setTooltip(enabledResult.getTooltip());
+         else if (responseOption.getTooltip() != null)
+            button.setTooltip(responseOption.getTooltip());
 
          responseButtons.add(button);
          addRenderableWidget(button);
-         index++;
       }
    }
 
@@ -111,17 +121,32 @@ public class VillagerDialogueScreen extends Screen {
             optionContext.getSelectedOption().getOnPress().onOptionSelected(optionContext);
       if (result == ResponseOption.SelectedAction.DO_NOTHING)
          return;
+
+      dialogue.getOnEnded().accept(context);
       if (result == ResponseOption.SelectedAction.CLOSE_DIALOGUE)
          Minecraft.getInstance().setScreen(null);
       else if (result == ResponseOption.SelectedAction.GO_NEXT) {
-         if (optionContext.getSelectedOption().getNextDialogue() != null) {
-            dialogue = optionContext.getSelectedOption().getNextDialogue();
-            rebuildWidgets();
-         } else if (dialogue.hasNextPage()) {
-            dialogue = dialogue.getNextPage();
-            rebuildWidgets();
-         } else
+         @Nullable
+         Dialogue next = null;
+         // response option's dialogue takes precedence over pages
+         if (optionContext.getSelectedOption().getNextDialogue() != null)
+            next = optionContext.getSelectedOption().getNextDialogue();
+         else if (dialogue.hasNextPage())
+            next = dialogue.getNextPage();
+
+         // check availability and fallbacks
+         while (next != null && !next.isAvailableToPlayer(context)) {
+            next = next.getFallback();
+         }
+
+         // finally, if there is still dialogue to display, close the screen
+         if (next == null) {
             Minecraft.getInstance().setScreen(null);
+            return;
+         }
+
+         dialogue = next;
+         rebuildWidgets();
       }
    }
 
@@ -133,14 +158,26 @@ public class VillagerDialogueScreen extends Screen {
    }
 
    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-      MutableComponent villagerName =
-            Component.literal(villager.getInfo().getFullName()).withStyle(ChatFormatting.UNDERLINE);
-      graphics.drawCenteredString(
+      StringRenderHelper.drawCenterAlignedWordWrap(
+            graphics,
             this.font,
             villagerName,
             leftPos + contentWidth / 2,
             topPos,
-            Colors.MENU_TEXT_VILLAGER_DIALOGUE);
+            contentWidth,
+            Colors.MENU_TEXT_VILLAGER_DIALOGUE,
+            true);
+
+      int villagerSpeechHeight =
+            StringRenderHelper.drawCenterAlignedWordWrap(
+                  graphics,
+                  this.font,
+                  dialogue.getVillagerSpeech(),
+                  leftPos + contentWidth / 2,
+                  topPos + 30,
+                  contentWidth,
+                  Colors.MENU_TEXT_VILLAGER_DIALOGUE,
+                  true);
    }
 
    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {

@@ -17,8 +17,10 @@ public class ResponseOption {
    private IResponseOptionEnabledCheck enabledCheck;
    private IOnResponseSelectedAction onPress;
    private @Nullable Dialogue nextDialogue;
+   @Nullable
+   private Tooltip tooltip;
 
-   private ResponseOption(Component playerSpeech) {
+    private ResponseOption(Component playerSpeech) {
       this.playerSpeech = playerSpeech;
       this.visibleCheck = IResponseOptionVisibleCheck.alwaysVisible();
       this.enabledCheck = IResponseOptionEnabledCheck.alwaysEnabled();
@@ -66,7 +68,12 @@ public class ResponseOption {
    }
 
    public static ResponseOption option(Component playerSpeech) {
-      return new ResponseOption(playerSpeech).onSelectDoNothing();
+      return new ResponseOption(playerSpeech).onSelectGoNextPage();
+   }
+
+   public ResponseOption withTooltip(Tooltip tooltip) {
+       this.tooltip = tooltip;
+       return this;
    }
 
    @Getter

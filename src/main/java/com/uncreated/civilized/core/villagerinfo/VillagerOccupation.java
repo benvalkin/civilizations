@@ -1,4 +1,4 @@
-package com.uncreated.civilized.entity;
+package com.uncreated.civilized.core.villagerinfo;
 
 import net.minecraft.network.chat.Component;
 

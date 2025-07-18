@@ -98,7 +98,7 @@ public class Settlement {
       public static final CustomPacketPayload.Type<Settlement.Packet> SYNC_TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_settlement"));
 
-      public static StreamCodec<FriendlyByteBuf, Settlement.Packet> CODEC =
+      public static StreamCodec<FriendlyByteBuf, Settlement.Packet> STREAM_CODEC =
             StreamCodec.ofMember(Settlement.Packet::encode, Settlement.Packet::decode);
 
       public static Settlement.Packet decode(FriendlyByteBuf buffer) {

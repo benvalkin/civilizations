@@ -5,7 +5,7 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.uncreated.civilized.entity.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.entity.goals.NearbyBlockSensor;
 
 import net.minecraft.core.BlockPos;

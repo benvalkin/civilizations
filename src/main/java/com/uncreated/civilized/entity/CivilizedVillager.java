@@ -18,7 +18,9 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.dialogue.DialoguePackage;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
-import com.uncreated.civilized.core.dialogue.traveler.QuestStayAtVillage;
+import com.uncreated.civilized.core.dialogue.advisor.quest.QuestAdvisor;
+import com.uncreated.civilized.core.dialogue.context.DialogueContext;
+import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
 import com.uncreated.civilized.core.dialogue.traveler.quest.JoinSettlementContext;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
@@ -68,6 +70,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 
@@ -153,13 +156,34 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    }
 
    @Override
-   public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+   public InteractionResult mobInteract(Player player, InteractionHand hand) {
+
+      DialoguePackage dialoguePackage = QuestAdvisor.advisorQuests();
+      DialogueContext context = new JoinSettlementContext(this, player);
+      IVillageDialogue dialogue = dialoguePackage.chooseFirstAvailable(context);
+
+      while (dialogue != null && !dialogue.isAvailableToPlayer(context)) {
+         dialogue = dialogue.getFallback();
+      }
+
+      if (dialogue == null) {
+         return InteractionResult.PASS;
+      }
+      if (dialogue instanceof ItemDepotDialogue itemDepotDialogue) {
+
+         ItemStack itemInHand = player.getItemInHand(hand);
+         if (itemInHand.isEmpty())
+            return InteractionResult.PASS;
+
+         if (!itemDepotDialogue.getCanConsumeItemCheck().canConsumeItem(context, itemInHand, hand))
+            return InteractionResult.PASS;
+
+         ItemStack consumed = itemDepotDialogue.getConsumeItemAction().consumeItem(context, itemInHand, hand);
+         return InteractionResult.CONSUME.heldItemTransformedTo(consumed);
+      }
 
       if (player.level().isClientSide) {
-         DialoguePackage dialoguePackage = QuestStayAtVillage.questStayAtVillage();
-         IVillageDialogue dialogue = dialoguePackage.chooseRandom();
-         VillagerDialogueScreen screen =
-               new VillagerDialogueScreen(this, dialogue, new JoinSettlementContext(this, player));
+         VillagerDialogueScreen screen = new VillagerDialogueScreen(this, dialogue, context);
          Minecraft.getInstance().setScreen(screen);
       }
       return InteractionResult.SUCCESS;

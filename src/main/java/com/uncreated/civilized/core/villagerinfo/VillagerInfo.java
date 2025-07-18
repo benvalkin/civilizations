@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import com.mojang.datafixers.util.Pair;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.entity.VillagerOccupation;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -165,7 +164,7 @@ public class VillagerInfo {
       public static final Type<Packet> SYNC_TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_villagerinfo"));
 
-      public static StreamCodec<FriendlyByteBuf, Packet> CODEC = StreamCodec.ofMember(Packet::encode, Packet::decode);
+      public static StreamCodec<FriendlyByteBuf, Packet> STREAM_CODEC = StreamCodec.ofMember(Packet::encode, Packet::decode);
 
       public static Packet decode(FriendlyByteBuf buffer) {
          return new Packet(VillagerInfo.decode(buffer), buffer.readEnum(StoreOperation.class));

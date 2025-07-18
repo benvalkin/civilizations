@@ -5,7 +5,7 @@ import org.joml.Matrix4f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.uncreated.civilized.CivilizedMod;
 import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.entity.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

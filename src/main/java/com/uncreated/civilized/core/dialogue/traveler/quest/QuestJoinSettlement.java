@@ -1,8 +1,9 @@
-package com.uncreated.civilized.core.dialogue.traveler;
+package com.uncreated.civilized.core.dialogue.traveler.quest;
 
 import static com.uncreated.civilized.core.dialogue.Dialogue.*;
 import static com.uncreated.civilized.core.dialogue.DialoguePackage.dialoguePackage;
 import static com.uncreated.civilized.core.dialogue.DialogueWithPages.dialogueWithpages;
+import static com.uncreated.civilized.core.dialogue.RandomSpeech.randomPlayerGreeting;
 import static com.uncreated.civilized.core.dialogue.ResponseOption.option;
 import static net.minecraft.network.chat.Component.translatable;
 
@@ -13,10 +14,8 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.dialogue.DialoguePackage;
-import com.uncreated.civilized.core.dialogue.RandomSpeech;
 import com.uncreated.civilized.core.dialogue.ResponseOption;
 import com.uncreated.civilized.core.dialogue.context.ResponseOptionContext;
-import com.uncreated.civilized.core.dialogue.traveler.quest.JoinSettlementContext;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
@@ -26,18 +25,15 @@ import com.uncreated.civilized.ui.style.Colors;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.world.entity.player.Player;
 
-public class QuestStayAtVillage {
+public class QuestJoinSettlement {
 
    public static DialoguePackage questStayAtVillage() {
       return dialoguePackage().add(
             dialogueWithpages()
+                  .page(simplePage(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page.1"), randomPlayerGreeting()))
+                  .page(simplePage(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page.2")))
                   .page(
-                        simplePage(
-                              translatable("villager.dialogue.traveller.1.page.1"),
-                                RandomSpeech.randomPlayerGreeting()))
-                  .page(simplePage(translatable("villager.dialogue.traveller.1.page.2")))
-                  .page(
-                        dialogue(translatable("villager.dialogue.traveller.1.page.3"))
+                        dialogue(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page.3"))
                               .response(
                                     option(translatable("villager.dialogue.traveller.quest.stay_at_village.accept"))
                                           .shouldBeEnabled(new CanJoinSettlementCheck())

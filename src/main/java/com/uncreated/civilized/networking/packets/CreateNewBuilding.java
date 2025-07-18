@@ -29,7 +29,7 @@ public record CreateNewBuilding(BuildingType buildingType, BuildingBounds buildi
    public static final CustomPacketPayload.Type<CreateNewBuilding> TYPE =
          new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "create_new_building"));
 
-   public static StreamCodec<FriendlyByteBuf, CreateNewBuilding> CODEC =
+   public static StreamCodec<FriendlyByteBuf, CreateNewBuilding> STREAM_CODEC =
          StreamCodec.ofMember(CreateNewBuilding::encode, CreateNewBuilding::decode);
 
    public static CreateNewBuilding decode(FriendlyByteBuf buffer) {

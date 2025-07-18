@@ -29,7 +29,7 @@ public record ShowBuildingMenu(UUID buildingId) implements CustomPacketPayload {
    public static final CustomPacketPayload.Type<ShowBuildingMenu> TYPE =
          new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "show_building_menu"));
 
-   public static StreamCodec<FriendlyByteBuf, ShowBuildingMenu> CODEC =
+   public static StreamCodec<FriendlyByteBuf, ShowBuildingMenu> STREAM_CODEC =
          StreamCodec.ofMember(ShowBuildingMenu::encode, ShowBuildingMenu::decode);
 
    public static ShowBuildingMenu decode(FriendlyByteBuf buffer) {

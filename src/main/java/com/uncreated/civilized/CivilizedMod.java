@@ -1,5 +1,6 @@
 package com.uncreated.civilized;
 
+import com.uncreated.civilized.neoforge.registration.attachments.MyDataComponents;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -64,6 +65,7 @@ public class CivilizedMod {
       AIRegistry.SENSORS.register(modEventBus);
       AIRegistry.SCHEDULES.register(modEventBus);
       DataAttachments.ATTACHMENTS.register(modEventBus);
+      MyDataComponents.COMPONENTS.register(modEventBus);
 
       CreativeTab.CREATIVE_MODE_TABS.register(modEventBus);
 

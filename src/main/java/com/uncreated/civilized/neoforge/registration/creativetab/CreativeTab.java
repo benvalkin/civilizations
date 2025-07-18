@@ -32,6 +32,8 @@ public class CreativeTab {
                         output.accept(BlockRegistry.EXAMPLE_BLOCK_ITEM.get());
                         output.accept(BlockRegistry.CROP_FARM_BLOCK_ITEM.get());
                         output.accept(ItemRegistry.SETTLEMENT_MANDATE.get());
+                        output.accept(ItemRegistry.COIN.get());
+                        output.accept(ItemRegistry.COIN_STACK.get());
                         output.accept(ItemRegistry.FARMER_HOUSE.get());
                         output.accept(ItemRegistry.TRADING_POST.get());
                      })

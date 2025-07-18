@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Setter;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import org.apache.commons.compress.utils.Lists;
@@ -142,7 +140,7 @@ public class Building {
       public static final CustomPacketPayload.Type<Packet> SYNC_TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_building"));
 
-      public static StreamCodec<FriendlyByteBuf, Packet> CODEC = StreamCodec.ofMember(Packet::encode, Packet::decode);
+      public static StreamCodec<FriendlyByteBuf, Packet> STREAM_CODEC = StreamCodec.ofMember(Packet::encode, Packet::decode);
 
       public static Packet decode(FriendlyByteBuf buffer) {
          return new Packet(Building.decode(buffer), buffer.readEnum(StoreOperation.class));

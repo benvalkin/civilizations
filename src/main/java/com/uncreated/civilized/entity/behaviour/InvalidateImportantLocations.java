@@ -15,7 +15,7 @@ import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.entity.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
