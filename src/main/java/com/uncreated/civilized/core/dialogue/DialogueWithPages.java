@@ -38,7 +38,7 @@ public class DialogueWithPages {
 
    public Dialogue create() {
       if (firstPage == null)
-         throw new IllegalStateException("DialogueWithPages must be given at least one page.");
+         throw new IllegalStateException("DialogueWithPages must be given at least one page_");
 
       return firstPage;
    }

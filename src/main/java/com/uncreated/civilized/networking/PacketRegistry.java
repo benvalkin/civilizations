@@ -16,6 +16,7 @@ import com.uncreated.civilized.core.quest.ActivatedQuest;
 import com.uncreated.civilized.core.quest.attachments.PlayerQuests;
 import com.uncreated.civilized.networking.packets.CreateNewBuilding;
 import com.uncreated.civilized.networking.packets.ShowBuildingMenu;
+import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
@@ -73,6 +74,11 @@ public class PacketRegistry {
               GiveItemsToPlayer.TYPE,
               GiveItemsToPlayer.STREAM_CODEC,
               RewardActions::serverGiveItemsToPlayer);
+
+      registrar.playToClient(
+              VillagerDialogueScreen.ShowPacket.TYPE,
+              VillagerDialogueScreen.ShowPacket.STREAM_CODEC,
+              VillagerDialogueScreen::clientReceiveShowScreen);
 
 
    }

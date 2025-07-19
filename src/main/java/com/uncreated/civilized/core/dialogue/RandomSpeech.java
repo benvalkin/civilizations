@@ -12,9 +12,9 @@ public class RandomSpeech {
 
    public static Component randomPlayerGreeting() {
       return oneOf(
-              Component.translatable("villager.dialogue.response.misc.greet.1"),
-              Component.translatable("villager.dialogue.response.misc.greet.2"),
-              Component.translatable("villager.dialogue.response.misc.greet.3")
+              Component.translatable("villager.dialogue.response.misc.greet.o1"),
+              Component.translatable("villager.dialogue.response.misc.greet.o2"),
+              Component.translatable("villager.dialogue.response.misc.greet.o3")
       );
    }
 

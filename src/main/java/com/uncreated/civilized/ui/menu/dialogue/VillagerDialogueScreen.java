@@ -2,7 +2,10 @@ package com.uncreated.civilized.ui.menu.dialogue;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -25,9 +28,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class VillagerDialogueScreen extends Screen {
    private static final ResourceLocation BACKGROUND_TEXTURE =
@@ -194,5 +204,33 @@ public class VillagerDialogueScreen extends Screen {
             this.imageHeight,
             512,
             512);
+   }
+
+   public record ShowPacket(UUID entityId, InteractionHand hand) implements CustomPacketPayload {
+
+      public static final Type<ShowPacket> TYPE =
+            new CustomPacketPayload.Type<>(
+                  ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "show_villager_dialogue_menu"));
+
+      public static final StreamCodec<ByteBuf, ShowPacket> STREAM_CODEC =
+            StreamCodec.composite(
+                  UUIDUtil.STREAM_CODEC,
+                  ShowPacket::entityId,
+                  ByteBufCodecs.STRING_UTF8.map(InteractionHand::valueOf, InteractionHand::name),
+                  ShowPacket::hand,
+                  ShowPacket::new);
+
+      @Override
+      public Type<? extends CustomPacketPayload> type() {
+         return TYPE;
+      }
+   }
+
+   public static void serverTellShowScreen(Player player, CivilizedVillager villager, InteractionHand hand) {
+
+   }
+
+   public static void clientReceiveShowScreen(ShowPacket packet, IPayloadContext context) {
+
    }
 }

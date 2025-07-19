@@ -1,9 +1,8 @@
 package com.uncreated.civilized.core.quest;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.Objects;
+
+import lombok.Getter;
 
 @Getter
 public class QuestType {
@@ -11,11 +10,13 @@ public class QuestType {
    private final String name;
    private final boolean repeatable;
    private final boolean vendorSpecific;
+   private final boolean isCheckpoint;
 
-   private QuestType(String name, boolean repeatable, boolean vendorSpecific) {
+   private QuestType(String name, boolean repeatable, boolean vendorSpecific, boolean isCheckpoint) {
       this.name = name;
       this.repeatable = repeatable;
       this.vendorSpecific = vendorSpecific;
+      this.isCheckpoint = isCheckpoint;
    }
 
    public static QuestProperties properties(String type) {
@@ -27,11 +28,13 @@ public class QuestType {
       private final String name;
       private boolean repeatable;
       private boolean vendorSpecific;
+      private boolean isCheckpoint;
 
       private QuestProperties(String name) {
          this.name = name;
          this.repeatable = false;
-         this.vendorSpecific = false;
+         this.vendorSpecific = true;
+         this.isCheckpoint = false;
       }
 
       public QuestProperties repeatable(boolean repeatable) {
@@ -44,14 +47,20 @@ public class QuestType {
          return this;
       }
 
+      public QuestProperties isCheckpoint(boolean isCheckpoint) {
+         this.isCheckpoint = isCheckpoint;
+         return this;
+      }
+
       public QuestType build() {
-         return new QuestType(name, repeatable, vendorSpecific);
+         return new QuestType(name, repeatable, vendorSpecific, isCheckpoint);
       }
    }
 
    @Override
    public boolean equals(Object object) {
-      if (object == null || getClass() != object.getClass()) return false;
+      if (object == null || getClass() != object.getClass())
+         return false;
       QuestType questType = (QuestType) object;
       return Objects.equals(name, questType.name);
    }

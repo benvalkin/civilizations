@@ -1,7 +1,6 @@
 package com.uncreated.civilized.core.dialogue.questline.traveler;
 
 import static com.uncreated.civilized.core.dialogue.Dialogue.*;
-import static com.uncreated.civilized.core.dialogue.DialoguePackage.dialoguePackage;
 import static com.uncreated.civilized.core.dialogue.DialogueWithPages.dialogueWithpages;
 import static com.uncreated.civilized.core.dialogue.RandomSpeech.randomPlayerGreeting;
 import static com.uncreated.civilized.core.dialogue.ResponseOption.option;
@@ -13,38 +12,49 @@ import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.dialogue.DialoguePackage;
+import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.core.dialogue.ResponseOption;
+import com.uncreated.civilized.core.dialogue.context.DialogueContext;
 import com.uncreated.civilized.core.dialogue.context.ResponseOptionContext;
+import com.uncreated.civilized.core.dialogue.controller.DialogueFlow;
+import com.uncreated.civilized.core.quest.attachments.PlayerQuests;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.world.entity.player.Player;
 
-public class JoinSettlementQuest {
+public class JoinSettlementQuest extends DialogueFlow {
 
-   public static DialoguePackage getPackage() {
-      return dialoguePackage().add(
-            dialogueWithpages()
-                  .page(simplePage(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page.1"), randomPlayerGreeting()))
-                  .page(simplePage(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page.2")))
-                  .page(
-                        dialogue(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page.3"))
-                              .response(
-                                    option(translatable("villager.dialogue.traveller.quest.stay_at_village.accept"))
-                                          .shouldBeEnabled(new CanJoinSettlementCheck())
-                                          .onSelect(new VillagerJoinSettlement()))
-                              .response(
-                                    option(translatable("villager.dialogue.traveller.quest.stay_at_village.reject"))
-                                          .onSelectGoTo(
-                                                finalPage(
-                                                      translatable(
-                                                            "villager.dialogue.traveller.quest.stay_at_village.reject.page.1")))))
-                  .create());
+   @Override
+   protected IVillageDialogue getOpeningDialogue(
+         DialogueContext context,
+         CivilizedVillager villager,
+         Player player,
+         PlayerQuests playerQuests) {
+      return dialogueWithpages()
+            .page(
+                  simplePage(
+                        translatable("villager.dialogue.traveller.quest.stay_at_village.1.page_1"),
+                        randomPlayerGreeting()))
+            .page(simplePage(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page_2")))
+            .page(
+                  dialogue(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page_3"))
+                        .response(
+                              option(translatable("villager.dialogue.traveller.quest.stay_at_village.accept"))
+                                    .shouldBeEnabled(new CanJoinSettlementCheck())
+                                    .onSelect(new VillagerJoinSettlement()))
+                        .response(
+                              option(translatable("villager.dialogue.traveller.quest.stay_at_village.reject"))
+                                    .onSelectGoTo(
+                                          finalPage(
+                                                translatable(
+                                                      "villager.dialogue.traveller.quest.stay_at_village.reject.page_1")))))
+            .create();
    }
 
    private static class VillagerJoinSettlement implements ResponseOption.IOnResponseSelectedAction {

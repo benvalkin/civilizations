@@ -2,6 +2,8 @@ package com.uncreated.civilized.core.villagerinfo;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -35,12 +37,10 @@ public class VillagerInfo {
                   .isDeceased(buffer.readBoolean())
                   .firstName(buffer.readUtf())
                   .lastName(buffer.readUtf())
-                  .occupation(buffer.readEnum(VillagerOccupation.class));
-
-      if (buffer.readBoolean())
-         builder.settlementId(buffer.readUUID());
-      if (buffer.readBoolean())
-         builder.homeBuildingId(buffer.readUUID());
+                  .occupation(buffer.readEnum(VillagerOccupation.class))
+                  .settlementId(buffer.readNullable((b -> b.readUUID())))
+                  .homeBuildingId(buffer.readNullable((b -> b.readUUID())))
+                  .npcRoles(buffer.readCollection(ArrayList::new, b -> b.readEnum(VillagerNpcRole.class)));
 
       return builder.build();
    }
@@ -52,12 +52,9 @@ public class VillagerInfo {
       buffer.writeUtf(firstName);
       buffer.writeUtf(lastName);
       buffer.writeEnum(occupation);
-      buffer.writeBoolean(settlementId != null);
-      if (settlementId != null)
-         buffer.writeUUID(settlementId);
-      buffer.writeBoolean(homeBuildingId != null);
-      if (homeBuildingId != null)
-         buffer.writeUUID(homeBuildingId);
+      buffer.writeNullable(settlementId, (b, v) -> b.writeUUID(v));
+      buffer.writeNullable(homeBuildingId, (b, v) -> b.writeUUID(v));
+      buffer.writeCollection(npcRoles, FriendlyByteBuf::writeEnum);
    }
 
    public static final String FIELD_VILLAGER_ID = "villager_id";
@@ -67,6 +64,8 @@ public class VillagerInfo {
    public static final String FIELD_FIRST_NAME = "first_name";
    public static final String FIELD_LAST_NAME = "last_name";
    public static final String FIELD_VILLAGER_OCCUPATION = "field_villager_occupation";
+   public static final String FIELD_VILLAGER_NPC_ROLES = "field_villager_npc_roles";
+   public static final String FIELD_VILLAGER_NPC_ROLE = "field_villager_npc_role";
 
    private @Nullable Integer entityId;
    private UUID villagerId;
@@ -81,6 +80,8 @@ public class VillagerInfo {
    @Setter
    @Builder.Default
    private VillagerOccupation occupation = VillagerOccupation.UNEMPLOYED;
+   @Builder.Default
+   private List<VillagerNpcRole> npcRoles = new ArrayList<>();
    @Setter
    private @Nullable UUID settlementId;
    @Setter
@@ -142,6 +143,7 @@ public class VillagerInfo {
       occupation = other.occupation;
       settlementId = other.settlementId;
       homeBuildingId = other.homeBuildingId;
+      npcRoles = other.npcRoles;
    }
 
    public String toStringLite() {
@@ -164,7 +166,8 @@ public class VillagerInfo {
       public static final Type<Packet> SYNC_TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_villagerinfo"));
 
-      public static StreamCodec<FriendlyByteBuf, Packet> STREAM_CODEC = StreamCodec.ofMember(Packet::encode, Packet::decode);
+      public static StreamCodec<FriendlyByteBuf, Packet> STREAM_CODEC =
+            StreamCodec.ofMember(Packet::encode, Packet::decode);
 
       public static Packet decode(FriendlyByteBuf buffer) {
          return new Packet(VillagerInfo.decode(buffer), buffer.readEnum(StoreOperation.class));

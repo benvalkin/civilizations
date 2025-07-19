@@ -1,4 +1,4 @@
-package com.uncreated.civilized.entity.behaviour.farmer;
+package com.uncreated.civilized.entity.behaviour.worker.farmer;
 
 import java.util.List;
 import java.util.Optional;

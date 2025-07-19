@@ -12,47 +12,44 @@ import lombok.Getter;
 @Getter
 public class QuestRequirements {
 
-   public static IDialogueAvailabilityCheck hasActiveQuest(QuestType questType) {
+   public static IDialogueAvailabilityCheck hasActiveIncompleteQuest(QuestType questType) {
       return context -> {
          PlayerQuests quests = context.getPlayer().getData(DataAttachments.QUESTS);
-         UUID vendorId = context.getVillager().getInfo().getVillagerId();
-         if (questType.isVendorSpecific())
-            return quests.hasActiveQuest(questType, vendorId);
-
-         return quests.hasActiveQuest(questType);
+         UUID vendorId = questType.isVendorSpecific() ? context.getVillager().getInfo().getVillagerId() : null;
+         return quests.hasActiveIncompleteQuest(questType, vendorId);
       };
    }
 
-   public static IDialogueAvailabilityCheck hasNotStartedQuest(QuestType questType) {
+   public static IDialogueAvailabilityCheck hasNeverBeenGivenQuest(QuestType questType) {
       return context -> {
          PlayerQuests quests = context.getPlayer().getData(DataAttachments.QUESTS);
-         UUID vendorId = context.getVillager().getInfo().getVillagerId();
-         if (questType.isVendorSpecific())
-            return !quests.hasStartedOrCompleted(questType, vendorId);
-
-         return !quests.hasStartedOrCompleted(questType);
+         UUID vendorId = questType.isVendorSpecific() ? context.getVillager().getInfo().getVillagerId() : null;
+         return quests.hasNeverCompletedQuest(questType, vendorId);
       };
    }
 
-   public static IDialogueAvailabilityCheck hasCompletedQuest(QuestType questType) {
+   public static IDialogueAvailabilityCheck hasFullyCompletedAButNeverBeenGivenB(QuestType A, QuestType B) {
       return context -> {
          PlayerQuests quests = context.getPlayer().getData(DataAttachments.QUESTS);
-         UUID vendorId = context.getVillager().getInfo().getVillagerId();
-         if (questType.isVendorSpecific())
-            return quests.hasCompleted(questType, vendorId);
-
-         return quests.hasCompleted(questType);
+         UUID vendorIdA = A.isVendorSpecific() ? context.getVillager().getInfo().getVillagerId() : null;
+         UUID vendorIdB = B.isVendorSpecific() ? context.getVillager().getInfo().getVillagerId() : null;
+         return quests.hasFullyCompletedAButNeverBeenGivenB(A, vendorIdA, B, vendorIdB);
       };
    }
 
-   public static IDialogueAvailabilityCheck hasNotCompletedQuest(QuestType questType) {
+   public static IDialogueAvailabilityCheck isActiveQuestComplete(QuestType questType) {
       return context -> {
          PlayerQuests quests = context.getPlayer().getData(DataAttachments.QUESTS);
-         UUID vendorId = context.getVillager().getInfo().getVillagerId();
-         if (questType.isVendorSpecific())
-            return !quests.hasCompleted(questType, vendorId);
+         UUID vendorId = questType.isVendorSpecific() ? context.getVillager().getInfo().getVillagerId() : null;
+         return quests.hasActiveCompletedQuest(questType, vendorId);
+      };
+   }
 
-         return !quests.hasCompleted(questType);
+   public static IDialogueAvailabilityCheck isActiveQuestIncomplete(QuestType questType) {
+      return context -> {
+         PlayerQuests quests = context.getPlayer().getData(DataAttachments.QUESTS);
+         UUID vendorId = questType.isVendorSpecific() ? context.getVillager().getInfo().getVillagerId() : null;
+         return quests.hasActiveIncompleteQuest(questType, vendorId);
       };
    }
 }

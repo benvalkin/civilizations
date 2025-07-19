@@ -1,6 +1,6 @@
 package com.uncreated.civilized.core.dialogue.rewards;
 
-import static net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion.MOD_ID;
+import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.List;
 
@@ -32,5 +32,5 @@ public class GiveItemsToPlayer implements CustomPacketPayload {
    }
 
    public static final CustomPacketPayload.Type<GiveItemsToPlayer> TYPE =
-         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(MOD_ID, "give_item_to_player"));
+         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "give_item_to_player"));
 }

@@ -14,35 +14,31 @@ import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.entity.CivilizedVillager;
 
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
-public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
+public class InvalidateImportantLocations extends RecurringIntervalBehaviour<CivilizedVillager> {
 
-   private static final int FREQUENCY_SECONDS = 20;
    private Logger LOGGER = LogUtils.getLogger();
 
    public InvalidateImportantLocations() {
       super(ImmutableMap.of());
    }
 
-   private long timeStart;
-
    @Override
-   protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
-      return level.getGameTime() - timeStart > 20 * FREQUENCY_SECONDS;
+   protected long getIntervalDurationSeconds() {
+      return 20;
    }
 
    @Override
-   protected void start(ServerLevel level, CivilizedVillager villager, long gameTicks) {
-      timeStart = gameTicks;
+   protected void start(ServerLevel level, CivilizedVillager entity, long gameTicks) {
+      super.start(level, entity, gameTicks);
 
-      VillagerInfo villagerInfo = villager.getInfo();
+      VillagerInfo villagerInfo = entity.getInfo();
       VillagerOccupation oldOccupation = villagerInfo.getOccupation();
       Optional<Building> oldHome = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
 
@@ -55,11 +51,11 @@ public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
 
       Optional<Building> worksite = invalidateWorksite(villagerInfo, level);
       if (worksite.isPresent()) {
-         villager.getBrain()
+         entity.getBrain()
                .setMemory(MemoryModuleType.JOB_SITE, new GlobalPos(level.dimension(), worksite.get().getBlockPos()));
       }
 
-      villager.invalidateHomeAndJobMemories();
+      entity.invalidateHomeAndJobMemories();
 
       boolean jobChanged = oldOccupation != villagerInfo.getOccupation();
       boolean homeChanged =
@@ -90,7 +86,7 @@ public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
             "Villager {} worksite: {} - current activity {} ",
             villagerInfo.getFullName(),
             worksite.isPresent() ? worksite.get().getBuildingType() : "none",
-            villager.getBrain().getActiveNonCoreActivity());
+            entity.getBrain().getActiveNonCoreActivity());
    }
 
    private Optional<Building> invalidateHome(VillagerInfo villagerInfo, ServerLevel level) {
@@ -136,15 +132,5 @@ public class InvalidateImportantLocations extends Behavior<CivilizedVillager> {
          return cropFarm;
       }
       return Optional.empty();
-   }
-
-   @Override
-   protected void stop(ServerLevel level, CivilizedVillager entity, long gameTime) {
-
-   }
-
-   @Override
-   protected boolean canStillUse(ServerLevel level, CivilizedVillager entity, long gameTime) {
-      return false;
    }
 }

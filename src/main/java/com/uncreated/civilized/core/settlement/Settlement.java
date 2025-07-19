@@ -2,15 +2,15 @@ package com.uncreated.civilized.core.settlement;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import com.uncreated.civilized.ui.style.Colors;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
-import com.uncreated.civilized.networking.PacketHelper;
+import com.uncreated.civilized.ui.style.Colors;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +32,7 @@ public class Settlement {
             .settlementId(buffer.readUUID())
             .ownerId(buffer.readUUID())
             .displayName(buffer.readUtf())
-            .citizenIds(PacketHelper.readPrefixedList(buffer, b -> b.readUUID()))
+            .citizenIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
             .settlementLevel(SettlementLevel.valueOf(buffer.readInt()))
             .build();
    }
@@ -42,7 +42,7 @@ public class Settlement {
       buffer.writeUUID(settlementId);
       buffer.writeUUID(ownerId);
       buffer.writeUtf(displayName);
-      PacketHelper.writePrefixedList(buffer, citizenIds, (b, i) -> b.writeUUID(i));
+      buffer.writeCollection(citizenIds, (b, i) -> b.writeUUID(i));
       buffer.writeInt(settlementLevel.getLevel());
    }
 

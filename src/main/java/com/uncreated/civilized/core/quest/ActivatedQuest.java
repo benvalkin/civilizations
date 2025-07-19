@@ -1,12 +1,10 @@
 package com.uncreated.civilized.core.quest;
 
-import static net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion.MOD_ID;
+import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-
-import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,42 +22,52 @@ public class ActivatedQuest implements CustomPacketPayload {
    @Setter
    private int points;
    @Setter
-   private QuestStatus status;
+   private QuestLifecycleState lifecycleState;
+   @Setter
+   private boolean completed;
 
-   public ActivatedQuest(String id, QuestType questType, @Nullable UUID vendorId, int points, QuestStatus status) {
+   public ActivatedQuest(
+         String id,
+         QuestType questType,
+         @Nullable UUID vendorId,
+         int points,
+         QuestLifecycleState lifecycleState,
+         boolean completed) {
       this.id = id;
       this.questType = questType;
       this.vendorId = vendorId;
       this.points = points;
-      this.status = status;
+      this.lifecycleState = lifecycleState;
+      this.completed = completed;
    }
 
-   public ActivatedQuest(String id, QuestType questType, @NotNull UUID vendorId) {
+   public ActivatedQuest(String id, QuestType questType, @Nullable UUID vendorId) {
       this.id = id;
       this.questType = questType;
       this.vendorId = vendorId;
       this.points = 0;
-      this.status = QuestStatus.STARTED;
-   }
-
-   public ActivatedQuest(String id, QuestType questType) {
-      this.id = questType.getName();
-      this.questType = questType;
-      this.vendorId = null;
-      this.points = 0;
-      this.status = QuestStatus.STARTED;
-   }
-
-   public boolean isComplete() {
-      return this.status == QuestStatus.COMPLETE;
+      this.lifecycleState = QuestLifecycleState.STARTED;
+      this.completed = false;
    }
 
    public boolean isEnded() {
-      return this.status == QuestStatus.ENDED;
+      return this.lifecycleState == QuestLifecycleState.ENDED;
    }
 
-   public boolean isActive() {
-      return !isEnded();
+   public boolean isStarted() {
+      return this.lifecycleState == QuestLifecycleState.STARTED;
+   }
+
+   public boolean isStartedButNotCompleted() {
+      return this.lifecycleState == QuestLifecycleState.STARTED && !this.completed;
+   }
+
+   public boolean isStartedAndCompleted() {
+      return this.lifecycleState == QuestLifecycleState.STARTED && !this.completed;
+   }
+
+   public boolean isFullyCompleted() {
+      return this.lifecycleState == QuestLifecycleState.ENDED && this.isCompleted();
    }
 
    @Override
@@ -68,23 +76,25 @@ public class ActivatedQuest implements CustomPacketPayload {
    }
 
    public static final CustomPacketPayload.Type<ActivatedQuest> TYPE =
-         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(MOD_ID, "sync_player_quest"));
+         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_player_quest"));
 
    public static final StreamCodec<FriendlyByteBuf, ActivatedQuest> STREAM_CODEC = StreamCodec.of((buffer, quest) -> {
       buffer.writeUtf(quest.getId());
       buffer.writeUtf(quest.getQuestType().getName());
       buffer.writeNullable(quest.getVendorId(), (b, uuid) -> b.writeUUID(uuid));
       buffer.writeInt(quest.getPoints());
-      buffer.writeEnum(quest.getStatus());
+      buffer.writeEnum(quest.getLifecycleState());
+      buffer.writeBoolean(quest.isCompleted());
    },
          buffer -> new ActivatedQuest(
                buffer.readUtf(),
                Quests.get(buffer.readUtf()),
                buffer.readNullable(b -> b.readUUID()),
                buffer.readInt(),
-               buffer.readEnum(QuestStatus.class)));
+               buffer.readEnum(QuestLifecycleState.class),
+               buffer.readBoolean()));
 
-   public enum QuestStatus {
-      STARTED, COMPLETE, ENDED
+   public enum QuestLifecycleState {
+      STARTED, ENDED
    }
 }

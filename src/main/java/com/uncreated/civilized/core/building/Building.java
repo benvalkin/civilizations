@@ -2,29 +2,29 @@ package com.uncreated.civilized.core.building;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.Setter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
+import javax.annotation.Nullable;
+
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.behaviour.BuildingBehaviour;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
-import com.uncreated.civilized.networking.PacketHelper;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-
-import javax.annotation.Nullable;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 
 @Getter
 @Builder
@@ -41,7 +41,7 @@ public class Building {
             .placerId(buffer.readUUID())
             .buildingType(buffer.readEnum(BuildingType.class))
             .bounds(BuildingBounds.decode(buffer))
-            .occupantIds(PacketHelper.readPrefixedList(buffer, b -> b.readUUID()))
+            .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
             .build();
    }
 
@@ -52,7 +52,7 @@ public class Building {
       buffer.writeUUID(placerId);
       buffer.writeEnum(buildingType);
       bounds.encode(buffer);
-      PacketHelper.writePrefixedList(buffer, occupantIds, (buf, o) -> buf.writeUUID(o));
+      buffer.writeCollection(occupantIds, (buf, o) -> buf.writeUUID(o));
    }
 
    public static final String FIELD_BUILDING_ID = "instance_uuid";
@@ -140,7 +140,8 @@ public class Building {
       public static final CustomPacketPayload.Type<Packet> SYNC_TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_building"));
 
-      public static StreamCodec<FriendlyByteBuf, Packet> STREAM_CODEC = StreamCodec.ofMember(Packet::encode, Packet::decode);
+      public static StreamCodec<FriendlyByteBuf, Packet> STREAM_CODEC =
+            StreamCodec.ofMember(Packet::encode, Packet::decode);
 
       public static Packet decode(FriendlyByteBuf buffer) {
          return new Packet(Building.decode(buffer), buffer.readEnum(StoreOperation.class));

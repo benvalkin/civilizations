@@ -23,6 +23,8 @@ public class Quests {
       return questType;
    }
 
-   public static final QuestType ADVISOR_MEAL =
-         registerQuest(QuestType.properties("advisor_meal").repeatable(true).vendorSpecific(true));
+   public static final QuestType ADVISOR_INTRO_1 = registerQuest(QuestType.properties("advisor_intro_1"));
+
+   public static final QuestType ADVISOR_INTRO_2_CHECKPOINT =
+         registerQuest(QuestType.properties("advisor_intro_2").isCheckpoint(true));
 }

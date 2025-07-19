@@ -16,20 +16,20 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.dialogue.DialoguePackage;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
-import com.uncreated.civilized.core.dialogue.questline.advisor.AdvisorIntroQuest;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
+import com.uncreated.civilized.core.dialogue.controller.DialogueController;
+import com.uncreated.civilized.core.dialogue.controller.DialogueFlow;
 import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
-import com.uncreated.civilized.core.dialogue.questline.traveler.JoinSettlementContext;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.core.villagerinfo.VillagerNpcRole;
 import com.uncreated.civilized.entity.behaviour.InvalidateImportantLocations;
 import com.uncreated.civilized.entity.behaviour.LongDistanceTravelToRememberedPos;
 import com.uncreated.civilized.entity.behaviour.OffloadResourcesAtHome;
 import com.uncreated.civilized.entity.behaviour.UpdateActivityFromSchedule;
-import com.uncreated.civilized.entity.behaviour.farmer.HarvestCrops;
+import com.uncreated.civilized.entity.behaviour.worker.farmer.HarvestCrops;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
@@ -85,6 +85,9 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Getter
    private VillagerInfo info;
 
+   @Getter
+   private DialogueController dialogueController = DialogueController.noDialogue();
+
    private final SimpleContainer inventory = new SimpleContainer(8);
 
    public CivilizedVillager(EntityType<? extends AgeableMob> entityType, Level level) {
@@ -98,6 +101,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
             villagerId = UUID.randomUUID(); // TECHDEBT: find a more reliable place to set villagerId for the first time
 
          info = ServerVillagerStore.INSTANCE.getOrAdd(this);
+         dialogueController = DialogueController.selectDialogueController(this);
 
          if (!info.hasName()) {
             Pair<String, String> newName = VillagerInfo.generateRandomName();
@@ -136,6 +140,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Override
    public void readSpawnData(RegistryFriendlyByteBuf buf) {
       info = VillagerInfo.decode(buf);
+      dialogueController = DialogueController.selectDialogueController(this);
       ClientVillagerStore.INSTANCE.addFromServer(info);
       villagerId = info.getVillagerId();
    }
@@ -158,9 +163,15 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Override
    public InteractionResult mobInteract(Player player, InteractionHand hand) {
 
-      DialoguePackage dialoguePackage = AdvisorIntroQuest.getPackage();
-      DialogueContext context = new JoinSettlementContext(this, player);
-      IVillageDialogue dialogue = dialoguePackage.chooseFirstAvailable(context);
+      getInfo().getNpcRoles().add(VillagerNpcRole.ADVISOR);
+      dialogueController = DialogueController.selectDialogueController(this);
+      DialogueFlow dialogueFlow = dialogueController.getDialogueFlow(this, player, hand);
+
+      if (dialogueFlow == null)
+         return InteractionResult.PASS;
+
+      DialogueContext context = dialogueFlow.buildDialogueContext(this, player, hand);
+      IVillageDialogue dialogue = dialogueFlow.getOpeningDialogue(context);
 
       while (dialogue != null && !dialogue.isAvailableToPlayer(context)) {
          dialogue = dialogue.getFallback();
