@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.dialogue.quest;
+package com.uncreated.civilized.core.dialogue.actions.quest;
 
 import java.util.UUID;
 

@@ -18,10 +18,10 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.dialogue.DialoguePackage;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
-import com.uncreated.civilized.core.dialogue.advisor.quest.QuestAdvisor;
+import com.uncreated.civilized.core.dialogue.questline.advisor.AdvisorIntroQuest;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
 import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
-import com.uncreated.civilized.core.dialogue.traveler.quest.JoinSettlementContext;
+import com.uncreated.civilized.core.dialogue.questline.traveler.JoinSettlementContext;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
@@ -158,7 +158,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Override
    public InteractionResult mobInteract(Player player, InteractionHand hand) {
 
-      DialoguePackage dialoguePackage = QuestAdvisor.advisorQuests();
+      DialoguePackage dialoguePackage = AdvisorIntroQuest.getPackage();
       DialogueContext context = new JoinSettlementContext(this, player);
       IVillageDialogue dialogue = dialoguePackage.chooseFirstAvailable(context);
 

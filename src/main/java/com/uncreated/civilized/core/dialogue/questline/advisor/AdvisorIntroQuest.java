@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.dialogue.advisor.quest;
+package com.uncreated.civilized.core.dialogue.questline.advisor;
 
 import static com.uncreated.civilized.core.dialogue.Dialogue.*;
 import static com.uncreated.civilized.core.dialogue.DialoguePackage.dialoguePackage;
@@ -8,8 +8,8 @@ import static com.uncreated.civilized.core.dialogue.RandomSpeech.oneOf;
 import static com.uncreated.civilized.core.dialogue.ResponseOption.closeDialogue;
 import static com.uncreated.civilized.core.dialogue.ResponseOption.option;
 import static com.uncreated.civilized.core.dialogue.actions.SoundActions.playerVillagerSound;
-import static com.uncreated.civilized.core.dialogue.quest.QuestActions.*;
-import static com.uncreated.civilized.core.dialogue.quest.QuestRequirements.*;
+import static com.uncreated.civilized.core.dialogue.actions.quest.QuestActions.*;
+import static com.uncreated.civilized.core.dialogue.actions.quest.QuestRequirements.*;
 import static com.uncreated.civilized.core.dialogue.rewards.RewardActions.rewardCurrency;
 import static com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue.itemDepotDialogue;
 import static net.minecraft.network.chat.Component.translatable;
@@ -28,16 +28,16 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 
-public class QuestAdvisor {
-   public static DialoguePackage advisorQuests() {
-      return dialoguePackage().addConditional(hasNotStartedQuest(Quests.ADVISOR_MEAL), openingDialogue())
+public class AdvisorIntroQuest {
+   public static DialoguePackage getPackage() {
+      return dialoguePackage().addConditional(hasNotStartedQuest(Quests.ADVISOR_MEAL), questIntro())
             .addConditional(
                   hasActiveQuest(Quests.ADVISOR_MEAL),
                   Switch(Case(playerIsHoldingFood(), consumeFood()), defaultCase(questIncomplete())))
             .addConditional(hasCompletedQuest(Quests.ADVISOR_MEAL), questComplete());
    }
 
-   private static Dialogue openingDialogue() {
+   private static Dialogue questIntro() {
       return dialogueWithpages()
             .page(
                   simplePage(

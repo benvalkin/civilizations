@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.dialogue.traveler.quest;
+package com.uncreated.civilized.core.dialogue.questline.traveler;
 
 import static com.uncreated.civilized.core.dialogue.Dialogue.*;
 import static com.uncreated.civilized.core.dialogue.DialoguePackage.dialoguePackage;
@@ -25,9 +25,9 @@ import com.uncreated.civilized.ui.style.Colors;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.world.entity.player.Player;
 
-public class QuestJoinSettlement {
+public class JoinSettlementQuest {
 
-   public static DialoguePackage questStayAtVillage() {
+   public static DialoguePackage getPackage() {
       return dialoguePackage().add(
             dialogueWithpages()
                   .page(simplePage(translatable("villager.dialogue.traveller.quest.stay_at_village.1.page.1"), randomPlayerGreeting()))

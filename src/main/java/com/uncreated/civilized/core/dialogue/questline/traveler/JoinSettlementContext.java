@@ -1,7 +1,6 @@
-package com.uncreated.civilized.core.dialogue.traveler.quest;
+package com.uncreated.civilized.core.dialogue.questline.traveler;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.entity.CivilizedVillager;
