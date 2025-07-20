@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
-import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
+import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -94,9 +94,6 @@ public class HarvestCrops extends Behavior<CivilizedVillager> {
       if (tickTime - lastWorkTime > 25) {
 
          lastWorkTime = tickTime;
-         // Optional<GlobalPos> jobSite = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
-         // if (jobSite.isEmpty())
-         // return;
 
          findFarmland(level);
          LOGGER.info("Villager found {} crops to harvest.", maturesCrops.size());

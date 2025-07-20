@@ -3,6 +3,7 @@ package com.uncreated.civilized;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
+import com.uncreated.civilized.block.building.requirement.registry.BuildingRequirementRegistry;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.events.BuildingStoreEvents;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
@@ -67,6 +68,8 @@ public class CivilizedMod {
       AIRegistry.SCHEDULES.register(modEventBus);
       DataAttachments.ATTACHMENTS.register(modEventBus);
       MyDataComponents.COMPONENTS.register(modEventBus);
+
+      BuildingRequirementRegistry.BUILDING_REQUIREMENTS.register(modEventBus);
 
       CreativeTab.CREATIVE_MODE_TABS.register(modEventBus);
 

@@ -2,14 +2,18 @@ package com.uncreated.civilized.item;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.block.building.requirement.EnclosedWallsRequirement;
+import com.uncreated.civilized.block.building.requirement.IBuildingRequirement;
 import com.uncreated.civilized.block.building.requirement.IBuildingRequirementResult;
 import com.uncreated.civilized.block.building.requirement.SpaceRequirement;
+import com.uncreated.civilized.block.building.requirement.SurfaceAreaRequirement;
 import com.uncreated.civilized.block.building.requirement.blockcount.BlockCountRequirement;
-import com.uncreated.civilized.block.building.requirement.blockcount.BlockTypeRequirement;
-import com.uncreated.civilized.block.building.requirement.blockcount.BuildingBlockTypes;
-import com.uncreated.civilized.block.building.requirement.blockcount.validators.BlockClassValidator;
+import com.uncreated.civilized.block.building.requirement.registry.BuildingRequirementList;
+import com.uncreated.civilized.block.building.requirement.registry.BuildingRequirementRegistry;
 import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingType;
@@ -27,7 +31,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -92,46 +95,55 @@ public class BuildingDeedItem extends Item {
             return InteractionResult.FAIL;
          }
 
-         if (!boundsResult.centerIsAir()) {
-            player.displayClientMessage(
-                  Component
-                        .translatable(
-                              "message.building.placement.validation.center_obstructed",
-                              buildingType.translation(),
-                              boundsResult.bounds().getCenter().toShortString())
-                        .withColor(Colors.VALIDATION_ERROR),
-                  false);
-            return InteractionResult.FAIL;
+         if (!buildingType.isWorksite()) {
+            if (!boundsResult.centerIsAir()) {
+               player.displayClientMessage(
+                     Component
+                           .translatable(
+                                 "message.building.placement.validation.center_obstructed",
+                                 buildingType.translation(),
+                                 boundsResult.bounds().getCenter().toShortString())
+                           .withColor(Colors.VALIDATION_ERROR),
+                     false);
+               return InteractionResult.FAIL;
+            }
+
+            if (!boundsResult.centerIsInside()) {
+               player.displayClientMessage(
+                     Component
+                           .translatable(
+                                 "message.building.placement.validation.center_no_roof",
+                                 buildingType.translation(),
+                                 boundsResult.bounds().getCenter().toShortString())
+                           .withColor(Colors.VALIDATION_ERROR),
+                     false);
+               return InteractionResult.FAIL;
+            }
          }
 
-         if (!boundsResult.centerIsInside()) {
-            player.displayClientMessage(
-                  Component
-                        .translatable(
-                              "message.building.placement.validation.center_no_roof",
-                              buildingType.translation(),
-                              boundsResult.bounds().getCenter().toShortString())
-                        .withColor(Colors.VALIDATION_ERROR),
-                  false);
-            return InteractionResult.FAIL;
+         int buildingLevel = 1;
+         BuildingRequirementList requirements =
+               BuildingRequirementRegistry.getBuildingRequirements(buildingType, buildingLevel);
+         List<IBuildingRequirementResult> requirementResults = Lists.newArrayList();
+
+         Set<SpaceRequirement.ValidFloor> validFloorBlocks = Set.of();
+         for (IBuildingRequirement requirement : requirements) {
+
+            if (requirement instanceof SpaceRequirement s) {
+               SpaceRequirement.Result spaceResult = s.getResult(context.getLevel(), boundsResult.bounds());
+               validFloorBlocks = spaceResult.getValidFloorBlocks();
+               requirementResults.add(spaceResult);
+               // BAD IMPLEMENTATION: dependant requirements mean that they are also dependent on the order they are
+               // defined in.
+               // EnclosedWallsRequirements will not work if it comes before SpaceRequirement in the list.
+            }
+            if (requirement instanceof EnclosedWallsRequirement ew)
+               requirementResults.add(ew.getResult(context.getLevel(), boundsResult.bounds(), validFloorBlocks));
+            if (requirement instanceof BlockCountRequirement bt)
+               requirementResults.add(bt.getResult(context.getLevel(), boundsResult.bounds()));
+            if (requirement instanceof SurfaceAreaRequirement sa)
+               requirementResults.add(sa.getResult(boundsResult.bounds()));
          }
-
-         BlockCountRequirement.BlockCountResult blockTypeResult =
-               new BlockTypeRequirement(BuildingBlockTypes.WOOD)
-                     .getResult(context.getLevel(), boundsResult.bounds(), 80);
-         SpaceRequirement.Result spaceResult =
-               new SpaceRequirement().getResult(context.getLevel(), boundsResult.bounds(), 15);
-         EnclosedWallsRequirement.Result enclosedWallsResult =
-               new EnclosedWallsRequirement()
-                     .getResult(context.getLevel(), boundsResult.bounds(), spaceResult.getValidFloorBlocks(), 0);
-         BlockCountRequirement.BlockCountResult signsCountResult =
-               new BlockCountRequirement(
-                     new BlockClassValidator(SignBlock.class),
-                     Component.translatable("menu.building.management.requirements.count.description.signs"),
-                     false).getResult(context.getLevel(), boundsResult.bounds(), 1);
-
-         List<IBuildingRequirementResult> requirementResults =
-               List.of(spaceResult, enclosedWallsResult, blockTypeResult, signsCountResult);
 
          Minecraft.getInstance()
                .setScreen(new EstablishBuildingScreen(buildingType, boundsResult.bounds(), requirementResults));

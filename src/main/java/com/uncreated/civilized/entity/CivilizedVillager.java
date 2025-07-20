@@ -1,5 +1,8 @@
 package com.uncreated.civilized.entity;
 
+import static com.uncreated.civilized.entity.behaviour.CivilizedVillagerActivities.*;
+import static com.uncreated.civilized.entity.behaviour.worker.WorkActivities.getWorkPackage;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -8,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
@@ -25,14 +26,7 @@ import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerNpcRole;
-import com.uncreated.civilized.entity.behaviour.InvalidateImportantLocations;
-import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelOnceOff;
-import com.uncreated.civilized.entity.behaviour.OffloadResourcesAtHome;
-import com.uncreated.civilized.entity.behaviour.SpeakToPlayer;
-import com.uncreated.civilized.entity.behaviour.UpdateActivityFromSchedule;
-import com.uncreated.civilized.entity.behaviour.worker.farmer.HarvestCrops;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
-import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
 import lombok.Getter;
@@ -49,21 +43,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.BehaviorControl;
-import net.minecraft.world.entity.ai.behavior.DoNothing;
-import net.minecraft.world.entity.ai.behavior.InteractWith;
-import net.minecraft.world.entity.ai.behavior.InteractWithDoor;
-import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
-import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.RunOne;
-import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
-import net.minecraft.world.entity.ai.behavior.SetLookAndInteract;
-import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
-import net.minecraft.world.entity.ai.behavior.StrollAroundPoi;
-import net.minecraft.world.entity.ai.behavior.Swim;
-import net.minecraft.world.entity.ai.behavior.VillageBoundRandomStroll;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -255,13 +235,12 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    }
 
    private void registerBrainGoals(Brain<CivilizedVillager> brain) {
-
       brain.setSchedule(AIRegistry.SCHED_CIVILIZED_VILLAGER_DEFAULT.get());
       brain.addActivity(Activity.CORE, getCorePackage(0.33f));
       brain.addActivity(Activity.IDLE, getIdlePackage(0.25f));
       brain.addActivityWithConditions(
             Activity.WORK,
-            getWorkPackage(),
+            getWorkPackage(getInfo().getOccupation()),
             Set.of(Pair.of(AIRegistry.MM_VILLAGER_OCCUPATION.get(), MemoryStatus.VALUE_PRESENT)));
       brain.addActivityWithConditions(
             Activity.REST,
@@ -276,6 +255,13 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       brain.setDefaultActivity(Activity.IDLE);
       brain.setActiveActivityIfPossible(Activity.IDLE);
       brain.updateActivityFromSchedule(this.level().getDayTime(), this.level().getGameTime());
+   }
+
+   public void refreshBrain(ServerLevel serverLevel) {
+      Brain<CivilizedVillager> brain = this.getBrain();
+      brain.stopAll(serverLevel, this);
+      this.brain = brain.copyWithoutBehaviors();
+      this.registerBrainGoals(this.getBrain());
    }
 
    @Override
@@ -302,142 +288,5 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    public void stopSpeakingToPlayer() {
       getBrain().eraseMemory(AIRegistry.MM_DIALOGUE_TARGET.get());
       brain.setActiveActivityIfPossible(Activity.IDLE);
-   }
-
-   public void invalidateVillagerMemories() {
-
-   }
-
-   public static ImmutableList<Pair<Integer, ? extends BehaviorControl<CivilizedVillager>>> getWorkPackage() {
-      return ImmutableList.of(
-            getMinimalLookBehavior(),
-            Pair.of(
-                  1,
-                  new RunOne<>(
-                        ImmutableList.of(
-                              // go to work. closeEnoughDist should +1 more StrollAroundPoi's maxDistFromPoi.
-                              Pair.of(
-                                    MediumDistanceTravelOnceOff.create(MemoryModuleType.JOB_SITE, 0.4f, 5, 300, 1500),
-                                    3),
-                              Pair.of(new HarvestCrops(), 4),
-                              Pair.of(new OffloadResourcesAtHome(), 5),
-                              // if cannot perform main work tasks, stroll around the job site.
-                              Pair.of(StrollAroundPoi.create(MemoryModuleType.JOB_SITE, 0.25F, 4), 6)))),
-            Pair.of(99, UpdateActivityFromSchedule.create()));
-   }
-
-   public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super CivilizedVillager>>> getRestPackage(
-         float speedModifier) {
-      return ImmutableList.of(
-            Pair.of(2, MediumDistanceTravelOnceOff.create(MemoryModuleType.HOME, speedModifier, 1, 300, 1500)),
-            // Pair.of(3, ValidateNearbyPoi.create((p_217495_) -> p_217495_.is(PoiTypes.HOME), MemoryModuleType.HOME)),
-            // Pair.of(3, new SleepInBed()),
-            Pair.of(
-                  5,
-                  new RunOne( // for now, do nothing at home
-                        ImmutableMap.of(MemoryModuleType.HOME, MemoryStatus.VALUE_PRESENT),
-                        ImmutableList.of(
-                              // Pair.of(SetClosestHomeAsWalkTarget.create(speedModifier), 1),
-                              // Pair.of(InsideBrownianWalk.create(speedModifier), 4),
-                              // Pair.of(GoToClosestVillage.create(speedModifier, 4), 2),
-                              Pair.of(new DoNothing(20, 40), 2)))),
-            getMinimalLookBehavior(),
-            Pair.of(99, UpdateActivityFromSchedule.create()));
-   }
-
-   public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super CivilizedVillager>>> getCorePackage(
-         float speedModifier) {
-      return ImmutableList.of(
-            Pair.of(0, new MoveToTargetSink()),
-            Pair.of(0, new Swim(0.8F)),
-            Pair.of(0, InteractWithDoor.create()),
-            Pair.of(0, new LookAtTargetSink(45, 90)),
-            Pair.of(0, new InvalidateImportantLocations()));
-   }
-
-   public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super CivilizedVillager>>> getIdlePackage(
-         float speedModifier) {
-      return ImmutableList.of(
-            Pair.of(
-                  3,
-                  new RunOne(
-                        ImmutableList.of(
-                              Pair.of(
-                                    InteractWith.of(
-                                          EntityRegistry.CIVILIZED_VILLAGER.get(),
-                                          8,
-                                          MemoryModuleType.INTERACTION_TARGET,
-                                          speedModifier,
-                                          2),
-                                    2),
-                              Pair.of(
-                                    InteractWith.of(
-                                          EntityRegistry.CIVILIZED_VILLAGER.get(),
-                                          8,
-                                          AgeableMob::canBreed,
-                                          AgeableMob::canBreed,
-                                          MemoryModuleType.BREED_TARGET,
-                                          speedModifier,
-                                          2),
-                                    1),
-                              Pair.of(
-                                    InteractWith
-                                          .of(EntityType.CAT, 8, MemoryModuleType.INTERACTION_TARGET, speedModifier, 2),
-                                    1),
-                              Pair.of(VillageBoundRandomStroll.create(speedModifier), 1),
-                              Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 2), 1),
-                              // Pair.of(new JumpOnBed(speedModifier), 1),
-                              Pair.of(new DoNothing(30, 60), 1)))),
-            Pair.of(3, SetLookAndInteract.create(EntityType.PLAYER, 4)),
-            // Pair.of(
-            // 3,
-            // new GateBehavior(
-            // ImmutableMap.of(),
-            // ImmutableSet.of(MemoryModuleType.INTERACTION_TARGET),
-            // GateBehavior.OrderPolicy.ORDERED,
-            // GateBehavior.RunningPolicy.RUN_ONE,
-            // ImmutableList.of(Pair.of(new TradeWithVillager(), 1)))),
-            // Pair.of(
-            // 3,
-            // new GateBehavior(
-            // ImmutableMap.of(),
-            // ImmutableSet.of(MemoryModuleType.BREED_TARGET),
-            // GateBehavior.OrderPolicy.ORDERED,
-            // GateBehavior.RunningPolicy.RUN_ONE,
-            // ImmutableList.of(Pair.of(new VillagerMakeLove(), 1)))),
-            getFullLookBehavior(),
-            Pair.of(99, UpdateActivityFromSchedule.create()));
-   }
-
-   public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super CivilizedVillager>>> getSpeakToPlayerPackage() {
-      return ImmutableList.of(Pair.of(0, new SpeakToPlayer()));
-   }
-
-   private static Pair<Integer, BehaviorControl<CivilizedVillager>> getMinimalLookBehavior() {
-      return Pair.of(
-            5,
-            new RunOne(
-                  ImmutableList.of(
-                        Pair.of(SetEntityLookTarget.create(EntityRegistry.CIVILIZED_VILLAGER.get(), 8.0F), 2),
-                        Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 8.0F), 2),
-                        Pair.of(new DoNothing(30, 60), 8))));
-   }
-
-   private static Pair<Integer, BehaviorControl<CivilizedVillager>> getFullLookBehavior() {
-      return Pair.of(
-            5,
-            new RunOne(
-                  ImmutableList.of(
-                        Pair.of(SetEntityLookTarget.create(EntityType.CAT, 8.0F), 8),
-                        Pair.of(SetEntityLookTarget.create(EntityRegistry.CIVILIZED_VILLAGER.get(), 8.0F), 2),
-                        Pair.of(SetEntityLookTarget.create(EntityType.VILLAGER, 8.0F), 2),
-                        Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 8.0F), 2),
-                        Pair.of(SetEntityLookTarget.create(MobCategory.CREATURE, 8.0F), 1),
-                        Pair.of(SetEntityLookTarget.create(MobCategory.WATER_CREATURE, 8.0F), 1),
-                        Pair.of(SetEntityLookTarget.create(MobCategory.AXOLOTLS, 8.0F), 1),
-                        Pair.of(SetEntityLookTarget.create(MobCategory.UNDERGROUND_WATER_CREATURE, 8.0F), 1),
-                        Pair.of(SetEntityLookTarget.create(MobCategory.WATER_AMBIENT, 8.0F), 1),
-                        Pair.of(SetEntityLookTarget.create(MobCategory.MONSTER, 8.0F), 1),
-                        Pair.of(new DoNothing(30, 60), 2))));
    }
 }

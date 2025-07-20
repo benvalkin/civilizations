@@ -15,12 +15,17 @@ public class EnclosedWallsRequirement implements IBuildingRequirement {
 
    public static final double VALID_WALL_HEIGHT = 3;
    public static final float PERCENTAGE_VALID_SOLID_WALL = 0.6f;
+   private final int allowedFaults;
 
-   public Result getResult(
-         Level level,
-         BuildingBounds bounds,
-         Set<SpaceRequirement.ValidFloor> validFloorBlocks,
-         int allowedFaults) {
+   public EnclosedWallsRequirement(int allowedFaults) {
+      this.allowedFaults = allowedFaults;
+   }
+
+   public EnclosedWallsRequirement() {
+      this(1);
+   }
+
+   public Result getResult(Level level, BuildingBounds bounds, Set<SpaceRequirement.ValidFloor> validFloorBlocks) {
 
       HashSet<BlockPos> faults = new HashSet<>();
       for (SpaceRequirement.ValidFloor floorBlock : validFloorBlocks) {

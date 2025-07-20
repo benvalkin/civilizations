@@ -8,13 +8,13 @@ import net.minecraft.network.chat.Component;
 public class BlockTypeRequirement extends BlockCountRequirement {
    private final BuildingBlockTypes.BuildingBlockType type;
 
-   public BlockTypeRequirement(BuildingBlockTypes.BuildingBlockType type) {
-      super(new BlockTagValidator(type), type.getDescription(), false);
+   public BlockTypeRequirement(BuildingBlockTypes.BuildingBlockType type, int requiredBlocks) {
+      super(new BlockTagValidator(type), requiredBlocks, type.getDescription(), false);
       this.type = type;
    }
 
    @Override
-   public BlockCountResult createResult(int actualBlocks, int requiredBlocks) {
+   public BlockCountResult createResult(int actualBlocks) {
       return new Result(actualBlocks, requiredBlocks);
    }
 
