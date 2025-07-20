@@ -29,6 +29,7 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
    private Building storehouse;
    private Building home;
    private List<ChestBlockEntity> chestsAtHome;
+   private MediumDistanceTravelTask travelHelper;
 
    public OffloadResourcesAtHome() {
       super(
@@ -72,6 +73,8 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       LOGGER.info("Villager going to offload resources.");
       offloaded = false;
+
+      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.HOME);
    }
 
    @Override
@@ -91,6 +94,9 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
 
       if (offloaded)
          return;
+
+      if (!travelHelper.isJourneySuccessful())
+         travelHelper.walkToPoi(tickTime);
 
       BlockPos chestPos = chestsAtHome.getFirst().getBlockPos();
       // try walk to first chest
@@ -120,32 +126,3 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
       villager.getBrain().eraseMemory(AIRegistry.MM_CAN_OFFLOAD.get());
    }
 }
-
-// public class OffloadResources {
-// public static OneShot<CivilizedVillager> create(
-// MemoryModuleType<GlobalPos> poiPosMemory,
-// float speedModifier,
-// int maxDistFromPoi) {
-// MutableLong mutablelong = new MutableLong(0L);
-// return BehaviorBuilder.create(
-// (villager) -> villager
-// .group(villager.registered(MemoryModuleType.WALK_TARGET), villager.present(poiPosMemory))
-// .apply(villager, (walkTarget, targetPos) -> (serverLevel, v, gameTicks) -> {
-// GlobalPos globalpos = (GlobalPos) villager.get(targetPos);
-// if (serverLevel.dimension() == globalpos.dimension()
-// && globalpos.pos().closerToCenterThan(v.position(), (double) maxDistFromPoi)) {
-// if (gameTicks <= mutablelong.getValue()) {
-// return true;
-// } else {
-// Optional<Vec3> optional = Optional.ofNullable(LandRandomPos.getPos(v, 8, 6));
-// walkTarget
-// .setOrErase(optional.map((p_258816_) -> new WalkTarget(p_258816_, speedModifier, 1)));
-// mutablelong.setValue(gameTicks + 180L);
-// return true;
-// }
-// } else {
-// return false;
-// }
-// }));
-// }
-// }

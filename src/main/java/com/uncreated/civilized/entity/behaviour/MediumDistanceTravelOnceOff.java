@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.phys.Vec3;
 
-public class LongDistanceTravelToRememberedPos {
+public class MediumDistanceTravelOnceOff {
    public static OneShot<CivilizedVillager> create(
          MemoryModuleType<GlobalPos> finalWalkTarget,
          float speedModifier,
@@ -55,7 +55,8 @@ public class LongDistanceTravelToRememberedPos {
                                     }
                                  }
 
-                                 currentWalkTarget.set(new WalkTarget(nextIntermediatePos, speedModifier, closeEnoughDistance));
+                                 currentWalkTarget
+                                       .set(new WalkTarget(nextIntermediatePos, speedModifier, closeEnoughDistance));
                               } else if (globalPos.pos()
                                     .distManhattan(villager.blockPosition()) > closeEnoughDistance) {
                                  currentWalkTarget

@@ -35,8 +35,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class VillagerDialogueScreen extends Screen {
@@ -124,6 +125,8 @@ public class VillagerDialogueScreen extends Screen {
          responseButtons.add(button);
          addRenderableWidget(button);
       }
+
+      clientNotifyServerScreenOpen(villager);
    }
 
    private void onResponseOptionPressed(Button button, ResponseOptionContext optionContext) {
@@ -206,19 +209,19 @@ public class VillagerDialogueScreen extends Screen {
             512);
    }
 
-   public record ShowPacket(UUID entityId, InteractionHand hand) implements CustomPacketPayload {
+   public record ScreenToggledPacket(UUID entityId, boolean showDialogueScreen) implements CustomPacketPayload {
 
-      public static final Type<ShowPacket> TYPE =
+      public static final Type<ScreenToggledPacket> TYPE =
             new CustomPacketPayload.Type<>(
-                  ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "show_villager_dialogue_menu"));
+                  ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "villager_dialogue_screen_toggled"));
 
-      public static final StreamCodec<ByteBuf, ShowPacket> STREAM_CODEC =
+      public static final StreamCodec<ByteBuf, ScreenToggledPacket> STREAM_CODEC =
             StreamCodec.composite(
                   UUIDUtil.STREAM_CODEC,
-                  ShowPacket::entityId,
-                  ByteBufCodecs.STRING_UTF8.map(InteractionHand::valueOf, InteractionHand::name),
-                  ShowPacket::hand,
-                  ShowPacket::new);
+                  ScreenToggledPacket::entityId,
+                  ByteBufCodecs.BOOL,
+                  ScreenToggledPacket::showDialogueScreen,
+                  ScreenToggledPacket::new);
 
       @Override
       public Type<? extends CustomPacketPayload> type() {
@@ -226,11 +229,32 @@ public class VillagerDialogueScreen extends Screen {
       }
    }
 
-   public static void serverTellShowScreen(Player player, CivilizedVillager villager, InteractionHand hand) {
+   public static void serverReceiveShowScreen(ScreenToggledPacket packet, IPayloadContext context) {
 
+      if (!(context.player().level() instanceof ServerLevel serverLevel))
+         return;
+
+      Entity entity = serverLevel.getEntity(packet.entityId());
+      if (!(entity instanceof CivilizedVillager villager))
+         return;
+
+      if (packet.showDialogueScreen)
+         villager.goSpeakToPlayer(context.player());
+      else
+         villager.stopSpeakingToPlayer();
    }
 
-   public static void clientReceiveShowScreen(ShowPacket packet, IPayloadContext context) {
+   @Override
+   public void onClose() {
+      super.onClose();
+      clientNotifyServerScreenClosed(villager);
+   }
 
+   private void clientNotifyServerScreenOpen(CivilizedVillager villager) {
+      PacketDistributor.sendToServer(new ScreenToggledPacket(villager.getUUID(), true));
+   }
+
+   private void clientNotifyServerScreenClosed(CivilizedVillager villager) {
+      PacketDistributor.sendToServer(new ScreenToggledPacket(villager.getUUID(), false));
    }
 }

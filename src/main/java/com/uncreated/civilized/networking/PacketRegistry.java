@@ -5,18 +5,18 @@ import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.dialogue.rewards.GiveItemsToPlayer;
 import com.uncreated.civilized.core.dialogue.rewards.RewardActions;
+import com.uncreated.civilized.core.quest.ActivatedQuest;
+import com.uncreated.civilized.core.quest.attachments.PlayerQuests;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-
-import com.uncreated.civilized.core.quest.ActivatedQuest;
-import com.uncreated.civilized.core.quest.attachments.PlayerQuests;
 import com.uncreated.civilized.networking.packets.CreateNewBuilding;
 import com.uncreated.civilized.networking.packets.ShowBuildingMenu;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
+
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
@@ -53,33 +53,29 @@ public class PacketRegistry {
 
       // quests
       registrar.playBidirectional(
-              ActivatedQuest.TYPE,
-              ActivatedQuest.STREAM_CODEC,
-            new DirectionalPayloadHandler<>(
-                  PlayerQuests::receiveSyncFromServer,
-                    PlayerQuests::receiveSyncFromClient));
+            ActivatedQuest.TYPE,
+            ActivatedQuest.STREAM_CODEC,
+            new DirectionalPayloadHandler<>(PlayerQuests::receiveSyncFromServer, PlayerQuests::receiveSyncFromClient));
 
       // bespoke actions
       registrar.playToServer(
-              CreateNewBuilding.TYPE,
-              CreateNewBuilding.STREAM_CODEC,
-              CreateNewBuilding::serverReceiveCreateNewBuilding);
+            CreateNewBuilding.TYPE,
+            CreateNewBuilding.STREAM_CODEC,
+            CreateNewBuilding::serverReceiveCreateNewBuilding);
 
       registrar.playToServer(
-              ShowBuildingMenu.TYPE,
-              ShowBuildingMenu.STREAM_CODEC,
-              ShowBuildingMenu::serverReceiveShowBuildingMenu);
+            ShowBuildingMenu.TYPE,
+            ShowBuildingMenu.STREAM_CODEC,
+            ShowBuildingMenu::serverReceiveShowBuildingMenu);
 
       registrar.playToServer(
-              GiveItemsToPlayer.TYPE,
-              GiveItemsToPlayer.STREAM_CODEC,
-              RewardActions::serverGiveItemsToPlayer);
+            GiveItemsToPlayer.TYPE,
+            GiveItemsToPlayer.STREAM_CODEC,
+            RewardActions::serverGiveItemsToPlayer);
 
-      registrar.playToClient(
-              VillagerDialogueScreen.ShowPacket.TYPE,
-              VillagerDialogueScreen.ShowPacket.STREAM_CODEC,
-              VillagerDialogueScreen::clientReceiveShowScreen);
-
-
+      registrar.playToServer(
+            VillagerDialogueScreen.ScreenToggledPacket.TYPE,
+            VillagerDialogueScreen.ScreenToggledPacket.STREAM_CODEC,
+            VillagerDialogueScreen::serverReceiveShowScreen);
    }
 }

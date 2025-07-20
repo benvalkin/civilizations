@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.entity.schedule.ScheduleBuilder;
@@ -19,6 +20,12 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class AIRegistry {
    // Create a Deferred Register to hold Blocks which will all be registered under the "civilized" namespace
+
+   public static DeferredRegister<Activity> ACTIVITIES =
+           DeferredRegister.create(BuiltInRegistries.ACTIVITY, CIVILIZED_MOD_ID);
+
+   public static final Supplier<Activity> A_SPEAK_TO_PLAYER =
+           ACTIVITIES.register("speak_to_player", () -> new Activity("speak_to_player"));
 
    public static DeferredRegister<MemoryModuleType<?>> MEMORY_MODULES =
          DeferredRegister.create(BuiltInRegistries.MEMORY_MODULE_TYPE, CIVILIZED_MOD_ID);
@@ -31,6 +38,9 @@ public class AIRegistry {
          MEMORY_MODULES.register("villager_occupation_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
    public static final Supplier<MemoryModuleType<Boolean>> MM_CAN_OFFLOAD =
          MEMORY_MODULES.register("can_offload_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
+
+   public static final Supplier<MemoryModuleType<Player>> MM_DIALOGUE_TARGET =
+           MEMORY_MODULES.register("dialogue_target_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
 
    public static DeferredRegister<SensorType<?>> SENSORS =
          DeferredRegister.create(BuiltInRegistries.SENSOR_TYPE, CIVILIZED_MOD_ID);

@@ -1,6 +1,5 @@
 package com.uncreated.civilized;
 
-import com.uncreated.civilized.neoforge.registration.attachments.MyDataComponents;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -14,6 +13,7 @@ import com.uncreated.civilized.neoforge.registration.BlockRegistry;
 import com.uncreated.civilized.neoforge.registration.ItemRegistry;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.neoforge.registration.attachments.DataAttachments;
+import com.uncreated.civilized.neoforge.registration.attachments.MyDataComponents;
 import com.uncreated.civilized.neoforge.registration.creativetab.CreativeTab;
 import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 import com.uncreated.civilized.neoforge.registration.entity.EntitySetupEventsClient;
@@ -61,6 +61,7 @@ public class CivilizedMod {
       ItemRegistry.ITEMS.register(modEventBus);
       EntityRegistry.ENTITIES.register(modEventBus);
       GuiRegistry.MENUS.register(modEventBus);
+      AIRegistry.ACTIVITIES.register(modEventBus);
       AIRegistry.MEMORY_MODULES.register(modEventBus);
       AIRegistry.SENSORS.register(modEventBus);
       AIRegistry.SCHEDULES.register(modEventBus);

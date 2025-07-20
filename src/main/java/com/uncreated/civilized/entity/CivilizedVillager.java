@@ -26,8 +26,9 @@ import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerNpcRole;
 import com.uncreated.civilized.entity.behaviour.InvalidateImportantLocations;
-import com.uncreated.civilized.entity.behaviour.LongDistanceTravelToRememberedPos;
+import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelOnceOff;
 import com.uncreated.civilized.entity.behaviour.OffloadResourcesAtHome;
+import com.uncreated.civilized.entity.behaviour.SpeakToPlayer;
 import com.uncreated.civilized.entity.behaviour.UpdateActivityFromSchedule;
 import com.uncreated.civilized.entity.behaviour.worker.farmer.HarvestCrops;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
@@ -61,11 +62,11 @@ import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
 import net.minecraft.world.entity.ai.behavior.SetLookAndInteract;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StrollAroundPoi;
-import net.minecraft.world.entity.ai.behavior.StrollToPoi;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.behavior.VillageBoundRandomStroll;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
@@ -92,6 +93,10 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    public CivilizedVillager(EntityType<? extends AgeableMob> entityType, Level level) {
       super(entityType, level);
+      ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
+      this.getNavigation().setCanFloat(true);
+      this.getNavigation().setRequiredPathLength(48.0F);
+      this.setCanPickUpLoot(true);
    }
 
    public void syncVillagerInfo() {
@@ -222,6 +227,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
                   AIRegistry.MM_CROP_FIELD_CENTER.get(),
                   AIRegistry.MM_CAN_OFFLOAD.get(),
                   AIRegistry.MM_VILLAGER_OCCUPATION.get(),
+                  AIRegistry.MM_DIALOGUE_TARGET.get(),
                   MemoryModuleType.JOB_SITE,
                   MemoryModuleType.HOME,
                   MemoryModuleType.PATH,
@@ -261,6 +267,11 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
             Activity.REST,
             getRestPackage(0.4F),
             Set.of(Pair.of(MemoryModuleType.HOME, MemoryStatus.VALUE_PRESENT)));
+      brain.addActivityAndRemoveMemoriesWhenStopped(
+            AIRegistry.A_SPEAK_TO_PLAYER.get(),
+            getSpeakToPlayerPackage(),
+            Set.of(Pair.of(AIRegistry.MM_DIALOGUE_TARGET.get(), MemoryStatus.VALUE_PRESENT)),
+            Set.of(AIRegistry.MM_DIALOGUE_TARGET.get()));
       brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
       brain.setDefaultActivity(Activity.IDLE);
       brain.setActiveActivityIfPossible(Activity.IDLE);
@@ -283,6 +294,16 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       super.customServerAiStep(serverLevel);
    }
 
+   public void goSpeakToPlayer(Player player) {
+      getBrain().setMemory(AIRegistry.MM_DIALOGUE_TARGET.get(), player);
+      getBrain().setActiveActivityIfPossible(AIRegistry.A_SPEAK_TO_PLAYER.get());
+   }
+
+   public void stopSpeakingToPlayer() {
+      getBrain().eraseMemory(AIRegistry.MM_DIALOGUE_TARGET.get());
+      brain.setActiveActivityIfPossible(Activity.IDLE);
+   }
+
    public void invalidateVillagerMemories() {
 
    }
@@ -295,7 +316,9 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
                   new RunOne<>(
                         ImmutableList.of(
                               // go to work. closeEnoughDist should +1 more StrollAroundPoi's maxDistFromPoi.
-                              Pair.of(StrollToPoi.create(MemoryModuleType.JOB_SITE, 0.4F, 5, 100), 2),
+                              Pair.of(
+                                    MediumDistanceTravelOnceOff.create(MemoryModuleType.JOB_SITE, 0.4f, 5, 300, 1500),
+                                    3),
                               Pair.of(new HarvestCrops(), 4),
                               Pair.of(new OffloadResourcesAtHome(), 5),
                               // if cannot perform main work tasks, stroll around the job site.
@@ -306,7 +329,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super CivilizedVillager>>> getRestPackage(
          float speedModifier) {
       return ImmutableList.of(
-            Pair.of(2, LongDistanceTravelToRememberedPos.create(MemoryModuleType.HOME, speedModifier, 1, 300, 1500)),
+            Pair.of(2, MediumDistanceTravelOnceOff.create(MemoryModuleType.HOME, speedModifier, 1, 300, 1500)),
             // Pair.of(3, ValidateNearbyPoi.create((p_217495_) -> p_217495_.is(PoiTypes.HOME), MemoryModuleType.HOME)),
             // Pair.of(3, new SleepInBed()),
             Pair.of(
@@ -384,6 +407,10 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
             // ImmutableList.of(Pair.of(new VillagerMakeLove(), 1)))),
             getFullLookBehavior(),
             Pair.of(99, UpdateActivityFromSchedule.create()));
+   }
+
+   public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super CivilizedVillager>>> getSpeakToPlayerPackage() {
+      return ImmutableList.of(Pair.of(0, new SpeakToPlayer()));
    }
 
    private static Pair<Integer, BehaviorControl<CivilizedVillager>> getMinimalLookBehavior() {
