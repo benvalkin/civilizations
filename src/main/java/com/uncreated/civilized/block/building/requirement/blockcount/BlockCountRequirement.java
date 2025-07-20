@@ -12,16 +12,22 @@ import net.minecraft.world.level.Level;
 public class BlockCountRequirement implements IBuildingRequirement {
 
    protected final IBlockValidator validator;
+   protected final int requiredBlocks;
    protected final Component blockDescription;
    private final boolean hidIfSatisfied;
 
-   public BlockCountRequirement(IBlockValidator validator, Component blockDescription, boolean hideIfSatisfied) {
+   public BlockCountRequirement(
+         IBlockValidator validator,
+         int requiredBlocks,
+         Component blockDescription,
+         boolean hideIfSatisfied) {
       this.validator = validator;
+      this.requiredBlocks = requiredBlocks;
       this.blockDescription = blockDescription;
       this.hidIfSatisfied = hideIfSatisfied;
    }
 
-   public BlockCountResult getResult(Level level, BuildingBounds bounds, int requiredBlocks) {
+   public BlockCountResult getResult(Level level, BuildingBounds bounds) {
       int validBlocksFound = 0;
       BlockPos.MutableBlockPos current = bounds.getLowerCorner().mutable();
       for (int x = bounds.getLowerCorner().getX(); x <= bounds.getUpperCorner().getX(); x++) {
@@ -37,14 +43,14 @@ public class BlockCountRequirement implements IBuildingRequirement {
             }
          }
       }
-      return createResult(validBlocksFound, requiredBlocks);
+      return createResult(validBlocksFound);
    }
 
    public boolean haltChecksIfBlockCanSeeSky() {
       return false;
    }
 
-   public BlockCountResult createResult(int actualBlocks, int requiredBlocks) {
+   public BlockCountResult createResult(int actualBlocks) {
       return new BlockCountResult(actualBlocks, requiredBlocks);
    }
 

@@ -35,27 +35,26 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
    }
 
    @Override
-   protected void start(ServerLevel level, CivilizedVillager entity, long gameTicks) {
-      super.start(level, entity, gameTicks);
+   protected void start(ServerLevel level, CivilizedVillager villager, long gameTicks) {
+      super.start(level, villager, gameTicks);
 
-      VillagerInfo villagerInfo = entity.getInfo();
+      VillagerInfo villagerInfo = villager.getInfo();
       VillagerOccupation oldOccupation = villagerInfo.getOccupation();
       Optional<Building> oldHome = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
 
       Optional<Building> newHome = invalidateHome(villagerInfo, level);
       if (newHome.isPresent()) {
-         // TODO: find an alternative for newHome.get().refreshBlockEntities(level);
          villagerInfo.setOccupation(newHome.get().getBuildingType().toJobType());
       } else
          villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
 
       Optional<Building> worksite = invalidateWorksite(villagerInfo, level);
       if (worksite.isPresent()) {
-         entity.getBrain()
+         villager.getBrain()
                .setMemory(MemoryModuleType.JOB_SITE, new GlobalPos(level.dimension(), worksite.get().getBlockPos()));
       }
 
-      entity.invalidateHomeAndJobMemories();
+      villager.invalidateHomeAndJobMemories();
 
       boolean jobChanged = oldOccupation != villagerInfo.getOccupation();
       boolean homeChanged =
@@ -81,12 +80,14 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
                villagerInfo.getFullName(),
                oldOccupation,
                villagerInfo.getOccupation());
+
+         villager.refreshBrain(level);
       }
       LOGGER.info(
             "Villager {} worksite: {} - current activity {} ",
             villagerInfo.getFullName(),
             worksite.isPresent() ? worksite.get().getBuildingType() : "none",
-            entity.getBrain().getActiveNonCoreActivity());
+            villager.getBrain().getActiveNonCoreActivity());
    }
 
    private Optional<Building> invalidateHome(VillagerInfo villagerInfo, ServerLevel level) {

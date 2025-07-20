@@ -2,7 +2,6 @@ package com.uncreated.civilized.neoforge.registration.creativetab;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
-import com.uncreated.civilized.neoforge.registration.BlockRegistry;
 import com.uncreated.civilized.neoforge.registration.ItemRegistry;
 
 import net.minecraft.core.registries.Registries;
@@ -25,16 +24,17 @@ public class CreativeTab {
                "example_tab",
                () -> CreativeModeTab.builder()
                      .title(Component.translatable("itemGroup.civilized")) // The language key for the title of your
-                                                                            // CreativeModeTab
+                                                                           // CreativeModeTab
                      .withTabsBefore(CreativeModeTabs.COMBAT)
                      .icon(() -> ItemRegistry.FARMER_HOUSE.get().getDefaultInstance())
                      .displayItems((parameters, output) -> {
-                        output.accept(BlockRegistry.EXAMPLE_BLOCK_ITEM.get());
-                        output.accept(BlockRegistry.CROP_FARM_BLOCK_ITEM.get());
                         output.accept(ItemRegistry.SETTLEMENT_MANDATE.get());
                         output.accept(ItemRegistry.COIN.get());
                         output.accept(ItemRegistry.COIN_STACK.get());
                         output.accept(ItemRegistry.FARMER_HOUSE.get());
+                        output.accept(ItemRegistry.WOODCUTTER_HOUSE.get());
+                        output.accept(ItemRegistry.CROP_FARM.get());
+                        output.accept(ItemRegistry.GROVE.get());
                         output.accept(ItemRegistry.TRADING_POST.get());
                      })
                      .build());

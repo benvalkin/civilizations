@@ -15,8 +15,13 @@ import net.minecraft.world.level.Level;
 public class SpaceRequirement implements IBuildingRequirement {
 
    public static final int MIN_ROOF_HEIGHT_ABOVE_FLOOR = 3;
+   private final int requiredSpace;
 
-   public Result getResult(Level level, BuildingBounds bounds, int requiredSpace) {
+   public SpaceRequirement(int requiredSpace) {
+      this.requiredSpace = requiredSpace;
+   }
+
+   public Result getResult(Level level, BuildingBounds bounds) {
 
       Set<ValidFloor> validFloorPositions = new HashSet<>();
 
