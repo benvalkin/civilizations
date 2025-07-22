@@ -1,10 +1,10 @@
 package com.uncreated.civilized.core.villagerinfo;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.mojang.datafixers.util.Pair;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.villagerinfo.events.model.VillagerInfoUpdatedEvent;
 import com.uncreated.civilized.entity.CivilizedVillager;
@@ -54,6 +54,7 @@ public class ServerVillagerStore extends VillagerStore {
          item.putString(VillagerInfo.FIELD_FIRST_NAME, villagerInfo.getFirstName());
          item.putString(VillagerInfo.FIELD_LAST_NAME, villagerInfo.getLastName());
          item.putString(VillagerInfo.FIELD_VILLAGER_OCCUPATION, villagerInfo.getOccupation().name());
+         item.putString(VillagerInfo.FIELD_VILLAGER_GENDER, villagerInfo.getGender().name());
 
          ListTag npcRoles = new ListTag();
          npcRoles.addAll(villagerInfo.getNpcRoles().stream().map(role -> {
@@ -85,7 +86,8 @@ public class ServerVillagerStore extends VillagerStore {
                      .isDeceased(itemTag.getBoolean(VillagerInfo.FIELD_IS_DECEASED))
                      .firstName(itemTag.getString(VillagerInfo.FIELD_FIRST_NAME))
                      .lastName(itemTag.getString(VillagerInfo.FIELD_LAST_NAME))
-                     .occupation(VillagerOccupation.valueOf(itemTag.getString(VillagerInfo.FIELD_VILLAGER_OCCUPATION)));
+                     .occupation(VillagerOccupation.valueOf(itemTag.getString(VillagerInfo.FIELD_VILLAGER_OCCUPATION)))
+                     .gender(Gender.valueOf(itemTag.getString(VillagerInfo.FIELD_VILLAGER_GENDER)));
 
          if (itemTag.hasUUID(VillagerInfo.FIELD_SETTLEMENT_ID))
             builder.settlementId(itemTag.getUUID(VillagerInfo.FIELD_SETTLEMENT_ID));
@@ -162,18 +164,16 @@ public class ServerVillagerStore extends VillagerStore {
       }
    }
 
-   public VillagerInfo getOrAdd(CivilizedVillager villager) {
-      Objects.requireNonNull(villager.getVillagerId());
-      VillagerInfo villagerInfo = villagers.get(villager.getVillagerId());
-      if (villagerInfo != null) {
-         return villagerInfo;
-      }
+   public VillagerInfo createNewVillager(CivilizedVillager villager) {
+      VillagerInfo.VillagerInfoBuilder newVillager = VillagerInfo.builder().villagerId(UUID.randomUUID());
+      Gender gender = villager.getRandom().nextBoolean() ? Gender.MALE : Gender.FEMALE;
+      newVillager.gender(gender);
+      Pair<String, String> names = VillagerInfo.generateRandomName();
+      newVillager.firstName(names.getFirst()).lastName(names.getSecond());
 
-      VillagerInfo newInfo =
-            VillagerInfo.builder().entityId(villager.getId()).villagerId(villager.getVillagerId()).build();
-
-      villagers.put(villager.getVillagerId(), newInfo);
-      return newInfo;
+      VillagerInfo info = newVillager.build();
+      villagers.put(info.getVillagerId(), info);
+      return info;
    }
 
    public Optional<VillagerInfo> delete(CivilizedVillager villager) {

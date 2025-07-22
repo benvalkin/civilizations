@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
@@ -34,6 +35,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
@@ -58,6 +60,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    private static final Logger LOGGER = LogUtils.getLogger();
    public static final String FIELD_VILLAGER_ID = "villager_id";
+   public static final String FIELD_LIFETIME_SEED = "lifetime_seed";
 
    @Getter
    private UUID villagerId;
@@ -70,50 +73,66 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    private final SimpleContainer inventory = new SimpleContainer(8);
 
+   private long lifetimeSeed;
+
+   @Getter
+   private final RandomSource lifetimeRandom;
+
    public CivilizedVillager(EntityType<? extends AgeableMob> entityType, Level level) {
       super(entityType, level);
       ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
       this.getNavigation().setCanFloat(true);
       this.getNavigation().setRequiredPathLength(48.0F);
       this.setCanPickUpLoot(true);
+      this.lifetimeRandom = RandomSource.create();
    }
 
-   public void syncVillagerInfo() {
+   public void initBrandNewVillager() {
+      info = ServerVillagerStore.INSTANCE.createNewVillager(this);
+      ServerVillagerStore.INSTANCE.replicateChange(info, StoreOperation.ADD_OR_OVERWRITE);
+      ServerVillagerStore.INSTANCE.setDirty();
+      villagerId = info.getVillagerId();
+      setLifetimeRandom(getRandom().nextLong());
+   }
 
-      if (!level().isClientSide) {
-         if (villagerId == null)
-            villagerId = UUID.randomUUID(); // TECHDEBT: find a more reliable place to set villagerId for the first time
+   public void initVillagerFromSave() {
+      info = ServerVillagerStore.INSTANCE.get(villagerId);
+   }
 
-         info = ServerVillagerStore.INSTANCE.getOrAdd(this);
-         refreshBrain((ServerLevel) level());
+   public void serverFinalizeSpawn() {
+      refreshBrain((ServerLevel) level());
 
-         dialogueController = DialogueController.selectDialogueController(this);
+      dialogueController = DialogueController.selectDialogueController(this);
+   }
 
-         if (!info.hasName()) {
-            Pair<String, String> newName = VillagerInfo.generateRandomName();
-            info.setFirstName(newName.getFirst());
-            info.setLastName(newName.getSecond());
-         }
-      }
+   private void setLifetimeRandom(long seed) {
+      lifetimeSeed = seed;
+      lifetimeRandom.setSeed(seed);
+   }
+
+   public RandomSource getConsistentLifetimeRandom() {
+      return RandomSource.create(lifetimeSeed);
    }
 
    @Override
    public void addAdditionalSaveData(CompoundTag compound) {
       super.addAdditionalSaveData(compound);
 
-      if (villagerId != null)
-         compound.putUUID(FIELD_VILLAGER_ID, villagerId);
-
+      // if (villagerId != null)
+      compound.putUUID(FIELD_VILLAGER_ID, villagerId);
+      compound.putLong(FIELD_LIFETIME_SEED, lifetimeSeed);
       this.writeInventoryToTag(compound, this.registryAccess());
+
    }
 
    @Override
    public void readAdditionalSaveData(CompoundTag compound) {
       super.readAdditionalSaveData(compound);
+      // when spawning a new villager, readAdditionalSaveData will still run, but the NBT data won't have our fields
+      // yet, so we need to check
       if (compound.hasUUID(FIELD_VILLAGER_ID))
          villagerId = compound.getUUID(FIELD_VILLAGER_ID);
-      else
-         villagerId = UUID.randomUUID();
+      setLifetimeRandom(compound.getLong(FIELD_LIFETIME_SEED));
 
       this.readInventoryFromTag(compound, this.registryAccess());
    }
@@ -121,11 +140,13 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Override
    public void writeSpawnData(RegistryFriendlyByteBuf buf) {
       info.encode(buf);
+      buf.writeLong(lifetimeSeed);
    }
 
    @Override
    public void readSpawnData(RegistryFriendlyByteBuf buf) {
-      info = VillagerInfo.decode(buf);
+      info = ClientVillagerStore.INSTANCE.addFromServer(VillagerInfo.decode(buf));
+      lifetimeSeed = buf.readLong();
       dialogueController = DialogueController.selectDialogueController(this);
       ClientVillagerStore.INSTANCE.addFromServer(info);
       villagerId = info.getVillagerId();

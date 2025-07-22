@@ -23,7 +23,7 @@ public class MigrantDialogueController extends DialogueController {
 
    @Override
    public @Nullable DialogueFlow getDialogueFlow(CivilizedVillager villager, Player player, InteractionHand hand) {
-      Optional<DialogueFlow> dialogueFlow = FLOW_OPTIONS.getRandomValue(villager.getRandom());
+      Optional<DialogueFlow> dialogueFlow = FLOW_OPTIONS.getRandomValue(villager.getConsistentLifetimeRandom());
       return dialogueFlow.orElse(null);
 
    }

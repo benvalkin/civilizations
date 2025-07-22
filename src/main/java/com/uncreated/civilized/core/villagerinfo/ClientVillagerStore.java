@@ -78,11 +78,13 @@ public class ClientVillagerStore extends VillagerStore {
       NeoForge.EVENT_BUS.post(new VillagerInfoUpdatedEvent(existing.orElse(fromPacket), true));
    }
 
-   public void addFromServer(VillagerInfo info) {
+   public VillagerInfo addFromServer(VillagerInfo info) {
       Optional<VillagerInfo> existing = find(info.getVillagerId());
-      if (existing.isPresent())
+      if (existing.isPresent()) {
          existing.get().copyFrom(info);
-      else
-         villagers.put(info.getVillagerId(), info);
+         return existing.get();
+      }
+      villagers.put(info.getVillagerId(), info);
+      return info;
    }
 }

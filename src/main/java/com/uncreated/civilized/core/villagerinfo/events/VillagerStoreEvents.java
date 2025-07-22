@@ -26,7 +26,15 @@ public class VillagerStoreEvents {
    public static void entitySpawnFinalized(EntityJoinLevelEvent event) {
 
       if (event.getEntity() instanceof CivilizedVillager villager) {
-         villager.syncVillagerInfo();
+
+         if (!villager.level().isClientSide) {
+            if (!event.loadedFromDisk()) {
+               villager.initBrandNewVillager();
+            } else {
+               villager.initVillagerFromSave();
+            }
+            villager.serverFinalizeSpawn();
+         }
       }
    }
 

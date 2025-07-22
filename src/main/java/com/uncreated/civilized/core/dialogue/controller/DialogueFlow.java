@@ -14,11 +14,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 
 public abstract class DialogueFlow {
-   protected final Random random;
-
-   public DialogueFlow() {
-      this.random = new Random();
-   }
 
    public DialogueContext buildDialogueContext(CivilizedVillager villager, Player player, InteractionHand hand) {
       return new DialogueContext(villager, player);
@@ -37,9 +32,4 @@ public abstract class DialogueFlow {
          CivilizedVillager villager,
          Player player,
          PlayerQuests playerQuests);
-
-   protected IVillageDialogue chooseRandom(List<Dialogue> dialogueOptions) {
-      int randomIndex = random.nextInt(0, dialogueOptions.size());
-      return dialogueOptions.get(randomIndex);
-   }
 }

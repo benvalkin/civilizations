@@ -40,7 +40,8 @@ public class VillagerInfo {
                   .occupation(buffer.readEnum(VillagerOccupation.class))
                   .settlementId(buffer.readNullable((b -> b.readUUID())))
                   .homeBuildingId(buffer.readNullable((b -> b.readUUID())))
-                  .npcRoles(buffer.readCollection(ArrayList::new, b -> b.readEnum(VillagerNpcRole.class)));
+                  .npcRoles(buffer.readCollection(ArrayList::new, b -> b.readEnum(VillagerNpcRole.class)))
+                  .gender(buffer.readEnum(Gender.class));
 
       return builder.build();
    }
@@ -55,6 +56,7 @@ public class VillagerInfo {
       buffer.writeNullable(settlementId, (b, v) -> b.writeUUID(v));
       buffer.writeNullable(homeBuildingId, (b, v) -> b.writeUUID(v));
       buffer.writeCollection(npcRoles, FriendlyByteBuf::writeEnum);
+      buffer.writeEnum(gender);
    }
 
    public static final String FIELD_VILLAGER_ID = "villager_id";
@@ -66,8 +68,8 @@ public class VillagerInfo {
    public static final String FIELD_VILLAGER_OCCUPATION = "field_villager_occupation";
    public static final String FIELD_VILLAGER_NPC_ROLES = "field_villager_npc_roles";
    public static final String FIELD_VILLAGER_NPC_ROLE = "field_villager_npc_role";
+   public static final String FIELD_VILLAGER_GENDER = "field_villager_gender";
 
-   private @Nullable Integer entityId;
    private UUID villagerId;
    @Setter
    private boolean isDeceased;
@@ -88,14 +90,7 @@ public class VillagerInfo {
    private @Nullable UUID homeBuildingId;
    @Setter
    private @Nullable UUID primaryWorksiteId;
-
-   public int getEntityId() {
-      if (entityId == null)
-         throw new IllegalStateException(
-               "VillagerInfo's entityId has not been set yet. Ensure that this field is set correctly.");
-
-      return entityId;
-   }
+   private Gender gender;
 
    public boolean hasName() {
       return !firstName.isEmpty() && !lastName.isEmpty();
@@ -144,14 +139,14 @@ public class VillagerInfo {
       settlementId = other.settlementId;
       homeBuildingId = other.homeBuildingId;
       npcRoles = other.npcRoles;
+      gender = other.gender;
    }
 
    public String toStringLite() {
       return String.format(
-            "{name: %s %s - entityId: %s entityUuid: %s settlementId: %s, occupation: %s}",
+            "{name: %s %s - occupation: %s, villagerId: %s settlementId: %s}",
             firstName,
             lastName,
-            entityId,
             villagerId,
             settlementId,
             occupation);
