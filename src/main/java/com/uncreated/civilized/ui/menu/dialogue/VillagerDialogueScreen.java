@@ -108,7 +108,7 @@ public class VillagerDialogueScreen extends Screen {
                new ModernButton(
                      Button.builder(responseOption.getPlayerSpeech(), b -> onResponseOptionPressed(b, optionContext))
                            .pos(leftPos + buttonMarginX, currentButtonHeight)
-                           .size(contentWidth - buttonMarginX * 2, buttonHeight));
+                           .width(contentWidth - buttonMarginX * 2));
 
          currentButtonHeight += button.getHeight();
 

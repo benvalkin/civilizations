@@ -42,7 +42,9 @@ public class ImageButtonWithText extends Button {
    }
 
    private void updateHeight() {
-      int textHeight = StringRenderHelper.getHeightOfWrappedText(Minecraft.getInstance().font, getMessage(), width);
+      int textHeight =
+            StringRenderHelper
+                  .getHeightOfWrappedText(Minecraft.getInstance().font, getMessage(), width - labelPadding * 2);
       this.height = textHeight + labelPadding * 2;
    }
 

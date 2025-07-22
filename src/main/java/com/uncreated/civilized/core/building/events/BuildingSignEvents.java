@@ -3,7 +3,7 @@ package com.uncreated.civilized.core.building.events;
 import java.util.List;
 
 import com.uncreated.civilized.CivilizedMod;
-import com.uncreated.civilized.block.building.signs.SignHelper;
+import com.uncreated.civilized.core.building.signs.SignHelper;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;

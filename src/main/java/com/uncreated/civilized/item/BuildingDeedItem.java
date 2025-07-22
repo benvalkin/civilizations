@@ -6,14 +6,14 @@ import java.util.Set;
 
 import org.apache.commons.compress.utils.Lists;
 
-import com.uncreated.civilized.block.building.requirement.EnclosedWallsRequirement;
-import com.uncreated.civilized.block.building.requirement.IBuildingRequirement;
-import com.uncreated.civilized.block.building.requirement.IBuildingRequirementResult;
-import com.uncreated.civilized.block.building.requirement.SpaceRequirement;
-import com.uncreated.civilized.block.building.requirement.SurfaceAreaRequirement;
-import com.uncreated.civilized.block.building.requirement.blockcount.BlockCountRequirement;
-import com.uncreated.civilized.block.building.requirement.registry.BuildingRequirementList;
-import com.uncreated.civilized.block.building.requirement.registry.BuildingRequirementRegistry;
+import com.uncreated.civilized.core.building.requirement.EnclosedWallsRequirement;
+import com.uncreated.civilized.core.building.requirement.IBuildingRequirement;
+import com.uncreated.civilized.core.building.requirement.IBuildingRequirementResult;
+import com.uncreated.civilized.core.building.requirement.SpaceRequirement;
+import com.uncreated.civilized.core.building.requirement.SurfaceAreaRequirement;
+import com.uncreated.civilized.core.building.requirement.blockcount.BlockCountRequirement;
+import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementList;
+import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementRegistry;
 import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingType;
@@ -126,7 +126,7 @@ public class BuildingDeedItem extends Item {
                BuildingRequirementRegistry.getBuildingRequirements(buildingType, buildingLevel);
          List<IBuildingRequirementResult> requirementResults = Lists.newArrayList();
 
-         Set<SpaceRequirement.ValidFloor> validFloorBlocks = Set.of();
+         Set<BlockPos> validFloorBlocks = Set.of();
          for (IBuildingRequirement requirement : requirements) {
 
             if (requirement instanceof SpaceRequirement s) {

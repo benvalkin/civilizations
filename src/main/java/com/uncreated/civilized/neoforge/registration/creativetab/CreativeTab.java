@@ -35,7 +35,7 @@ public class CreativeTab {
                         output.accept(ItemRegistry.WOODCUTTER_HOUSE.get());
                         output.accept(ItemRegistry.CROP_FARM.get());
                         output.accept(ItemRegistry.GROVE.get());
-                        output.accept(ItemRegistry.TRADING_POST.get());
+                        output.accept(ItemRegistry.INN.get());
                      })
                      .build());
 }

@@ -4,7 +4,7 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.List;
 
-import com.uncreated.civilized.block.building.requirement.IBuildingRequirementResult;
+import com.uncreated.civilized.core.building.requirement.IBuildingRequirementResult;
 import com.uncreated.civilized.ui.components.multiline.ImprovedMultiLineTextWidget;
 
 import net.minecraft.client.gui.Font;

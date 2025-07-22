@@ -92,7 +92,7 @@ public class ServerVillagerStore extends VillagerStore {
          if (itemTag.hasUUID(VillagerInfo.FIELD_HOME_BUILDING_ID))
             builder.homeBuildingId(itemTag.getUUID(VillagerInfo.FIELD_HOME_BUILDING_ID));
 
-         ListTag npcRoles = itemTag.getList(VillagerInfo.FIELD_HOME_BUILDING_ID, Tag.TAG_COMPOUND);
+         ListTag npcRoles = itemTag.getList(VillagerInfo.FIELD_VILLAGER_NPC_ROLES, Tag.TAG_COMPOUND);
          builder.npcRoles(
                npcRoles.stream()
                      .map(

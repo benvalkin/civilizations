@@ -44,7 +44,7 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
 
       Optional<Building> newHome = invalidateHome(villagerInfo, level);
       if (newHome.isPresent()) {
-         villagerInfo.setOccupation(newHome.get().getBuildingType().toJobType());
+         villagerInfo.setOccupation(newHome.get().getBuildingType().getOccupation());
       } else
          villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
 
@@ -106,7 +106,7 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       }
 
       Optional<Building> home = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
-      if (home.isPresent() && home.get().getBuildingType() == BuildingType.TRADING_POST) {
+      if (home.isPresent() && home.get().getBuildingType() == BuildingType.INN) {
          // try to move villager out of the inn if a better home is available
          Optional<Building> betterHome =
                BuildingUtil.findUnoccupiedHome(
@@ -123,15 +123,18 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
    }
 
    private Optional<Building> invalidateWorksite(VillagerInfo villagerInfo, ServerLevel level) {
-      if (villagerInfo.getOccupation() == VillagerOccupation.FARMER) {
 
-         Optional<Building> cropFarm =
-               ServerBuildingsStore.INSTANCE.all()
-                     .stream()
-                     .filter(b -> b.getBuildingType() == BuildingType.CROP_FARM)
-                     .findFirst();
-         return cropFarm;
-      }
-      return Optional.empty();
+      BuildingType workSite;
+      if (villagerInfo.getOccupation() == VillagerOccupation.FARMER) {
+         workSite = BuildingType.CROP_FARM;
+      } else if (villagerInfo.getOccupation() == VillagerOccupation.WOODCUTTER) {
+         workSite = BuildingType.GROVE;
+      } else
+         workSite = BuildingType.CROP_FARM;
+
+      Optional<Building> worksite =
+            ServerBuildingsStore.INSTANCE.all().stream().filter(b -> b.getBuildingType() == workSite).findFirst();
+
+      return worksite;
    }
 }

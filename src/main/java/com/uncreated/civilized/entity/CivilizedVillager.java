@@ -25,7 +25,6 @@ import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-import com.uncreated.civilized.core.villagerinfo.VillagerNpcRole;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
@@ -86,6 +85,8 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
             villagerId = UUID.randomUUID(); // TECHDEBT: find a more reliable place to set villagerId for the first time
 
          info = ServerVillagerStore.INSTANCE.getOrAdd(this);
+         refreshBrain((ServerLevel) level());
+
          dialogueController = DialogueController.selectDialogueController(this);
 
          if (!info.hasName()) {
@@ -148,7 +149,6 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Override
    public InteractionResult mobInteract(Player player, InteractionHand hand) {
 
-      getInfo().getNpcRoles().add(VillagerNpcRole.ADVISOR);
       dialogueController = DialogueController.selectDialogueController(this);
       DialogueFlow dialogueFlow = dialogueController.getDialogueFlow(this, player, hand);
 
@@ -227,11 +227,11 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
                   SensorType.NEAREST_ITEMS));
    }
 
+   // TECHDEBT: since this is called in constructor, registerBrainGoals cannot be called here because it depends on
+   // villagerInfo
    @Override
    protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-      Brain<CivilizedVillager> brain = this.brainProvider().makeBrain(dynamic);
-      this.registerBrainGoals(brain);
-      return brain;
+      return this.brainProvider().makeBrain(dynamic);
    }
 
    private void registerBrainGoals(Brain<CivilizedVillager> brain) {
@@ -240,7 +240,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       brain.addActivity(Activity.IDLE, getIdlePackage(0.25f));
       brain.addActivityWithConditions(
             Activity.WORK,
-            getWorkPackage(getInfo().getOccupation()),
+            getWorkPackage(info.getOccupation()),
             Set.of(Pair.of(AIRegistry.MM_VILLAGER_OCCUPATION.get(), MemoryStatus.VALUE_PRESENT)));
       brain.addActivityWithConditions(
             Activity.REST,

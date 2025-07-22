@@ -88,7 +88,7 @@ public class ManageOccupantWidget extends AbstractContainerWidget {
       ServerSettlementsStore ClientBuildingsStore;
       if (option == EManagementOption.ASSIGN) {
          villagerInfo.setHomeBuildingId(building.getBuildingId());
-         villagerInfo.setOccupation(building.getBuildingType().toJobType());
+         villagerInfo.setOccupation(building.getBuildingType().getOccupation());
          ClientVillagerStore.INSTANCE.replicateChange(villagerInfo, StoreOperation.UPDATE);
          ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
       } else if (option == EManagementOption.EVICT) {

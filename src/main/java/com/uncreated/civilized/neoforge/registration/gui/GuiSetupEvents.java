@@ -4,7 +4,7 @@ import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingMenu;
 import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
-import com.uncreated.civilized.ui.menu.building.tradingpost.TradingPostBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
 
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,8 +19,8 @@ public class GuiSetupEvents {
             (MenuScreens.ScreenConstructor<BuildingMenu, ABuildingScreen>) (buildingMenu, inventory, component) -> {
                BuildingType buildingType = buildingMenu.getBuilding().getBuildingType();
 
-               if (buildingType == BuildingType.TRADING_POST)
-                  return new TradingPostBuildingScreen(buildingMenu, inventory, component);
+               if (buildingType == BuildingType.INN)
+                  return new InnBuildingScreen(buildingMenu, inventory, component);
                if (buildingType.isPermanentResidence())
                   return new ResidenceBuildingScreen(buildingMenu, inventory, component);
 

@@ -1,0 +1,44 @@
+package com.uncreated.civilized.core.dialogue.questline.migrant.context;
+
+import org.jetbrains.annotations.Nullable;
+
+import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.ClientBuildingStore;
+import com.uncreated.civilized.core.building.util.BuildingUtil;
+import com.uncreated.civilized.core.dialogue.context.DialogueContext;
+import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
+import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
+import com.uncreated.civilized.entity.CivilizedVillager;
+
+import lombok.Getter;
+import lombok.Setter;
+import net.minecraft.world.entity.player.Player;
+
+@Getter
+@Setter
+public class JoinSettlementContext extends DialogueContext {
+
+   private final BuildingType requiredBuildingType;
+   private @Nullable Settlement settlement;
+   private @Nullable Building unoccupiedBuilding;
+
+   public JoinSettlementContext(CivilizedVillager villager, Player player, BuildingType requiredBuildingType) {
+      super(villager, player);
+
+      this.requiredBuildingType = requiredBuildingType;
+      settlement = ClientSettlementsStore.INSTANCE.findFromOwner(player.getUUID()).orElse(null);
+      if (settlement == null)
+         return;
+
+      unoccupiedBuilding =
+            BuildingUtil
+                  .findUnoccupiedHome(
+                        settlement.getSettlementId(),
+                        requiredBuildingType,
+                        ClientBuildingStore.INSTANCE,
+                        ClientVillagerStore.INSTANCE)
+                  .orElse(null);
+   }
+}

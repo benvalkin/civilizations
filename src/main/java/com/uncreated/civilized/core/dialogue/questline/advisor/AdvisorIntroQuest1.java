@@ -11,43 +11,46 @@ import static com.uncreated.civilized.core.dialogue.rewards.RewardActions.reward
 import static com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue.itemDepotDialogue;
 import static net.minecraft.network.chat.Component.translatable;
 
-import com.uncreated.civilized.core.dialogue.IVillageDialogue;
-import com.uncreated.civilized.core.dialogue.context.DialogueContext;
-import com.uncreated.civilized.core.dialogue.controller.MissingOpeningDialogueException;
-import com.uncreated.civilized.core.quest.ActivatedQuest;
-import com.uncreated.civilized.core.quest.attachments.PlayerQuests;
-import com.uncreated.civilized.entity.CivilizedVillager;
-import net.minecraft.world.entity.player.Player;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 import com.uncreated.civilized.core.dialogue.Dialogue;
+import com.uncreated.civilized.core.dialogue.context.DialogueContext;
 import com.uncreated.civilized.core.dialogue.controller.DialogueFlow;
+import com.uncreated.civilized.core.dialogue.controller.MissingOpeningDialogueException;
 import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
+import com.uncreated.civilized.core.quest.ActivatedQuest;
 import com.uncreated.civilized.core.quest.Quests;
+import com.uncreated.civilized.core.quest.attachments.PlayerQuests;
+import com.uncreated.civilized.entity.CivilizedVillager;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-
-import javax.annotation.Nullable;
-import java.util.Optional;
 
 public class AdvisorIntroQuest1 extends DialogueFlow {
 
    @Override
-   protected @Nullable Dialogue getOpeningDialogue(DialogueContext context, CivilizedVillager villager, Player player, PlayerQuests playerQuests) {
+   protected @Nullable Dialogue getOpeningDialogue(
+         DialogueContext context,
+         CivilizedVillager villager,
+         Player player,
+         PlayerQuests playerQuests) {
 
-      Optional<ActivatedQuest> activatedQuest = playerQuests.tryGetQuest(Quests.ADVISOR_INTRO_1, villager.getVillagerId());
+      Optional<ActivatedQuest> activatedQuest =
+            playerQuests.tryGetQuest(Quests.ADVISOR_INTRO_1, villager.getVillagerId());
       if (activatedQuest.isEmpty())
          return opening();
 
       if (activatedQuest.get().isStarted()) {
          if (activatedQuest.get().isCompleted()) {
             return questComplete();
-         }
-         else {
+         } else {
             if (playerIsHoldingFood(player))
                return consumeFood();
 
@@ -57,15 +60,6 @@ public class AdvisorIntroQuest1 extends DialogueFlow {
 
       throw new MissingOpeningDialogueException();
    }
-
-   // return dialoguePackage().addConditional(hasNeverBeenGivenQuest(Quests.ADVISOR_INTRO_1), opening())
-   // .addConditional(
-   // hasActiveIncompleteQuest(Quests.ADVISOR_INTRO_1),
-   // Switch(
-   // Case(playerIsHoldingFood(), consumeFood()),
-   // defaultCase(
-   // questCannotComplete())))
-   // .addConditional(isActiveQuestComplete(Quests.ADVISOR_INTRO_1), questComplete());
 
    private static Dialogue opening() {
       return dialogueWithpages()
@@ -86,14 +80,11 @@ public class AdvisorIntroQuest1 extends DialogueFlow {
    }
 
    private static Dialogue questComplete() {
-      return dialogueWithpages()
-            .page(simplePage(translatable("villager.dialogue.quest.advisor_intro_1.complete.1")))
-            .page(
-                  finalPage(translatable("villager.dialogue.quest.advisor_intro_1.complete.2"))
-                        .onEnded(context -> {
-                           endQuest(context, Quests.ADVISOR_INTRO_1);
-                           rewardCurrency(context, 6);
-                        }))
+      return dialogueWithpages().page(simplePage(translatable("villager.dialogue.quest.advisor_intro_1.complete.1")))
+            .page(finalPage(translatable("villager.dialogue.quest.advisor_intro_1.complete.2")).onEnded(context -> {
+               endQuest(context, Quests.ADVISOR_INTRO_1);
+               rewardCurrency(context, 6);
+            }))
             .create();
    }
 

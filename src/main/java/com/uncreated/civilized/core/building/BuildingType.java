@@ -8,7 +8,7 @@ import net.minecraft.network.chat.MutableComponent;
 
 public enum BuildingType {
    NONE,
-   TRADING_POST,
+   INN,
    TOWN_HALL,
    STOREHOUSE,
    CHURCH,
@@ -46,13 +46,12 @@ public enum BuildingType {
             .withColor(Colors.BUILDING_DARK);
    }
 
-   public VillagerOccupation toJobType() {
-      switch (this) {
-      case FARMER_HOUSE:
-         return VillagerOccupation.FARMER;
-      default:
-         return VillagerOccupation.UNEMPLOYED;
-      }
+   public VillagerOccupation getOccupation() {
+      return switch (this) {
+      case FARMER_HOUSE -> VillagerOccupation.FARMER;
+      case WOODCUTTER_HOUSE -> VillagerOccupation.WOODCUTTER;
+      default -> VillagerOccupation.UNEMPLOYED;
+      };
    }
 
    public boolean isPermanentResidence() {
@@ -65,18 +64,15 @@ public enum BuildingType {
    }
 
    public boolean isTemporaryResidence() {
-      return this == TRADING_POST;
+      return this == INN;
    }
 
    public boolean isResidence() {
-      return switch (this) {
-         case TRADING_POST -> true;
-         default -> false;
-      };
+      return isPermanentResidence() || isTemporaryResidence();
    }
 
    public boolean canHaveOccupants() {
-       return isResidence() || isWorksite();
+      return isResidence() || isWorksite();
    }
 
    public boolean isWorksite() {

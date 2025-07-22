@@ -4,20 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.uncreated.civilized.ui.style.Colors;
-import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingStore;
-import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
-import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerStore;
-import com.uncreated.civilized.networking.packets.CreateNewBuilding;
-
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.pattern.BlockPattern;
 
 public class BuildingUtil {
 
@@ -38,6 +31,20 @@ public class BuildingUtil {
             .stream()
             .filter(
                   b -> b.getSettlementId().equals(settlementId) && b.getBuildingType().isPermanentResidence()
+                        && !isBuildingFull(b, villagerStore))
+            .findFirst();
+   }
+
+   public static Optional<Building> findUnoccupiedHome(
+         UUID settlementId,
+         BuildingType requiredBuildingType,
+         BuildingStore buildingStore,
+         VillagerStore villagerStore) {
+
+      return buildingStore.all()
+            .stream()
+            .filter(
+                  b -> b.getSettlementId().equals(settlementId) && b.getBuildingType() == requiredBuildingType
                         && !isBuildingFull(b, villagerStore))
             .findFirst();
    }

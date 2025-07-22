@@ -3,7 +3,7 @@ package com.uncreated.civilized;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
-import com.uncreated.civilized.block.building.requirement.registry.BuildingRequirementRegistry;
+import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementRegistry;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.events.BuildingStoreEvents;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;

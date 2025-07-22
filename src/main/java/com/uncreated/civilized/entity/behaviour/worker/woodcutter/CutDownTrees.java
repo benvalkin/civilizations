@@ -28,7 +28,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class CutDownTrees extends Behavior<CivilizedVillager> {
    public static final Logger LOGGER = LogUtils.getLogger();
    private long lastWorkTime;
-   private final List<BlockPos> blocksToHarvest = Lists.newArrayList();
+   private final List<BlockPos> logsToHarvest = Lists.newArrayList();
+   private final List<BlockPos> leavesToHarvest = Lists.newArrayList();
    private BlockPos cropFieldCenter;
 
    public CutDownTrees() {
@@ -54,17 +55,15 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
       this.cropFieldCenter = jobSiteBlockPos.get().pos();
 
       findBlocksToHarvest(level);
-      return !blocksToHarvest.isEmpty();
+      return !logsToHarvest.isEmpty(); // only start when there are logs to harvest (not leaves)
    }
 
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
-      LOGGER.info("Villager started cutting wood.");
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager entity, long gameTime) {
-      LOGGER.info("Villager stopped cutting wood.");
    }
 
    @Override
@@ -72,10 +71,8 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
 
       Optional<GlobalPos> optional = entity.getBrain().getMemory(MemoryModuleType.JOB_SITE);
       if (optional.isEmpty()) {
-         LOGGER.info("Villager will stop working because they have no more job site.");
          return false;
-      } else if (blocksToHarvest.isEmpty()) {
-         LOGGER.info("Villager will stop working because there are no more crops to havest.");
+      } else if (logsToHarvest.isEmpty() && leavesToHarvest.isEmpty()) {
          return false;
       }
 
@@ -87,50 +84,57 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
 
-      if (tickTime - lastWorkTime > 5) {
+      if (tickTime - lastWorkTime > 6) {
 
          lastWorkTime = tickTime;
 
          findBlocksToHarvest(level);
-         LOGGER.info("Villager found {} crops to harvest.", blocksToHarvest.size());
 
-         if (!blocksToHarvest.isEmpty()) {
-            BlockPos pos = blocksToHarvest.getFirst();
+         Optional<BlockPos> blockPos = logsToHarvest.stream().findFirst();
+         if (blockPos.isEmpty())
+            blockPos = leavesToHarvest.stream().findFirst();;
+         if (blockPos.isEmpty())
+            return;
 
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, 0.25f, 1));
-            villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(pos));
+         BlockPos pos = blockPos.get();
 
-            toolHits++;
-            villager.swing(InteractionHand.MAIN_HAND, true);
+         villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, 0.25f, 3));
+         villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(pos));
 
-            BlockState blockState = level.getBlockState(pos);
-            int requiredToolHits = blockState.getTags().anyMatch(t -> t.equals(BlockTags.LOGS)) ? 15 : 4;
+         toolHits++;
+         villager.swing(InteractionHand.MAIN_HAND, true);
 
-            if (toolHits == requiredToolHits) {
-               List<ItemStack> drops = Block.getDrops(blockState, level, pos, null);
-               drops.forEach(i -> villager.getInventory().addItem(i));
-               LOGGER.info("Villager's inventory now has: {}", villager.getInventory().getItems());
+         BlockState blockState = level.getBlockState(pos);
+         int requiredToolHits = blockState.getTags().anyMatch(t -> t.equals(BlockTags.LOGS)) ? 14 : 4;
 
-               level.destroyBlock(pos, false);
-               toolHits = 0;
+         if (toolHits == requiredToolHits) {
+            List<ItemStack> drops = Block.getDrops(blockState, level, pos, null);
+            drops.forEach(i -> villager.getInventory().addItem(i));
 
-               villager.getBrain().setMemory(AIRegistry.MM_CAN_OFFLOAD.get(), true);
-            }
+            level.destroyBlock(pos, false);
+            toolHits = 0;
+
+            villager.getBrain().setMemory(AIRegistry.MM_CAN_OFFLOAD.get(), true);
          }
       }
    }
 
    private void findBlocksToHarvest(ServerLevel serverLevel) {
       BlockPos.MutableBlockPos current = cropFieldCenter.mutable();
-      blocksToHarvest.clear();
+      logsToHarvest.clear();
+      leavesToHarvest.clear();
       for (int x = -5; x <= 5; x++) {
          for (int z = -5; z <= 5; z++) {
             for (int y = -1; y <= 32; y++) {
                current.set(cropFieldCenter.getX() + x, cropFieldCenter.getY() + y, cropFieldCenter.getZ() + z);
 
-               if (isLogOrLeaves(current.below(), serverLevel)) {
-                  blocksToHarvest.add(current.immutable());
+               BlockState block = serverLevel.getBlockState(current);
+               if (isLog(block)) {
+                  logsToHarvest.add(current.immutable());
+               } else if (isLeaves(block)) {
+                  leavesToHarvest.add(current.immutable());
                }
+
                if (serverLevel.canSeeSky(current))
                   break;
             }
@@ -138,8 +142,11 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
       }
    }
 
-   private boolean isLogOrLeaves(BlockPos blockPos, ServerLevel serverLevel) {
-      BlockState block = serverLevel.getBlockState(blockPos);
-      return block.getTags().anyMatch(t -> t.equals(BlockTags.LOGS) || t.equals(BlockTags.LEAVES));
+   private boolean isLog(BlockState blockState) {
+      return blockState.getTags().anyMatch(t -> t.equals(BlockTags.LOGS));
+   }
+
+   private boolean isLeaves(BlockState blockState) {
+      return blockState.getTags().anyMatch(t -> t.equals(BlockTags.LEAVES));
    }
 }

@@ -20,7 +20,7 @@ public class ResponseOption {
    @Nullable
    private Tooltip tooltip;
 
-    private ResponseOption(Component playerSpeech) {
+   private ResponseOption(Component playerSpeech) {
       this.playerSpeech = playerSpeech;
       this.visibleCheck = IResponseOptionVisibleCheck.alwaysVisible();
       this.enabledCheck = IResponseOptionEnabledCheck.alwaysEnabled();
@@ -72,8 +72,8 @@ public class ResponseOption {
    }
 
    public ResponseOption withTooltip(Tooltip tooltip) {
-       this.tooltip = tooltip;
-       return this;
+      this.tooltip = tooltip;
+      return this;
    }
 
    @Getter
@@ -129,6 +129,10 @@ public class ResponseOption {
       private EnabledCheckResult(boolean isEnabled, @Nullable Tooltip tooltip) {
          this.isEnabled = isEnabled;
          this.tooltip = tooltip;
+      }
+
+      public static EnabledCheckResult success(Tooltip tooltip) {
+         return new EnabledCheckResult(true, tooltip);
       }
 
       public static EnabledCheckResult success() {

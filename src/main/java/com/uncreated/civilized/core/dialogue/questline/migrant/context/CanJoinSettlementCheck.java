@@ -1,0 +1,40 @@
+package com.uncreated.civilized.core.dialogue.questline.migrant.context;
+
+import static net.minecraft.network.chat.Component.translatable;
+
+import com.uncreated.civilized.core.dialogue.ResponseOption;
+import com.uncreated.civilized.core.dialogue.context.ResponseOptionContext;
+import com.uncreated.civilized.ui.style.Colors;
+
+import net.minecraft.client.gui.components.Tooltip;
+
+public class CanJoinSettlementCheck implements ResponseOption.IResponseOptionEnabledCheck {
+
+   @Override
+   public ResponseOption.EnabledCheckResult isOptionEnabled(ResponseOptionContext context) {
+
+      JoinSettlementContext joinSettlement = context.getDialogueContext().as();
+
+      if (joinSettlement.getSettlement() == null) {
+         return ResponseOption.EnabledCheckResult.failed(
+               Tooltip.create(
+                     translatable("villager.dialogue.traveller.quest.validation.tooltip.player_no_settlement")
+                           .withColor(Colors.VALIDATION_ERROR)));
+      }
+
+      if (joinSettlement.getUnoccupiedBuilding() == null) {
+         return ResponseOption.EnabledCheckResult.failed(
+               Tooltip.create(
+                     translatable(
+                           "villager.dialogue.quest.migrant_worker.misc.response.accept.tooltip.option_disabled",
+                           joinSettlement.getRequiredBuildingType().translation()).withColor(Colors.VALIDATION_ERROR)));
+      }
+
+      return ResponseOption.EnabledCheckResult.success(
+            Tooltip.create(
+                  translatable(
+                        "villager.dialogue.quest.migrant_worker.misc.response.accept.tooltip.option_enabled",
+                        joinSettlement.getRequiredBuildingType().getOccupation().translation())
+                        .withColor(Colors.VALIDATION_SUCCESS)));
+   }
+}

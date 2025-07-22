@@ -1,11 +1,13 @@
 package com.uncreated.civilized.entity.renderer;
 
+import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
+
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.uncreated.civilized.CivilizedMod;
-import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.renderer.layer.ClothingLayer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -22,11 +24,13 @@ import net.minecraft.world.phys.Vec3;
 public class CivilizedVillagerRenderer extends
       HumanoidMobRenderer<CivilizedVillager, CivilizedVillagerRenderState, HumanoidModel<CivilizedVillagerRenderState>> {
 
-   public static final ResourceLocation TEXTURE_LOCATION =
-         ResourceLocation.fromNamespaceAndPath(CivilizedMod.CIVILIZED_MOD_ID, "textures/entity/civilized_villager.png");
+   public static final ResourceLocation TEXTURE_VILLAGER_1 =
+         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/civilized_villager.png");
 
    public CivilizedVillagerRenderer(EntityRendererProvider.Context context) {
       super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER)), 1);
+
+      this.addLayer(new ClothingLayer(this, context.getModelSet()));
    }
 
    @Override
@@ -38,14 +42,15 @@ public class CivilizedVillagerRenderer extends
    public void extractRenderState(CivilizedVillager villager, CivilizedVillagerRenderState state, float partialTick) {
       super.extractRenderState(villager, state, partialTick);
       state.villagerName = villager.getInfo().getFullNameComponent();
+      state.occupation = villager.getInfo().getOccupation();
 
       if (villager.getInfo().getOccupation() != VillagerOccupation.UNEMPLOYED)
-         state.jobName = villager.getInfo().getOccupation().translation();
+         state.occupationName = villager.getInfo().getOccupation().translation();
    }
 
    @Override
    public ResourceLocation getTextureLocation(CivilizedVillagerRenderState renderState) {
-      return TEXTURE_LOCATION;
+      return TEXTURE_VILLAGER_1;
    }
 
    @Override
@@ -63,8 +68,8 @@ public class CivilizedVillagerRenderer extends
 
       if (renderState.villagerName != null)
          renderNameTag(renderState, renderState.villagerName, pose, bufferSource, packedLight);
-      if (renderState.jobName != null)
-         renderJobTag(renderState, renderState.jobName, pose, bufferSource, packedLight);
+      if (renderState.occupationName != null)
+         renderJobTag(renderState, renderState.occupationName, pose, bufferSource, packedLight);
    }
 
    protected void renderNameTag(
