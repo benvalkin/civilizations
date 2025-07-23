@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.level.ServerLevel;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableList;
@@ -57,11 +58,13 @@ public abstract class BuildingStore extends SavedData {
       return find(blockPos).orElseThrow();
    }
 
-   public Optional<Building> find(UUID buildingId) {
+   public Optional<Building> find(@Nullable UUID buildingId) {
+      if (buildingId == null)
+         return Optional.empty();
       return Optional.ofNullable(buildings.get(buildingId));
    }
 
-   public Building get(UUID buildingId) {
+   public Building get(@Nullable UUID buildingId) {
       return find(buildingId).orElseThrow();
    }
 

@@ -46,6 +46,8 @@ public class CivilizedVillagerRenderer extends
 
       if (villager.getInfo().getOccupation() != VillagerOccupation.UNEMPLOYED)
          state.occupationName = villager.getInfo().getOccupation().translation();
+      else
+         state.occupationName = Component.empty();
    }
 
    @Override

@@ -72,7 +72,7 @@ public class ResidenceInfoTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createOccupantsList() {
-      return BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getResidents(building, ClientVillagerStore.INSTANCE);
    }
 
    @Override

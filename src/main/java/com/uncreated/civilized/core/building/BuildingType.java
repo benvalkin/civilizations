@@ -48,8 +48,8 @@ public enum BuildingType {
 
    public VillagerOccupation getOccupation() {
       return switch (this) {
-      case FARMER_HOUSE -> VillagerOccupation.FARMER;
-      case WOODCUTTER_HOUSE -> VillagerOccupation.WOODCUTTER;
+      case FARMER_HOUSE, CROP_FARM -> VillagerOccupation.FARMER;
+      case WOODCUTTER_HOUSE, GROVE -> VillagerOccupation.WOODCUTTER;
       default -> VillagerOccupation.UNEMPLOYED;
       };
    }

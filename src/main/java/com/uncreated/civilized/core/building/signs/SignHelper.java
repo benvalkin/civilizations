@@ -53,7 +53,7 @@ public class SignHelper {
    }
 
    public static SignText getBuildingSignText(Building building) {
-      List<VillagerInfo> occupants = BuildingUtil.getOccupants(building, ServerVillagerStore.INSTANCE);
+      List<VillagerInfo> occupants = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
       Settlement settlement = ServerSettlementsStore.INSTANCE.get(building.getSettlementId());
 
       Component[] signTextComponents = getSignTextComponents(building, settlement, occupants);

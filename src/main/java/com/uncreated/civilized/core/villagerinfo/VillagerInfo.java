@@ -40,6 +40,7 @@ public class VillagerInfo {
                   .occupation(buffer.readEnum(VillagerOccupation.class))
                   .settlementId(buffer.readNullable((b -> b.readUUID())))
                   .homeBuildingId(buffer.readNullable((b -> b.readUUID())))
+                  .primaryWorksiteId(buffer.readNullable((b -> b.readUUID())))
                   .npcRoles(buffer.readCollection(ArrayList::new, b -> b.readEnum(VillagerNpcRole.class)))
                   .gender(buffer.readEnum(Gender.class));
 
@@ -55,6 +56,7 @@ public class VillagerInfo {
       buffer.writeEnum(occupation);
       buffer.writeNullable(settlementId, (b, v) -> b.writeUUID(v));
       buffer.writeNullable(homeBuildingId, (b, v) -> b.writeUUID(v));
+      buffer.writeNullable(primaryWorksiteId, (b, v) -> b.writeUUID(v));
       buffer.writeCollection(npcRoles, FriendlyByteBuf::writeEnum);
       buffer.writeEnum(gender);
    }
@@ -138,6 +140,7 @@ public class VillagerInfo {
       occupation = other.occupation;
       settlementId = other.settlementId;
       homeBuildingId = other.homeBuildingId;
+      primaryWorksiteId = other.primaryWorksiteId;
       npcRoles = other.npcRoles;
       gender = other.gender;
    }
@@ -154,6 +157,10 @@ public class VillagerInfo {
 
    public boolean isOccupantOf(Building building) {
       return building.getBuildingId().equals(homeBuildingId);
+   }
+
+   public boolean isAssignedWorkerOf(Building building) {
+      return building.getBuildingId().equals(primaryWorksiteId);
    }
 
    public record Packet(VillagerInfo villager, StoreOperation storeOperation) implements CustomPacketPayload {

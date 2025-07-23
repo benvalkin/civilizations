@@ -3,8 +3,9 @@ package com.uncreated.civilized.neoforge.registration.gui;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingMenu;
-import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.worksite.residence.WorksiteBuildingScreen;
 
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -23,6 +24,8 @@ public class GuiSetupEvents {
                   return new InnBuildingScreen(buildingMenu, inventory, component);
                if (buildingType.isPermanentResidence())
                   return new ResidenceBuildingScreen(buildingMenu, inventory, component);
+               if (buildingType.isWorksite())
+                  return new WorksiteBuildingScreen(buildingMenu, inventory, component);
 
                return new ResidenceBuildingScreen(buildingMenu, inventory, component);
             });

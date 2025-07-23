@@ -1,4 +1,4 @@
-package com.uncreated.civilized.ui.menu.building.inn.tabs;
+package com.uncreated.civilized.ui.menu.building.worksite.residence.tabs;
 
 import java.util.List;
 
@@ -15,11 +15,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
-public class InnVisitorsTab extends ABuildingScreenTab {
+public class WorksiteInfoTab extends ABuildingScreenTab {
 
-   private List<VillagerInfo> visitors;
+   private List<VillagerInfo> workers;
 
-   public InnVisitorsTab(
+   public WorksiteInfoTab(
          int index,
          int x,
          int y,
@@ -28,39 +28,40 @@ public class InnVisitorsTab extends ABuildingScreenTab {
          Font font,
          Building building,
          Settlement settlement) {
-      super(index, x, y, width, height, font, Component.literal("Visitors"), building, settlement);
-      this.visitors = createVisitorsList();
+      super(
+            index,
+            x,
+            y,
+            width,
+            height,
+            font,
+            Component.translatable("menu.building.residence.info.tab.heading"),
+            building,
+            settlement);
+      this.workers = createOccupantsList();
    }
 
    @Override
    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
       super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-      if (visitors.isEmpty()) {
-         graphics.drawWordWrap(
-               font,
-               Component.translatable("menu.building.inn.visitors.count.heading.empty"),
-               getX(),
-               getY() + 20,
-               width,
-               Colors.MENU_TEXT_DARK,
-               false);
-         return;
-      }
 
       graphics.drawString(
             font,
-            Component.translatable("menu.building.inn.visitors.count.heading"),
+            Component.translatable(
+                  "menu.building.worksite.workers.heading",
+                  workers.size(),
+                  ManageWorkersTab.MAX_ASSIGNED_WORKERS),
             getX(),
             getY() + 20,
             Colors.MENU_TEXT_DARK,
             false);
 
-      for (int i = 0; i < visitors.size(); i++) {
+      for (int i = 0; i < workers.size(); i++) {
 
-         VillagerInfo visitor = visitors.get(i);
+         VillagerInfo occupant = workers.get(i);
          graphics.drawString(
                font,
-               Component.literal(visitor.getFullName()),
+               Component.literal(occupant.getFullName()),
                getX() + 8,
                getY() + 35 + i * 10,
                Colors.MENU_TEXT_DARK,
@@ -73,12 +74,12 @@ public class InnVisitorsTab extends ABuildingScreenTab {
       return List.of();
    }
 
-   private List<VillagerInfo> createVisitorsList() {
-      return BuildingUtil.getResidents(building, ClientVillagerStore.INSTANCE);
+   private List<VillagerInfo> createOccupantsList() {
+      return BuildingUtil.getAssignedWorkers(building, ClientVillagerStore.INSTANCE);
    }
 
    @Override
    public void refresh() {
-      visitors = createVisitorsList();
+      this.workers = createOccupantsList();
    }
 }

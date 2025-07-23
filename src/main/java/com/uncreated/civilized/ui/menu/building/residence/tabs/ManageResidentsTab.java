@@ -24,8 +24,10 @@ import net.minecraft.network.chat.Component;
 
 public class ManageResidentsTab extends ABuildingScreenTab {
 
+   public static final int MAX_ASSIGNED_RESIDENTS = 2;
    private ScrollListView scrollView;
-   private List<VillagerInfo> residents;
+   private List<VillagerInfo> currentOccupants;
+   private List<VillagerInfo> candidateOccupants;
 
    public ManageResidentsTab(
          int index,
@@ -46,38 +48,31 @@ public class ManageResidentsTab extends ABuildingScreenTab {
             Component.translatable("menu.building.residence.residents.tab.heading"),
             building,
             settlement);
-      residents = BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
-      scrollView = createScrollView(residents);
+      refresh();
    }
 
    @Override
    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
       super.renderWidget(graphics, mouseX, mouseY, partialTicks);
 
-      if (residents.isEmpty()) {
-         graphics.drawString(
-               font,
-               Component.translatable("menu.building.residence.residents.count.heading.empty"),
-               getX(),
-               getY() + 20,
-               Colors.MENU_TEXT_DARK,
-               false);
-         return;
-      }
+      Component heading;
+      if (candidateOccupants.isEmpty())
+         heading = getSubHeadingNoCandidates();
+      else
+         heading = getSubHeading(currentOccupants);
 
-      scrollView.render(graphics, mouseX, mouseY, partialTicks);
+      graphics.drawWordWrap(font, heading, getX(), getY() + 15, width, Colors.MENU_TEXT_DARK, false);
 
-      // List<CivilizedVillager> occupants = getBuilding.get().getOccupants();
-      // for (int i = 0; i < occupants.size(); i++) {
-      // CivilizedVillager occupant = occupants.get(i);
-      // graphics.drawString(
-      // parent.getFont(),
-      // Component.literal(occupant.getFirstName() + " " + occupant.getLastName()),
-      // parent.getContentLeftPos() + 4,
-      // parent.getContentTopPos() + 35 + i * 10,
-      // Colors.MENU_TEXT_DARK,
-      // false);
-      // }
+      if (!candidateOccupants.isEmpty())
+         scrollView.render(graphics, mouseX, mouseY, partialTicks);
+   }
+
+   protected Component getSubHeading(List<VillagerInfo> currentOccupants) {
+      return Component.translatable("menu.building.residence.residents.heading", currentOccupants.size());
+   }
+
+   protected Component getSubHeadingNoCandidates() {
+      return Component.translatable("menu.building.residence.residents.heading.empty");
    }
 
    @Override
@@ -88,48 +83,28 @@ public class ManageResidentsTab extends ABuildingScreenTab {
       return children;
    }
 
-   private ScrollListView createScrollView(List<VillagerInfo> residents) {
-      return new ScrollListView(getX(), getY() + 15, width, height, (x_, y_, w, h) -> {
+   private ScrollListView createScrollView(List<VillagerInfo> currentOccupants, List<VillagerInfo> candidateOccupants) {
+      return new ScrollListView(getX(), getY() + 30, width, height, (x_, y_, w, h) -> {
          List<AbstractWidget> elements = Lists.newArrayList();
-         List<VillagerInfo> citizens =
-               SettlementUtil.getCitizens(settlement, ClientVillagerStore.INSTANCE).stream().sorted((v1, v2) -> {
 
-                  boolean v1IsOccupant = building.getBuildingId().equals(v1.getHomeBuildingId());
-                  boolean v2IsOccupant = building.getBuildingId().equals(v2.getHomeBuildingId());
-                  if (v1IsOccupant && v2IsOccupant)
-                     return 0;
-                  else if (v1IsOccupant)
-                     return -1;
-                  else
-                     return 1;
-               }).toList();
+         boolean isBuildingFull = currentOccupants.size() >= getMaxNumberOfOccupants();
 
          final int elementHeight = 25;
 
          int elementIndex = 0;
-         for (VillagerInfo villager : citizens) {
+         for (VillagerInfo villager : candidateOccupants) {
 
-            // Building home = ClientBuildingStore.INSTANCE.get(villager.getHomeBuildingId());
-            boolean isUnemployed = villager.getOccupation() == VillagerOccupation.UNEMPLOYED;
-            boolean isBuildingFull = residents.size() >= 2;
-            // boolean isOccupantOfAnotherBuilding = !isOccupantOfThisBuilding && villager.getHomeBuildingId() != null;
+            ManageOccupantWidget.ManagementOption mode = getAssignButtonAction(villager);
 
-            ManageOccupantWidget.EManagementOption mode;
-            if (villager.isOccupantOf(building))
-               mode = ManageOccupantWidget.EManagementOption.EVICT;
-            else if (isUnemployed)
-               mode = ManageOccupantWidget.EManagementOption.ASSIGN;
-            else
+            if (mode == ManageOccupantWidget.ManagementOption.NOT_APPLICABLE)
                continue;
 
             elements.add(
-                  new ManageOccupantWidget(
+                  createManagementWidget(
                         x_,
                         y_ + elementIndex * elementHeight,
                         w - 10,
                         elementHeight,
-                        font,
-                        building,
                         villager,
                         mode,
                         isBuildingFull));
@@ -140,9 +115,60 @@ public class ManageResidentsTab extends ABuildingScreenTab {
       });
    }
 
+   protected List<VillagerInfo> getCurrentOccupants(Building building, Settlement settlement) {
+      return BuildingUtil.getResidents(building, ClientVillagerStore.INSTANCE);
+   }
+
+   protected List<VillagerInfo> getCandidateOccupants(Building building, Settlement settlement) {
+      return SettlementUtil.getCitizens(settlement, ClientVillagerStore.INSTANCE).stream().sorted((v1, v2) -> {
+         boolean v1IsOccupant = building.getBuildingId().equals(v1.getHomeBuildingId());
+         boolean v2IsOccupant = building.getBuildingId().equals(v2.getHomeBuildingId());
+         if (v1IsOccupant && v2IsOccupant)
+            return 0;
+         else if (v1IsOccupant)
+            return -1;
+         else
+            return 1;
+      }).toList();
+   }
+
+   protected int getMaxNumberOfOccupants() {
+      return MAX_ASSIGNED_RESIDENTS;
+   }
+
+   protected ManageOccupantWidget.ManagementOption getAssignButtonAction(VillagerInfo villager) {
+      if (villager.isOccupantOf(building))
+         return ManageOccupantWidget.ManagementOption.UNASSIGN;
+      else if (villager.getOccupation() == VillagerOccupation.UNEMPLOYED)
+         return ManageOccupantWidget.ManagementOption.ASSIGN;
+
+      return ManageOccupantWidget.ManagementOption.NOT_APPLICABLE;
+   }
+
+   protected ManageOccupantWidget createManagementWidget(
+         int x,
+         int y,
+         int width,
+         int height,
+         VillagerInfo villagerInfo,
+         ManageOccupantWidget.ManagementOption managementOption,
+         boolean isBuildingFull) {
+      return new ManageOccupantWidget(
+            x,
+            y,
+            width,
+            height,
+            font,
+            building,
+            villagerInfo,
+            managementOption,
+            isBuildingFull);
+   }
+
    @Override
    public void refresh() {
-      residents = BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
-      scrollView = createScrollView(residents);
+      currentOccupants = getCurrentOccupants(building, settlement);
+      candidateOccupants = getCandidateOccupants(building, settlement);
+      scrollView = createScrollView(currentOccupants, candidateOccupants);
    }
 }

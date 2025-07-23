@@ -233,16 +233,6 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       return InteractionResult.SUCCESS;
    }
 
-   public void invalidateHomeAndJobMemories() {
-
-      if (info.getHomeBuildingId() != null) {
-         Building home = ServerBuildingsStore.INSTANCE.get(info.getHomeBuildingId());
-         getBrain().setMemory(MemoryModuleType.HOME, new GlobalPos(level().dimension(), home.getBlockPos()));
-      }
-      getBrain().setMemory(AIRegistry.MM_VILLAGER_OCCUPATION.get(), info.getOccupation());
-      // probably ok to not invalidate workpos here
-   }
-
    @Override
    public Brain<CivilizedVillager> getBrain() {
       return (Brain<CivilizedVillager>) super.getBrain();

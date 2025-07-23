@@ -69,7 +69,7 @@ public class InnMainTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createVisitorsList() {
-      return BuildingUtil.getOccupants(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getResidents(building, ClientVillagerStore.INSTANCE);
    }
 
    @Override

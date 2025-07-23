@@ -16,6 +16,7 @@ import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -41,101 +42,100 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       VillagerInfo villagerInfo = villager.getInfo();
       VillagerOccupation oldOccupation = villagerInfo.getOccupation();
       Optional<Building> oldHome = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
+      Optional<Building> oldWorksite = ServerBuildingsStore.INSTANCE.find(villagerInfo.getPrimaryWorksiteId());
 
-      Optional<Building> newHome = invalidateHome(villagerInfo, level);
-      if (newHome.isPresent()) {
-         villagerInfo.setOccupation(newHome.get().getBuildingType().getOccupation());
-      } else
+      Optional<Building> home = invalidateHome(villagerInfo, level);
+      if (home.isPresent()) {
+         villagerInfo.setOccupation(home.get().getBuildingType().getOccupation());
+         villagerInfo.setHomeBuildingId(home.get().getBuildingId());
+         villager.getBrain()
+               .setMemory(MemoryModuleType.HOME, new GlobalPos(level.dimension(), home.get().getBlockPos()));
+         villager.getBrain().setMemory(AIRegistry.MM_VILLAGER_OCCUPATION.get(), villagerInfo.getOccupation());
+      } else {
          villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
+         villager.getBrain().eraseMemory(MemoryModuleType.HOME);
+         villager.getBrain().setMemory(AIRegistry.MM_VILLAGER_OCCUPATION.get(), VillagerOccupation.UNEMPLOYED);
+      }
 
       Optional<Building> worksite = invalidateWorksite(villagerInfo, level);
       if (worksite.isPresent()) {
+         villagerInfo.setPrimaryWorksiteId(worksite.get().getBuildingId());
          villager.getBrain()
                .setMemory(MemoryModuleType.JOB_SITE, new GlobalPos(level.dimension(), worksite.get().getBlockPos()));
+      } else {
+         villagerInfo.setPrimaryWorksiteId(null);
+         villager.getBrain().eraseMemory(MemoryModuleType.JOB_SITE);
       }
-
-      villager.invalidateHomeAndJobMemories();
 
       boolean jobChanged = oldOccupation != villagerInfo.getOccupation();
       boolean homeChanged =
             !Objects.equals(oldHome.map(Building::getBuildingId).orElse(null), villagerInfo.getHomeBuildingId());
-      boolean changed = jobChanged || homeChanged;
-      if (changed) {
+      boolean worksiteChanged = !Objects.equals(oldWorksite.map(Building::getBuildingId).orElse(null), villagerInfo.getPrimaryWorksiteId());
+      boolean villagerChanged = jobChanged || homeChanged || worksiteChanged;
+      if (villagerChanged) {
          ServerVillagerStore.INSTANCE.setDirty();
          ServerVillagerStore.INSTANCE.replicateChange(villagerInfo, StoreOperation.UPDATE);
       }
 
       if (homeChanged) {
-         LOGGER.info(
-               "CHANGED: Villager {} changed homes: {} => {}",
-               villagerInfo.getFullName(),
-               oldHome.isPresent() ? oldHome.get().getBuildingType() : "none",
-               newHome.isPresent() ? newHome.get().getBuildingType() : "none");
          oldHome.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
-         newHome.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
+         home.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
       }
       if (jobChanged) {
-         LOGGER.info(
-               "CHANGED: Villager {} changed jobs: {} => {}",
-               villagerInfo.getFullName(),
-               oldOccupation,
-               villagerInfo.getOccupation());
-
          villager.refreshBrain(level);
          villager.updateClothing();
       }
-      LOGGER.info(
-            "Villager {} worksite: {} - current activity {} ",
-            villagerInfo.getFullName(),
-            worksite.isPresent() ? worksite.get().getBuildingType() : "none",
-            villager.getBrain().getActiveNonCoreActivity());
+      if (worksiteChanged) {
+         oldWorksite.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
+         worksite.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
+      }
    }
 
    private Optional<Building> invalidateHome(VillagerInfo villagerInfo, ServerLevel level) {
-      if (villagerInfo.getHomeBuildingId() == null) {
-         // try to find a new home if homeless
-         Optional<Building> newHome =
-               BuildingUtil.findUnoccupiedHome(
-                     villagerInfo.getSettlementId(),
-                     ServerBuildingsStore.INSTANCE,
-                     ServerVillagerStore.INSTANCE);
-         if (newHome.isPresent()) {
-            villagerInfo.setHomeBuildingId(newHome.get().getBuildingId());
-            return newHome;
-         }
-         return Optional.empty();
-      }
 
-      Optional<Building> home = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
-      if (home.isPresent() && home.get().getBuildingType() == BuildingType.INN) {
+      Optional<Building> currentHome = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
+      if (currentHome.isPresent()) {
          // try to move villager out of the inn if a better home is available
-         Optional<Building> betterHome =
-               BuildingUtil.findUnoccupiedHome(
-                     villagerInfo.getSettlementId(),
-                     ServerBuildingsStore.INSTANCE,
-                     ServerVillagerStore.INSTANCE);
-         if (betterHome.isPresent()) {
-            villagerInfo.setHomeBuildingId(betterHome.get().getBuildingId());
-            return betterHome;
+         if (currentHome.get().getBuildingType() == BuildingType.INN) {
+            Optional<Building> betterHome =
+                  BuildingUtil.findUnoccupiedHome(
+                        villagerInfo.getSettlementId(),
+                        ServerBuildingsStore.INSTANCE,
+                        ServerVillagerStore.INSTANCE,
+                        false);
+
+            if (betterHome.isPresent())
+               return betterHome;
          }
+
+         return currentHome; // otherwise, they stay where they are
       }
 
-      return home;
+      return BuildingUtil.findUnoccupiedHome(
+            villagerInfo.getSettlementId(),
+            ServerBuildingsStore.INSTANCE,
+            ServerVillagerStore.INSTANCE,
+            true);
    }
 
    private Optional<Building> invalidateWorksite(VillagerInfo villagerInfo, ServerLevel level) {
 
-      BuildingType workSite;
+      Optional<Building> currentWorksite = ServerBuildingsStore.INSTANCE.find(villagerInfo.getPrimaryWorksiteId());
+      if (currentWorksite.isPresent())
+         return currentWorksite;
+
+      BuildingType worksiteType;
       if (villagerInfo.getOccupation() == VillagerOccupation.FARMER) {
-         workSite = BuildingType.CROP_FARM;
+         worksiteType = BuildingType.CROP_FARM;
       } else if (villagerInfo.getOccupation() == VillagerOccupation.WOODCUTTER) {
-         workSite = BuildingType.GROVE;
+         worksiteType = BuildingType.GROVE;
       } else
-         workSite = BuildingType.CROP_FARM;
+         worksiteType = BuildingType.CROP_FARM;
 
-      Optional<Building> worksite =
-            ServerBuildingsStore.INSTANCE.all().stream().filter(b -> b.getBuildingType() == workSite).findFirst();
-
-      return worksite;
+      return BuildingUtil.findUnoccupiedWorksite(
+            villagerInfo.getSettlementId(),
+            worksiteType,
+            ServerBuildingsStore.INSTANCE,
+            ServerVillagerStore.INSTANCE);
    }
 }
