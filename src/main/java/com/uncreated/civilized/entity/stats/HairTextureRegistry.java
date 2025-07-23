@@ -14,13 +14,13 @@ import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 
-public class SkinTextureRegistry {
+public class HairTextureRegistry {
 
    public static final ResourceLocation FALLBACK =
          ResourceLocation
-               .fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/civilized_villager/skins/default/male/1.png");
+               .fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/civilized_villager/hair/default/male/1.png");
 
-   private static final String ROOT_PREFIX = "textures/entity/civilized_villager/skins";
+   private static final String ROOT_PREFIX = "textures/entity/civilized_villager/hair";
    public static final String DEFAULT_CULTURE = "default";
 
    private static final Object2ObjectArrayMap<String, Int2ObjectMap<ResourceLocation>> CLOTHING_TEXTURES =

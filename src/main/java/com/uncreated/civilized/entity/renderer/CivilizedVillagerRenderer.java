@@ -1,13 +1,12 @@
 package com.uncreated.civilized.entity.renderer;
 
-import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
-
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.renderer.layer.ClothingLayer;
+import com.uncreated.civilized.entity.renderer.layer.HairLayer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -24,13 +23,11 @@ import net.minecraft.world.phys.Vec3;
 public class CivilizedVillagerRenderer extends
       HumanoidMobRenderer<CivilizedVillager, CivilizedVillagerRenderState, HumanoidModel<CivilizedVillagerRenderState>> {
 
-   public static final ResourceLocation TEXTURE_VILLAGER_1 =
-         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/1.png");
-
    public CivilizedVillagerRenderer(EntityRendererProvider.Context context) {
       super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER)), 1);
 
       this.addLayer(new ClothingLayer(this, context.getModelSet()));
+      this.addLayer(new HairLayer(this, context.getModelSet())); // hair renders over clothing
    }
 
    @Override
@@ -44,6 +41,7 @@ public class CivilizedVillagerRenderer extends
       state.villagerName = villager.getInfo().getFullNameComponent();
       state.occupation = villager.getInfo().getOccupation();
       state.skin = villager.getSkin();
+      state.hair = villager.getHair();
       state.clothing = villager.getClothing();
 
       if (villager.getInfo().getOccupation() != VillagerOccupation.UNEMPLOYED)

@@ -28,9 +28,12 @@ public class ClothingTextureRegistry {
    private static final Object2ObjectArrayMap<String, Int2ObjectMap<ResourceLocation>> CLOTHING_TEXTURES =
          Util.make(new Object2ObjectArrayMap<>(), map -> {
             add(map, DEFAULT_CULTURE, "farmer", "male", "1");
-            add(map, DEFAULT_CULTURE, "farmer", "female", "1");
+            add(map, DEFAULT_CULTURE, "farmer", "male", "1");
+            add(map, DEFAULT_CULTURE, "farmer", "female", "2");
             add(map, DEFAULT_CULTURE, "woodcutter", "male", "1");
+            add(map, DEFAULT_CULTURE, "woodcutter", "male", "2");
             add(map, DEFAULT_CULTURE, "woodcutter", "female", "1");
+            add(map, DEFAULT_CULTURE, "woodcutter", "female", "2");
          });
 
    private static void add(

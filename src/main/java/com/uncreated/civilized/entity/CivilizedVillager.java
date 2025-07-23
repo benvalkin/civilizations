@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.uncreated.civilized.entity.stats.HairTextureRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -147,6 +148,8 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Getter
    private ResourceLocation skin = SkinTextureRegistry.FALLBACK;
    @Getter
+   private ResourceLocation hair = SkinTextureRegistry.FALLBACK;
+   @Getter
    private ResourceLocation clothing = ClothingTextureRegistry.FALLBACK;
 
    @Override
@@ -162,6 +165,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    public void updateSkin() {
       skin = SkinTextureRegistry.getRandomSkin(getConsistentLifetimeRandom(), "default", info.getGender()).getValue();
+      hair = HairTextureRegistry.getRandomSkin(getConsistentLifetimeRandom(), "default", info.getGender()).getValue();
    }
 
    public void updateClothing() {
