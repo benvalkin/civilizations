@@ -26,6 +26,8 @@ import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.entity.stats.ClothingTextureRegistry;
+import com.uncreated.civilized.entity.stats.SkinTextureRegistry;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
@@ -34,6 +36,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.Profiler;
@@ -118,11 +121,9 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    public void addAdditionalSaveData(CompoundTag compound) {
       super.addAdditionalSaveData(compound);
 
-      // if (villagerId != null)
       compound.putUUID(FIELD_VILLAGER_ID, villagerId);
       compound.putLong(FIELD_LIFETIME_SEED, lifetimeSeed);
       this.writeInventoryToTag(compound, this.registryAccess());
-
    }
 
    @Override
@@ -143,6 +144,11 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       buf.writeLong(lifetimeSeed);
    }
 
+   @Getter
+   private ResourceLocation skin = SkinTextureRegistry.FALLBACK;
+   @Getter
+   private ResourceLocation clothing = ClothingTextureRegistry.FALLBACK;
+
    @Override
    public void readSpawnData(RegistryFriendlyByteBuf buf) {
       info = ClientVillagerStore.INSTANCE.addFromServer(VillagerInfo.decode(buf));
@@ -150,6 +156,23 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       dialogueController = DialogueController.selectDialogueController(this);
       ClientVillagerStore.INSTANCE.addFromServer(info);
       villagerId = info.getVillagerId();
+      updateSkin();
+      updateClothing();
+   }
+
+   public void updateSkin() {
+      skin = SkinTextureRegistry.getRandomSkin(getConsistentLifetimeRandom(), "default", info.getGender()).getValue();
+   }
+
+   public void updateClothing() {
+      clothing =
+            ClothingTextureRegistry
+                  .getRandomClothingTexture(
+                        getConsistentLifetimeRandom(),
+                        "default",
+                        info.getOccupation(),
+                        info.getGender())
+                  .getValue();
    }
 
    @Override

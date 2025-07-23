@@ -82,6 +82,7 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
                villagerInfo.getOccupation());
 
          villager.refreshBrain(level);
+         villager.updateClothing();
       }
       LOGGER.info(
             "Villager {} worksite: {} - current activity {} ",

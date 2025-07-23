@@ -1,9 +1,6 @@
 package com.uncreated.civilized.entity.renderer.layer;
 
-import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
-
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.entity.renderer.CivilizedVillagerRenderState;
 import com.uncreated.civilized.entity.renderer.CivilizedVillagerRenderer;
 
@@ -12,13 +9,10 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
 
 // The generic parameters need the proper types you used everywhere else up to this point.
 public class ClothingLayer
       extends RenderLayer<CivilizedVillagerRenderState, HumanoidModel<CivilizedVillagerRenderState>> {
-   private ResourceLocation clothesTexture;
-
    // private final CivilizedVillagerModel model;
 
    // Create the render layer. The renderer parameter is required for passing to super.
@@ -32,12 +26,6 @@ public class ClothingLayer
       entityModelSet.bakeLayer(ModelLayers.PLAYER);
    }
 
-   ResourceLocation TEXTURE_CLOTHES_FARMER_1 =
-         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/civilized_villager_2.png");
-
-   ResourceLocation TEXTURE_CLOTHES_WOODCUTTER_1 =
-         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/civilized_villager_3.png");
-
    @Override
    public void render(
          PoseStack poseStack,
@@ -47,16 +35,9 @@ public class ClothingLayer
          float yRot,
          float xRot) {
 
-      if (renderState.occupation == VillagerOccupation.WOODCUTTER)
-         clothesTexture = TEXTURE_CLOTHES_WOODCUTTER_1;
-      else if (renderState.occupation == VillagerOccupation.FARMER)
-         clothesTexture = TEXTURE_CLOTHES_FARMER_1;
-      else
-         clothesTexture = TEXTURE_CLOTHES_FARMER_1;
-
       RenderLayer.renderColoredCutoutModel(
             getParentModel(),
-            clothesTexture,
+            renderState.clothing,
             poseStack,
             bufferSource,
             packedLight,

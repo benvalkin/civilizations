@@ -25,7 +25,7 @@ public class CivilizedVillagerRenderer extends
       HumanoidMobRenderer<CivilizedVillager, CivilizedVillagerRenderState, HumanoidModel<CivilizedVillagerRenderState>> {
 
    public static final ResourceLocation TEXTURE_VILLAGER_1 =
-         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/civilized_villager.png");
+         ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/entity/1.png");
 
    public CivilizedVillagerRenderer(EntityRendererProvider.Context context) {
       super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER)), 1);
@@ -43,6 +43,8 @@ public class CivilizedVillagerRenderer extends
       super.extractRenderState(villager, state, partialTick);
       state.villagerName = villager.getInfo().getFullNameComponent();
       state.occupation = villager.getInfo().getOccupation();
+      state.skin = villager.getSkin();
+      state.clothing = villager.getClothing();
 
       if (villager.getInfo().getOccupation() != VillagerOccupation.UNEMPLOYED)
          state.occupationName = villager.getInfo().getOccupation().translation();
@@ -50,7 +52,7 @@ public class CivilizedVillagerRenderer extends
 
    @Override
    public ResourceLocation getTextureLocation(CivilizedVillagerRenderState renderState) {
-      return TEXTURE_VILLAGER_1;
+      return renderState.skin;
    }
 
    @Override
