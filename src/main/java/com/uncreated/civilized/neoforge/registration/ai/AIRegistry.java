@@ -22,10 +22,10 @@ public class AIRegistry {
    // Create a Deferred Register to hold Blocks which will all be registered under the "civilized" namespace
 
    public static DeferredRegister<Activity> ACTIVITIES =
-           DeferredRegister.create(BuiltInRegistries.ACTIVITY, CIVILIZED_MOD_ID);
+         DeferredRegister.create(BuiltInRegistries.ACTIVITY, CIVILIZED_MOD_ID);
 
    public static final Supplier<Activity> A_SPEAK_TO_PLAYER =
-           ACTIVITIES.register("speak_to_player", () -> new Activity("speak_to_player"));
+         ACTIVITIES.register("speak_to_player", () -> new Activity("speak_to_player"));
 
    public static DeferredRegister<MemoryModuleType<?>> MEMORY_MODULES =
          DeferredRegister.create(BuiltInRegistries.MEMORY_MODULE_TYPE, CIVILIZED_MOD_ID);
@@ -34,13 +34,14 @@ public class AIRegistry {
          MEMORY_MODULES.register("crop_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
    public static final Supplier<MemoryModuleType<BlockPos>> MM_WORK_POS =
          MEMORY_MODULES.register("work_pos_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
-   public static final Supplier<MemoryModuleType<VillagerOccupation>> MM_VILLAGER_OCCUPATION =
-         MEMORY_MODULES.register("villager_occupation_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<VillagerOccupation>> MM_VILLAGER_WORKTIME_OCCUPATION =
+         MEMORY_MODULES
+               .register("villager_worktime_occupation_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
    public static final Supplier<MemoryModuleType<Boolean>> MM_CAN_OFFLOAD =
          MEMORY_MODULES.register("can_offload_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
 
    public static final Supplier<MemoryModuleType<Player>> MM_DIALOGUE_TARGET =
-           MEMORY_MODULES.register("dialogue_target_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
+         MEMORY_MODULES.register("dialogue_target_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
 
    public static DeferredRegister<SensorType<?>> SENSORS =
          DeferredRegister.create(BuiltInRegistries.SENSOR_TYPE, CIVILIZED_MOD_ID);
@@ -48,7 +49,8 @@ public class AIRegistry {
    public static final Supplier<SensorType<NearbyBlockSensor>> S_CROP_BLOCK =
          SENSORS.register("crop_sensor", () -> new SensorType<>(NearbyBlockSensor::new));
 
-   public static DeferredRegister<Schedule> SCHEDULES = DeferredRegister.create(BuiltInRegistries.SCHEDULE, CIVILIZED_MOD_ID);
+   public static DeferredRegister<Schedule> SCHEDULES =
+         DeferredRegister.create(BuiltInRegistries.SCHEDULE, CIVILIZED_MOD_ID);
 
    public static final Supplier<Schedule> SCHED_CIVILIZED_VILLAGER_DEFAULT =
          SCHEDULES.register(

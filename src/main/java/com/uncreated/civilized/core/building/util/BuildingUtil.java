@@ -7,11 +7,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingStore;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerStore;
+
+import net.minecraft.core.BlockPos;
 
 public class BuildingUtil {
 
@@ -73,5 +77,28 @@ public class BuildingUtil {
                   b -> b.getSettlementId().equals(settlementId) && b.getBuildingType() == requiredBuildingType
                         && !isWorksiteFull(b, villagerStore))
             .findFirst();
+   }
+
+   public static Optional<Building> findAnyNearbyHome(
+         @Nullable UUID settlementId,
+         BlockPos pos,
+         float radius,
+         BuildingStore buildingStore) {
+      if (settlementId == null)
+         return Optional.empty();
+
+      return buildingStore.all()
+            .stream()
+            .filter(
+                  b -> b.getBlockPos().closerThan(pos, radius) && b.getSettlementId().equals(settlementId)
+                        && b.getBuildingType().isResidence())
+            .findFirst();
+   }
+
+   public static Optional<Building> findAnyBuilding(@Nullable UUID settlementId, BuildingStore buildingStore) {
+      if (settlementId == null)
+         return Optional.empty();
+
+      return buildingStore.all().stream().filter(b -> b.getSettlementId().equals(settlementId)).findFirst();
    }
 }

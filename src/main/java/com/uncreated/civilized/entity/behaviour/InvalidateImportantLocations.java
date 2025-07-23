@@ -50,11 +50,13 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
          villagerInfo.setHomeBuildingId(home.get().getBuildingId());
          villager.getBrain()
                .setMemory(MemoryModuleType.HOME, new GlobalPos(level.dimension(), home.get().getBlockPos()));
-         villager.getBrain().setMemory(AIRegistry.MM_VILLAGER_OCCUPATION.get(), villagerInfo.getOccupation());
+
+         if (villagerInfo.getOccupation() != VillagerOccupation.UNEMPLOYED) // take care not to make villagers think they can work if they are unemployed
+            villager.getBrain().setMemory(AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(), villagerInfo.getOccupation());
       } else {
          villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
          villager.getBrain().eraseMemory(MemoryModuleType.HOME);
-         villager.getBrain().setMemory(AIRegistry.MM_VILLAGER_OCCUPATION.get(), VillagerOccupation.UNEMPLOYED);
+         villager.getBrain().eraseMemory(AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get());
       }
 
       Optional<Building> worksite = invalidateWorksite(villagerInfo, level);
@@ -70,7 +72,8 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       boolean jobChanged = oldOccupation != villagerInfo.getOccupation();
       boolean homeChanged =
             !Objects.equals(oldHome.map(Building::getBuildingId).orElse(null), villagerInfo.getHomeBuildingId());
-      boolean worksiteChanged = !Objects.equals(oldWorksite.map(Building::getBuildingId).orElse(null), villagerInfo.getPrimaryWorksiteId());
+      boolean worksiteChanged =
+            !Objects.equals(oldWorksite.map(Building::getBuildingId).orElse(null), villagerInfo.getPrimaryWorksiteId());
       boolean villagerChanged = jobChanged || homeChanged || worksiteChanged;
       if (villagerChanged) {
          ServerVillagerStore.INSTANCE.setDirty();

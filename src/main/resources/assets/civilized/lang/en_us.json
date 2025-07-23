@@ -74,6 +74,7 @@
   "menu.building.residence.residents.button.evict_resident": "Evict",
   "menu.building.worksite.info.tab.heading": "Information",
   "menu.building.worksite.workers.tab.heading": "Manage Workers",
+  "menu.building.worksite.workers.count": "Workers: %s/%s",
   "menu.building.worksite.workers.heading": "Assigned Workers: %s/%s",
   "menu.building.worksite.workers.heading.empty": "There are no available workers who can be assigned to this site.",
   "menu.building.worksite.workers.button.assign_worker": "Assign",

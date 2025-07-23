@@ -1,5 +1,7 @@
 package com.uncreated.civilized.core.building.signs;
 
+import static com.uncreated.civilized.ui.menu.building.worksite.residence.tabs.ManageWorkersTab.MAX_ASSIGNED_WORKERS;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,30 +55,32 @@ public class SignHelper {
    }
 
    public static SignText getBuildingSignText(Building building) {
-      List<VillagerInfo> occupants = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
-      Settlement settlement = ServerSettlementsStore.INSTANCE.get(building.getSettlementId());
-
-      Component[] signTextComponents = getSignTextComponents(building, settlement, occupants);
+      Component[] signTextComponents = getSignTextComponents(building);
       return new SignText(signTextComponents, signTextComponents, DyeColor.BLACK, false);
 
    }
 
-   private static Component[] getSignTextComponents(
-         Building building,
-         Settlement settlement,
-         List<VillagerInfo> occupants) {
+   private static Component[] getSignTextComponents(Building building) {
       if (building.getBuildingType() == BuildingType.TOWN_HALL) {
+         Settlement settlement = ServerSettlementsStore.INSTANCE.get(building.getSettlementId());
          return new Component[] { building.getBuildingType().translation(),
                settlement.displayNameTranslation().withStyle(ChatFormatting.ITALIC), Component.empty(),
                Component.empty() };
       } else if (building.getBuildingType().isPermanentResidence()) {
+         List<VillagerInfo> residents = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
          return new Component[] { building.getBuildingType().translation(),
-               Component.translatable("menu.building.residence.residents.count", occupants.size()), Component.empty(),
+               Component.translatable("menu.building.residence.residents.count", residents.size()), Component.empty(),
                Component.empty() };
       } else if (building.getBuildingType().isTemporaryResidence()) {
+         List<VillagerInfo> visitors = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
          return new Component[] { building.getBuildingType().translation(),
-               Component.translatable("menu.building.inn.visitors.count", occupants.size()), Component.empty(),
+               Component.translatable("menu.building.inn.visitors.count", visitors.size()), Component.empty(),
                Component.empty() };
+      } else if (building.getBuildingType().isWorksite()) {
+         List<VillagerInfo> workers = BuildingUtil.getAssignedWorkers(building, ServerVillagerStore.INSTANCE);
+         return new Component[] { building.getBuildingType().translation(),
+               Component.translatable("menu.building.worksite.workers.count", workers.size(), MAX_ASSIGNED_WORKERS),
+               Component.empty(), Component.empty() };
       }
       return new Component[] { building.getBuildingType().translation(), Component.empty(), Component.empty(),
             Component.empty() };

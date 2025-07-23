@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.uncreated.civilized.entity.stats.HairTextureRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -17,8 +16,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import com.uncreated.civilized.core.StoreOperation;
-import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
 import com.uncreated.civilized.core.dialogue.controller.DialogueController;
@@ -27,14 +24,15 @@ import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.entity.stats.ClothingTextureRegistry;
+import com.uncreated.civilized.entity.stats.HairTextureRegistry;
 import com.uncreated.civilized.entity.stats.SkinTextureRegistry;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -244,7 +242,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
             List.of(
                   AIRegistry.MM_CROP_FIELD_CENTER.get(),
                   AIRegistry.MM_CAN_OFFLOAD.get(),
-                  AIRegistry.MM_VILLAGER_OCCUPATION.get(),
+                  AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(),
                   AIRegistry.MM_DIALOGUE_TARGET.get(),
                   MemoryModuleType.JOB_SITE,
                   MemoryModuleType.HOME,
@@ -276,10 +274,12 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       brain.setSchedule(AIRegistry.SCHED_CIVILIZED_VILLAGER_DEFAULT.get());
       brain.addActivity(Activity.CORE, getCorePackage(0.33f));
       brain.addActivity(Activity.IDLE, getIdlePackage(0.25f));
-      brain.addActivityWithConditions(
-            Activity.WORK,
-            getWorkPackage(info.getOccupation()),
-            Set.of(Pair.of(AIRegistry.MM_VILLAGER_OCCUPATION.get(), MemoryStatus.VALUE_PRESENT)));
+      if (info.getOccupation() != VillagerOccupation.UNEMPLOYED) {
+         brain.addActivityWithConditions(
+               Activity.WORK,
+               getWorkPackage(info.getOccupation()),
+               Set.of(Pair.of(AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(), MemoryStatus.VALUE_PRESENT)));
+      }
       brain.addActivityWithConditions(
             Activity.REST,
             getRestPackage(0.4F),
