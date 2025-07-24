@@ -1,12 +1,13 @@
 package com.uncreated.civilized.core.building;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.level.ServerLevel;
+import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -62,6 +63,12 @@ public abstract class BuildingStore extends SavedData {
       if (buildingId == null)
          return Optional.empty();
       return Optional.ofNullable(buildings.get(buildingId));
+   }
+
+   public List<Building> findForSettlement(@Nullable UUID settlementId) {
+      if (settlementId == null)
+         return List.of();
+      return buildings.values().stream().filter(b -> b.getSettlementId().equals(settlementId)).toList();
    }
 
    public Building get(@Nullable UUID buildingId) {

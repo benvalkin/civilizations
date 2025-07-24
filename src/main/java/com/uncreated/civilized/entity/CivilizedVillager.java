@@ -266,9 +266,11 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       return Brain.provider(
             List.of(
                   AIRegistry.MM_CROP_FIELD_CENTER.get(),
-                  AIRegistry.MM_CAN_OFFLOAD.get(),
                   AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(),
                   AIRegistry.MM_DIALOGUE_TARGET.get(),
+                  AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(),
+                  AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get(),
+                  AIRegistry.MM_CAN_OFFLOAD.get(),
                   MemoryModuleType.JOB_SITE,
                   MemoryModuleType.HOME,
                   MemoryModuleType.PATH,

@@ -11,16 +11,17 @@ import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
+import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -30,11 +31,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class ReplantSaplings extends Behavior<CivilizedVillager> {
+public class ReplantSaplings extends WorkTaskBehaviour {
    public static final Logger LOGGER = LogUtils.getLogger();
    private long lastWorkTime;
    private final List<BlockPos> validPlantingBlocks = Lists.newArrayList();
    private Building workSite;
+   private MediumDistanceTravelTask travelHelper;
 
    public ReplantSaplings() {
       super(
@@ -44,17 +46,11 @@ public class ReplantSaplings extends Behavior<CivilizedVillager> {
                   MemoryModuleType.WALK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT),
-            20 * 30);
+                  MemoryStatus.VALUE_PRESENT));
    }
 
    @Override
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
-
-      Optional<GlobalPos> jobSiteBlockPos = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
-      if (jobSiteBlockPos.isEmpty() || !jobSiteBlockPos.get().pos().closerThan(villager.blockPosition(), 6)) {
-         return false;
-      }
 
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
 
@@ -64,17 +60,14 @@ public class ReplantSaplings extends Behavior<CivilizedVillager> {
 
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
-   }
-
-   @Override
-   protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.start(level, villager, gameTime);
+      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.JOB_SITE, 5);
    }
 
    @Override
    protected boolean canStillUse(ServerLevel level, CivilizedVillager entity, long gameTime) {
 
-      Optional<GlobalPos> optional = entity.getBrain().getMemory(MemoryModuleType.JOB_SITE);
-      if (optional.isEmpty()) {
+      if (entity.getBrain().getMemory(MemoryModuleType.JOB_SITE).isEmpty()) {
          return false;
       } else if (validPlantingBlocks.isEmpty()) {
          return false;
@@ -85,6 +78,11 @@ public class ReplantSaplings extends Behavior<CivilizedVillager> {
 
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
+
+      if (!travelHelper.isJourneySuccessful()) {
+         travelHelper.walkToPoi(tickTime);
+         return;
+      }
 
       if (tickTime - lastWorkTime > 15) {
 
@@ -102,8 +100,10 @@ public class ReplantSaplings extends Behavior<CivilizedVillager> {
          villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(pos));
 
          Optional<ItemStack> saplingStack = getSaplingsInInventory(villager);
-         if (saplingStack.isEmpty())
+         if (saplingStack.isEmpty()) {
+            villager.getBrain().eraseMemory(AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get());
             return;
+         }
 
          villager.swing(InteractionHand.MAIN_HAND, true);
 

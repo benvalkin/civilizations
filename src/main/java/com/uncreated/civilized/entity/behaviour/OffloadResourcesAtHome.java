@@ -10,19 +10,18 @@ import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.util.ContainerHelper;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
-public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
+public class OffloadResourcesAtHome extends WorkTaskBehaviour {
 
    private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -39,8 +38,7 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
                   MemoryModuleType.WALK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
                   AIRegistry.MM_CAN_OFFLOAD.get(),
-                  MemoryStatus.VALUE_PRESENT),
-            20 * 60 * 3);
+                  MemoryStatus.VALUE_PRESENT));
    }
 
    @Override
@@ -71,14 +69,16 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
 
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.start(level, villager, gameTime);
       LOGGER.info("Villager going to offload resources.");
       offloaded = false;
 
-      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.HOME);
+      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.HOME, 3);
    }
 
    @Override
-   protected void stop(ServerLevel level, CivilizedVillager entity, long gameTime) {
+   protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.stop(level, villager, gameTime);
       LOGGER.info("Villager stopped offloading resources.");
    }
 
@@ -92,37 +92,35 @@ public class OffloadResourcesAtHome extends Behavior<CivilizedVillager> {
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
 
-      if (offloaded)
-         return;
-
-      if (!travelHelper.isJourneySuccessful())
+      if (!travelHelper.isJourneySuccessful()) {
          travelHelper.walkToPoi(tickTime);
-
-      BlockPos chestPos = chestsAtHome.getFirst().getBlockPos();
-      // try walk to first chest
-      if (!villager.blockPosition().closerThan(chestPos, 2)) {
-         if (!villager.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(chestPos, 0.4f, 1));
-         }
          return;
       }
 
-      for (int i = 0; i < villager.getInventory().getContainerSize(); i++) {
+      transferInventoryToChests(villager.getWorkOutputInventory());
+      transferInventoryToChests(villager.getWorkInputInventory());
 
-         ItemStack item = villager.getInventory().getItem(i);
+      offloaded = true;
+      villager.getBrain().eraseMemory(AIRegistry.MM_CAN_OFFLOAD.get());
+      villager.getBrain().eraseMemory(AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get());
+   }
+
+   private void transferInventoryToChests(Container inventory) {
+      for (int i = 0; i < inventory.getContainerSize(); i++) {
+
+         ItemStack item = inventory.getItem(i);
+         if (item.isEmpty())
+            continue;
 
          for (var chest : chestsAtHome) {
             // try to add item to chest
             ItemStack remainder = ContainerHelper.addItemNicely(chest, item);
-            villager.getInventory().removeItem(i, item.getCount() - remainder.getCount());
+            inventory.removeItem(i, item.getCount() - remainder.getCount());
 
             // if there is no remainder, we successfully inserted the stack
             if (remainder.isEmpty())
                break;
          }
       }
-
-      offloaded = true;
-      villager.getBrain().eraseMemory(AIRegistry.MM_CAN_OFFLOAD.get());
    }
 }

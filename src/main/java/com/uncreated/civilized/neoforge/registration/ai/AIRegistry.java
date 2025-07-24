@@ -37,8 +37,12 @@ public class AIRegistry {
    public static final Supplier<MemoryModuleType<VillagerOccupation>> MM_VILLAGER_WORKTIME_OCCUPATION =
          MEMORY_MODULES
                .register("villager_worktime_occupation_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_HAS_NON_IDLE_WORK_TASK =
+           MEMORY_MODULES.register("has_non_idle_work_task_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
    public static final Supplier<MemoryModuleType<Boolean>> MM_CAN_OFFLOAD =
          MEMORY_MODULES.register("can_offload_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_HAS_RESOURCES_FOR_WORK =
+         MEMORY_MODULES.register("has_resources_for_work_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
    public static final Supplier<MemoryModuleType<Player>> MM_DIALOGUE_TARGET =
          MEMORY_MODULES.register("dialogue_target_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
 

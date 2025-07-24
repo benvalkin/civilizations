@@ -1,0 +1,124 @@
+package com.uncreated.civilized.entity.behaviour;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+
+import com.google.common.collect.ImmutableMap;
+import com.mojang.logging.LogUtils;
+import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
+import net.minecraft.world.phys.Vec3;
+
+public class IdleStrollAroundSettlement extends Behavior<CivilizedVillager> {
+   public static final Logger LOGGER = LogUtils.getLogger();
+   private final int maxHorizontalDist;
+   private final int maxVerticalDist;
+   private final float speedModifier;
+   private long nextStrolTime;
+   private List<Building> settlementBuildings;
+   private Building home;
+
+   public IdleStrollAroundSettlement(int maxHorizontalDist, int maxVerticalDist, float strollSpeedModifier) {
+      super(
+            ImmutableMap.of(
+                  MemoryModuleType.LOOK_TARGET,
+                  MemoryStatus.VALUE_ABSENT,
+                  MemoryModuleType.WALK_TARGET,
+                  MemoryStatus.VALUE_ABSENT,
+                  AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(),
+                  MemoryStatus.VALUE_ABSENT,
+                  MemoryModuleType.JOB_SITE,
+                  MemoryStatus.VALUE_ABSENT),
+            20 * 5,
+            20 * 15);
+      this.maxHorizontalDist = maxHorizontalDist;
+      this.maxVerticalDist = maxVerticalDist;
+      this.speedModifier = strollSpeedModifier;
+   }
+
+   @Override
+   protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
+      return true;
+   }
+
+   @Override
+   protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      nextStrolTime = gameTime;
+      settlementBuildings = ServerBuildingsStore.INSTANCE.findForSettlement(villager.getInfo().getSettlementId());
+      home = ServerBuildingsStore.INSTANCE.find(villager.getInfo().getHomeBuildingId()).orElse(null);
+   }
+
+   @Override
+   protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
+
+   }
+
+   @Override
+   protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      return villager.getBrain().checkMemory(AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(), MemoryStatus.VALUE_ABSENT);
+   }
+
+   @Override
+   protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
+
+      if (tickTime >= nextStrolTime) {
+         nextStrolTime += villager.getRandom().nextInt(4 * 20, 12 * 20);
+
+         Vec3 wanderPos;
+         if (villager.getInfo().getSettlementId() == null) {
+            // if villager has no settlement, try to make them stay near their home (usually an Inn)
+            if (home != null)
+               wanderPos =
+                     DefaultRandomPos.getPosTowards(
+                           villager,
+                           maxHorizontalDist,
+                           maxVerticalDist,
+                           home.getBlockPos().getBottomCenter(),
+                           (float) Math.PI / 2F);
+            else // if no home available, wander without boundaries
+               wanderPos = LandRandomPos.getPos(villager, maxHorizontalDist, maxVerticalDist);
+         } else {
+            Optional<Building> nearbyBuilding =
+                  settlementBuildings.stream()
+                        .filter(b -> b.getBlockPos().closerThan(villager.blockPosition(), maxHorizontalDist))
+                        .findFirst();
+
+            if (nearbyBuilding.isPresent()) {
+               // if the villager is already nearby a building, let them wander normally
+               wanderPos = LandRandomPos.getPos(villager, maxHorizontalDist, maxVerticalDist);
+            } else {
+               // otherwise, try to wander back to this villager's settlement if possible
+               Optional<Building> someBuildingInSettlement = settlementBuildings.stream().findFirst();
+
+               if (someBuildingInSettlement.isPresent())
+                  wanderPos =
+                        DefaultRandomPos.getPosTowards(
+                              villager,
+                              maxHorizontalDist,
+                              maxVerticalDist,
+                              someBuildingInSettlement.get().getBlockPos().getBottomCenter(),
+                              (double) ((float) Math.PI / 2F));
+               else // if no home available, wander without boundaries
+                  wanderPos = LandRandomPos.getPos(villager, maxHorizontalDist, maxVerticalDist);
+            }
+         }
+
+         if (wanderPos != null)
+            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(wanderPos, speedModifier, 2));
+         else
+            villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+      }
+   }
+}

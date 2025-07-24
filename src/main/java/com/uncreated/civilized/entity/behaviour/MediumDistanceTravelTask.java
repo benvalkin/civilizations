@@ -45,9 +45,15 @@ public class MediumDistanceTravelTask {
       this.globalPos = villager.getBrain().getMemory(finalDestination).orElseThrow();
    }
 
-   public MediumDistanceTravelTask(CivilizedVillager villager,
-                                   MemoryModuleType<GlobalPos> finalDestination) {
-      this(villager, finalDestination, 0.4f, 1, 300, 1500);
+   public MediumDistanceTravelTask(CivilizedVillager villager, MemoryModuleType<GlobalPos> finalDestination) {
+      this(villager, finalDestination, 0.4f, 2, 300, 1500);
+   }
+
+   public MediumDistanceTravelTask(
+         CivilizedVillager villager,
+         MemoryModuleType<GlobalPos> finalDestination,
+         int closeEnoughDistance) {
+      this(villager, finalDestination, 0.4f, closeEnoughDistance, 300, 1500);
    }
 
    protected Level getServerLevel() {
@@ -55,7 +61,7 @@ public class MediumDistanceTravelTask {
    }
 
    protected boolean closeEnoughToPoi() {
-      return globalPos.pos().distManhattan(villager.blockPosition()) > closeEnoughDistance;
+      return globalPos.pos().distManhattan(villager.blockPosition()) <= closeEnoughDistance;
    }
 
    public void walkToPoi(long gameTicks) {
@@ -99,7 +105,7 @@ public class MediumDistanceTravelTask {
                   .setMemory(
                         MemoryModuleType.WALK_TARGET,
                         new WalkTarget(nextIntermediatePos, speedModifier, closeEnoughDistance));
-         } else if (closeEnoughToPoi()) {
+         } else if (!closeEnoughToPoi()) {
             villager.getBrain()
                   .setMemory(
                         MemoryModuleType.WALK_TARGET,

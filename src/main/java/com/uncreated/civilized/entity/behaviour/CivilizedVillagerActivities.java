@@ -83,7 +83,7 @@ public class CivilizedVillagerActivities {
                                     InteractWith
                                           .of(EntityType.CAT, 8, MemoryModuleType.INTERACTION_TARGET, speedModifier, 2),
                                     1),
-                              Pair.of(SettlementBoundRandomStroll.create(speedModifier), 1),
+                              Pair.of(new IdleStrollAroundSettlement(5, 3, 0.25f), 2),
                               Pair.of(SetWalkTargetFromLookTarget.create(speedModifier, 2), 1),
                               // Pair.of(new JumpOnBed(speedModifier), 1),
                               Pair.of(new DoNothing(30, 60), 1)))),

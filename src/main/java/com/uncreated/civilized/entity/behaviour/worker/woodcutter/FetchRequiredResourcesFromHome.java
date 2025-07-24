@@ -1,7 +1,6 @@
 package com.uncreated.civilized.entity.behaviour.worker.woodcutter;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 
@@ -11,18 +10,17 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
+import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.util.ContainerHelper;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
-public class FetchRequiredResourcesFromHome extends Behavior<CivilizedVillager> {
+public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
 
    private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -37,75 +35,61 @@ public class FetchRequiredResourcesFromHome extends Behavior<CivilizedVillager> 
                   MemoryModuleType.LOOK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT),
-            20 * 30);
+                  MemoryStatus.VALUE_ABSENT,
+                  AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get(),
+                  MemoryStatus.VALUE_ABSENT));
    }
 
    @Override
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
 
-      Optional<Building> home = ServerBuildingsStore.INSTANCE.find(villager.getInfo().getHomeBuildingId());
-      if (home.isEmpty()) {
+      home = ServerBuildingsStore.INSTANCE.find(villager.getInfo().getHomeBuildingId()).orElse(null);
+      if (home == null) {
          return false;
       }
 
-      List<ChestBlockEntity> chestAtHome =
-            home.get()
-                  .getBounds()
+      chestsAtHome =
+            home.getBounds()
                   .getBlockEntitiesInsideBuilding(level)
                   .stream()
                   .filter(b -> b instanceof ChestBlockEntity)
                   .map(b -> (ChestBlockEntity) b)
                   .toList();
 
-      if (chestAtHome.isEmpty()) {
-         return false;
-      }
-
-      this.home = home.get();
-      this.chestsAtHome = chestAtHome;
-      return true;
+      return homeChestsHaveResources(chestsAtHome);
    }
 
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.start(level, villager, gameTime);
       LOGGER.info("Villager going to fetch resources.");
-      fetched = false;
+      done = false;
 
-      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.HOME);
+      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.HOME, 2);
    }
 
    @Override
-   protected void stop(ServerLevel level, CivilizedVillager entity, long gameTime) {
+   protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.stop(level, villager, gameTime);
       LOGGER.info("Villager stopped fetching resources.");
    }
 
    @Override
    protected boolean canStillUse(ServerLevel level, CivilizedVillager entity, long gameTime) {
-      return !fetched;
+      return !done;
    }
 
-   private boolean fetched = false;
+   private boolean done = false;
 
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
 
-      if (fetched)
-         return;
-
-      if (!travelHelper.isJourneySuccessful())
+      if (!travelHelper.isJourneySuccessful()) {
          travelHelper.walkToPoi(tickTime);
-
-      BlockPos chestPos = chestsAtHome.getFirst().getBlockPos();
-      // try walk to first chest
-      if (!villager.blockPosition().closerThan(chestPos, 2)) {
-         if (!villager.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(chestPos, 0.4f, 1));
-         }
          return;
       }
 
-      int transferQuota = 64;
+      int transferQuota = 16;
       int successfullyTransfered = 0;
 
       for (var chest : chestsAtHome) {
@@ -121,6 +105,19 @@ public class FetchRequiredResourcesFromHome extends Behavior<CivilizedVillager> 
             break;
       }
 
-      fetched = true;
+      if (successfullyTransfered > 0)
+         villager.getBrain().setMemory(AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get(), true);
+      else
+         villager.getBrain().setMemory(AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get(), false);
+
+      done = true;
+   }
+
+   private boolean homeChestsHaveResources(List<ChestBlockEntity> chestsAtHome) {
+      for (var chest : chestsAtHome) {
+         if (chest.hasAnyMatching(i -> i.is(ItemTags.SAPLINGS)))
+            return true;
+      }
+      return false;
    }
 }

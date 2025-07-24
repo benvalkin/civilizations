@@ -3,12 +3,14 @@ package com.uncreated.civilized.entity.behaviour.worker.farmer;
 import java.util.List;
 import java.util.Optional;
 
+import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.core.BlockPos;
@@ -16,7 +18,6 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -28,12 +29,13 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class HarvestCrops extends Behavior<CivilizedVillager> {
+public class HarvestCrops extends WorkTaskBehaviour {
    public static final Logger LOGGER = LogUtils.getLogger();
    private long lastWorkTime;
    private final List<BlockPos> farmland = Lists.newArrayList();
    private final List<BlockPos> maturesCrops = Lists.newArrayList();
    private BlockPos cropFieldCenter;
+   private MediumDistanceTravelTask travelHelper;
 
    public HarvestCrops() {
       super(
@@ -43,8 +45,7 @@ public class HarvestCrops extends Behavior<CivilizedVillager> {
                   MemoryModuleType.WALK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT),
-            20 * 120);
+                  MemoryStatus.VALUE_PRESENT));
    }
 
    @Override
@@ -63,11 +64,14 @@ public class HarvestCrops extends Behavior<CivilizedVillager> {
 
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.start(level, villager, gameTime);
+      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.JOB_SITE, 5);
       LOGGER.info("Villager started harvesting crops.");
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager entity, long gameTime) {
+      super.stop(level, entity, gameTime);
       LOGGER.info("Villager stopped harvesting crops.");
    }
 
@@ -90,6 +94,11 @@ public class HarvestCrops extends Behavior<CivilizedVillager> {
 
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
+
+      if (!travelHelper.isJourneySuccessful()) {
+         travelHelper.walkToPoi(tickTime);
+         return;
+      }
 
       if (tickTime - lastWorkTime > 25) {
 
