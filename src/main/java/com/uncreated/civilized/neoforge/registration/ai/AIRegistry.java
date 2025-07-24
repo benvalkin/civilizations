@@ -39,7 +39,6 @@ public class AIRegistry {
                .register("villager_worktime_occupation_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
    public static final Supplier<MemoryModuleType<Boolean>> MM_CAN_OFFLOAD =
          MEMORY_MODULES.register("can_offload_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
-
    public static final Supplier<MemoryModuleType<Player>> MM_DIALOGUE_TARGET =
          MEMORY_MODULES.register("dialogue_target_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
 

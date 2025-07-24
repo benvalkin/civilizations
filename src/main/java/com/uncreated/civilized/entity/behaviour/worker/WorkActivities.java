@@ -12,6 +12,7 @@ import com.uncreated.civilized.entity.behaviour.SettlementBoundRandomStroll;
 import com.uncreated.civilized.entity.behaviour.UpdateActivityFromSchedule;
 import com.uncreated.civilized.entity.behaviour.worker.farmer.HarvestCrops;
 import com.uncreated.civilized.entity.behaviour.worker.woodcutter.CutDownTrees;
+import com.uncreated.civilized.entity.behaviour.worker.woodcutter.ReplantSaplings;
 
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
@@ -48,9 +49,8 @@ public class WorkActivities {
                               // if cannot perform main work tasks, stroll around the job site.
                               Pair.of(StrollAroundPoi.create(MemoryModuleType.JOB_SITE, 0.25F, 4), 6),
                               Pair.of(SettlementBoundRandomStroll.create(0.25F), 7),
-                              Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 1),
-                              // Pair.of(new JumpOnBed(speedModifier), 1),
-                              Pair.of(new DoNothing(30, 60), 1)))),
+                              Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 8),
+                              Pair.of(new DoNothing(30, 60), 9)))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 
@@ -66,13 +66,13 @@ public class WorkActivities {
                                     MediumDistanceTravelOnceOff.create(MemoryModuleType.JOB_SITE, 0.4f, 5, 300, 1500),
                                     3),
                               Pair.of(new CutDownTrees(), 4),
-                              Pair.of(new OffloadResourcesAtHome(), 5),
+                              Pair.of(new ReplantSaplings(), 5),
+                              Pair.of(new OffloadResourcesAtHome(), 6),
                               // if cannot perform main work tasks, stroll around the job site.
-                              Pair.of(StrollAroundPoi.create(MemoryModuleType.JOB_SITE, 0.25F, 4), 6),
-                              Pair.of(SettlementBoundRandomStroll.create(0.25F), 7),
-                              Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 1),
-                              // Pair.of(new JumpOnBed(speedModifier), 1),
-                              Pair.of(new DoNothing(30, 60), 1)))),
+                              Pair.of(StrollAroundPoi.create(MemoryModuleType.JOB_SITE, 0.25F, 4), 7),
+                              Pair.of(SettlementBoundRandomStroll.create(0.25F), 8),
+                              Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 9),
+                              Pair.of(new DoNothing(30, 60), 10)))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 }

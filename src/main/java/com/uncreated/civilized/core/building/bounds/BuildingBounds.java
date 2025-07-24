@@ -79,6 +79,21 @@ public class BuildingBounds {
       }
    }
 
+   public void traverseBlocksWithinTerminateYChecksIfCanSeeSky(Consumer<BlockPos> action, Level level) {
+      BlockPos.MutableBlockPos current = lowerCorner.mutable();
+
+      for (int x = lowerCorner.getX(); x <= upperCorner.getX(); x++) {
+         for (int z = lowerCorner.getZ(); z <= upperCorner.getZ(); z++) {
+            for (int y = lowerCorner.getY(); y <= upperCorner.getY(); y++) {
+               action.accept(current.set(x, y, z));
+
+               if (level.canSeeSky(current))
+                  break;
+            }
+         }
+      }
+   }
+
    public void traverseBaseRectangleBlocks(Consumer<BlockPos> action, int y) {
       BlockPos.MutableBlockPos current = lowerCorner.mutable();
       for (int x = lowerCorner.getX(); x <= upperCorner.getY(); x++) {

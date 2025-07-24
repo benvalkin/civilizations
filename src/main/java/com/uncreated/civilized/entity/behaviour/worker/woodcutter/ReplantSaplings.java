@@ -11,12 +11,14 @@ import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
@@ -25,16 +27,16 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class CutDownTrees extends Behavior<CivilizedVillager> {
+public class ReplantSaplings extends Behavior<CivilizedVillager> {
    public static final Logger LOGGER = LogUtils.getLogger();
    private long lastWorkTime;
-   private final List<BlockPos> logsToHarvest = Lists.newArrayList();
-   private final List<BlockPos> leavesToHarvest = Lists.newArrayList();
+   private final List<BlockPos> validPlantingBlocks = Lists.newArrayList();
    private Building workSite;
 
-   public CutDownTrees() {
+   public ReplantSaplings() {
       super(
             ImmutableMap.of(
                   MemoryModuleType.LOOK_TARGET,
@@ -43,21 +45,21 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
                   MemoryStatus.VALUE_PRESENT),
-            20 * 120);
+            20 * 2);
    }
 
    @Override
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
 
       Optional<GlobalPos> jobSiteBlockPos = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
-      if (jobSiteBlockPos.isEmpty()) {
+      if (jobSiteBlockPos.isEmpty() || !jobSiteBlockPos.get().pos().closerThan(villager.blockPosition(), 6)) {
          return false;
       }
 
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
 
-      findBlocksToHarvest(level);
-      return !logsToHarvest.isEmpty(); // only start when there are logs to harvest (not leaves)
+      findValidPlantingBlocks(level);
+      return !validPlantingBlocks.isEmpty(); // only start when it is possible to replant saplings
    }
 
    @Override
@@ -66,7 +68,6 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
-
    }
 
    @Override
@@ -75,27 +76,23 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
       Optional<GlobalPos> optional = entity.getBrain().getMemory(MemoryModuleType.JOB_SITE);
       if (optional.isEmpty()) {
          return false;
-      } else if (logsToHarvest.isEmpty() && leavesToHarvest.isEmpty()) {
+      } else if (validPlantingBlocks.isEmpty()) {
          return false;
       }
 
       return true;
    }
 
-   private int toolHits = 0;
-
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
 
-      if (tickTime - lastWorkTime > 6) {
+      if (tickTime - lastWorkTime > 15) {
 
          lastWorkTime = tickTime;
 
-         findBlocksToHarvest(level);
+         findValidPlantingBlocks(level);
 
-         Optional<BlockPos> blockPos = logsToHarvest.stream().findFirst();
-         if (blockPos.isEmpty())
-            blockPos = leavesToHarvest.stream().findFirst();;
+         Optional<BlockPos> blockPos = validPlantingBlocks.stream().findFirst();
          if (blockPos.isEmpty())
             return;
 
@@ -104,58 +101,55 @@ public class CutDownTrees extends Behavior<CivilizedVillager> {
          villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, 0.25f, 3));
          villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(pos));
 
-         toolHits++;
          villager.swing(InteractionHand.MAIN_HAND, true);
 
-         BlockState blockState = level.getBlockState(pos);
-         int requiredToolHits = blockState.getTags().anyMatch(t -> t.equals(BlockTags.LOGS)) ? 14 : 4;
+         Optional<ItemStack> saplingStack = getSaplingsInInventory(villager);
+         if (saplingStack.isEmpty())
+            return;
 
-         if (toolHits == requiredToolHits) {
-            List<ItemStack> drops = Block.getDrops(blockState, level, pos, null);
-            drops.forEach(i -> villager.getInventory().addItem(i));
+         SaplingBlock saplingBlock = (SaplingBlock) Block.byItem(saplingStack.get().getItem());
 
-            level.destroyBlock(pos, false);
-            toolHits = 0;
+         level.setBlockAndUpdate(pos, saplingBlock.defaultBlockState());
+         villager.playSound(SoundEvents.CROP_BREAK, 1.0f, 1.0f);
 
-            villager.getBrain().setMemory(AIRegistry.MM_CAN_OFFLOAD.get(), true);
-         }
+         villager.getInventory().removeItemType(saplingStack.get().getItem(), 1);
       }
    }
 
-   private void findBlocksToHarvest(ServerLevel serverLevel) {
+   private void findValidPlantingBlocks(ServerLevel serverLevel) {
+
       BlockPos.MutableBlockPos current = workSite.getBlockPos().mutable();
-      logsToHarvest.clear();
-      leavesToHarvest.clear();
+      validPlantingBlocks.clear();
 
       BlockPos lowerCorner = workSite.getBounds().getLowerCorner();
       BlockPos upperCorner = workSite.getBounds().getUpperCorner();
-      int yStart = workSite.getBounds().getCenter().getY() - 2;
-      int yEnd = workSite.getBounds().getCenter().getY() + 40;
 
-      for (int x = lowerCorner.getX(); x <= upperCorner.getX(); x++) {
-         for (int z = lowerCorner.getZ(); z <= upperCorner.getZ(); z++) {
-            for (int y = yStart; y <= yEnd; y++) {
+      int plantingXZMargin = 3;
+      for (int x = lowerCorner.getX() + plantingXZMargin; x <= upperCorner.getX() - plantingXZMargin; x++) {
+         for (int z = lowerCorner.getZ() + plantingXZMargin; z <= upperCorner.getZ() - plantingXZMargin; z++) {
+            for (int y = lowerCorner.getY(); y <= upperCorner.getY(); y++) {
                current.set(x, y, z);
 
-               BlockState block = serverLevel.getBlockState(current);
-               if (isLog(block)) {
-                  logsToHarvest.add(current.immutable());
-               } else if (isLeaves(block)) {
-                  leavesToHarvest.add(current.immutable());
-               }
+               BlockState currentState = serverLevel.getBlockState(current);
+               if (isValidPlantingBlock(currentState)) {
+                  BlockPos above = current.move(Direction.UP);
+                  BlockState aboveState = serverLevel.getBlockState(above);
+                  if (!aboveState.isEmpty())
+                     continue;
 
-               if (serverLevel.canSeeSky(current))
-                  break;
+                  validPlantingBlocks.add(above);
+                  return;
+               }
             }
          }
       }
    }
 
-   private boolean isLog(BlockState blockState) {
-      return blockState.getTags().anyMatch(t -> t.equals(BlockTags.LOGS));
+   private boolean isValidPlantingBlock(BlockState blockState) {
+      return blockState.getTags().anyMatch(t -> t.equals(BlockTags.DIRT));
    }
 
-   private boolean isLeaves(BlockState blockState) {
-      return blockState.getTags().anyMatch(t -> t.equals(BlockTags.LEAVES));
+   private Optional<ItemStack> getSaplingsInInventory(CivilizedVillager villager) {
+      return villager.getInventory().getItems().stream().filter(f -> f.is(ItemTags.SAPLINGS)).findFirst();
    }
 }
