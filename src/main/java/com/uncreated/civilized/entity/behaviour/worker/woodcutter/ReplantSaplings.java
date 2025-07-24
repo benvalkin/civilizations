@@ -45,7 +45,7 @@ public class ReplantSaplings extends Behavior<CivilizedVillager> {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
                   MemoryStatus.VALUE_PRESENT),
-            20 * 2);
+            20 * 30);
    }
 
    @Override
@@ -101,11 +101,11 @@ public class ReplantSaplings extends Behavior<CivilizedVillager> {
          villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, 0.25f, 3));
          villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(pos));
 
-         villager.swing(InteractionHand.MAIN_HAND, true);
-
          Optional<ItemStack> saplingStack = getSaplingsInInventory(villager);
          if (saplingStack.isEmpty())
             return;
+
+         villager.swing(InteractionHand.MAIN_HAND, true);
 
          SaplingBlock saplingBlock = (SaplingBlock) Block.byItem(saplingStack.get().getItem());
 
@@ -150,6 +150,6 @@ public class ReplantSaplings extends Behavior<CivilizedVillager> {
    }
 
    private Optional<ItemStack> getSaplingsInInventory(CivilizedVillager villager) {
-      return villager.getInventory().getItems().stream().filter(f -> f.is(ItemTags.SAPLINGS)).findFirst();
+      return villager.getWorkInputInventory().getItems().stream().filter(f -> f.is(ItemTags.SAPLINGS)).findFirst();
    }
 }

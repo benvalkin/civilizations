@@ -12,12 +12,12 @@ import com.uncreated.civilized.entity.behaviour.SettlementBoundRandomStroll;
 import com.uncreated.civilized.entity.behaviour.UpdateActivityFromSchedule;
 import com.uncreated.civilized.entity.behaviour.worker.farmer.HarvestCrops;
 import com.uncreated.civilized.entity.behaviour.worker.woodcutter.CutDownTrees;
+import com.uncreated.civilized.entity.behaviour.worker.woodcutter.FetchRequiredResourcesFromHome;
 import com.uncreated.civilized.entity.behaviour.worker.woodcutter.ReplantSaplings;
 
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.RunOne;
-import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StrollAroundPoi;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
@@ -49,7 +49,7 @@ public class WorkActivities {
                               // if cannot perform main work tasks, stroll around the job site.
                               Pair.of(StrollAroundPoi.create(MemoryModuleType.JOB_SITE, 0.25F, 4), 6),
                               Pair.of(SettlementBoundRandomStroll.create(0.25F), 7),
-                              Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 8),
+                              // Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 8),
                               Pair.of(new DoNothing(30, 60), 9)))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
@@ -61,18 +61,21 @@ public class WorkActivities {
                   1,
                   new RunOne<>(
                         ImmutableList.of(
+                              Pair.of(new FetchRequiredResourcesFromHome(), 3),
                               // go to work. closeEnoughDist should +1 more StrollAroundPoi's maxDistFromPoi.
                               Pair.of(
                                     MediumDistanceTravelOnceOff.create(MemoryModuleType.JOB_SITE, 0.4f, 5, 300, 1500),
-                                    3),
-                              Pair.of(new CutDownTrees(), 4),
-                              Pair.of(new ReplantSaplings(), 5),
-                              Pair.of(new OffloadResourcesAtHome(), 6),
-                              // if cannot perform main work tasks, stroll around the job site.
-                              Pair.of(StrollAroundPoi.create(MemoryModuleType.JOB_SITE, 0.25F, 4), 7),
-                              Pair.of(SettlementBoundRandomStroll.create(0.25F), 8),
-                              Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 9),
-                              Pair.of(new DoNothing(30, 60), 10)))),
+                                    4),
+                              Pair.of(new CutDownTrees(), 5),
+                              Pair.of(new ReplantSaplings(), 6),
+                              Pair.of(new OffloadResourcesAtHome(), 7)
+                        // ,
+                        // // if cannot perform main work tasks, stroll around the job site.
+                        // Pair.of(StrollAroundPoi.create(MemoryModuleType.JOB_SITE, 0.25F, 4), 8),
+                        // Pair.of(SettlementBoundRandomStroll.create(0.25F), 9),
+                        // // Pair.of(SetWalkTargetFromLookTarget.create(0.25F, 2), 10),
+                        // Pair.of(new DoNothing(30, 60), 11)
+                        ))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 }

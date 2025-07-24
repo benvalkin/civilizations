@@ -33,6 +33,7 @@ import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -73,7 +74,8 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    @Getter
    private DialogueController dialogueController = DialogueController.noDialogue();
 
-   private final SimpleContainer inventory = new SimpleContainer(8);
+   private final SimpleContainer workInputInventory = new SimpleContainer(8);
+   private final SimpleContainer workOutputInventory = new SimpleContainer(8);
 
    private long lifetimeSeed;
 
@@ -143,6 +145,21 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       buf.writeLong(lifetimeSeed);
    }
 
+   public void readInventoryFromTag(CompoundTag tag, HolderLookup.Provider levelRegistry) {
+      if (tag.contains("Inventory", 9)) {
+         workOutputInventory.fromTag(tag.getList("Inventory", 10), levelRegistry);
+      }
+      if (tag.contains("WorkInput", 9)) {
+         workInputInventory.fromTag(tag.getList("WorkInput", 10), levelRegistry);
+      }
+
+   }
+
+   public void writeInventoryToTag(CompoundTag tag, HolderLookup.Provider levelRegistry) {
+      tag.put("Inventory", workOutputInventory.createTag(levelRegistry));
+      tag.put("WorkInput", workInputInventory.createTag(levelRegistry));
+   }
+
    @Getter
    private ResourceLocation skin = SkinTextureRegistry.FALLBACK;
    @Getter
@@ -179,7 +196,15 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    @Override
    public @NotNull SimpleContainer getInventory() {
-      return inventory;
+      return workOutputInventory;
+   }
+
+   public @NotNull SimpleContainer getWorkInputInventory() {
+      return workInputInventory;
+   }
+
+   public @NotNull SimpleContainer getWorkOutputInventory() {
+      return workOutputInventory;
    }
 
    @Override
