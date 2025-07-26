@@ -50,6 +50,7 @@ public enum BuildingType {
       return switch (this) {
       case FARMER_HOUSE, CROP_FARM -> VillagerOccupation.FARMER;
       case WOODCUTTER_HOUSE, GROVE -> VillagerOccupation.WOODCUTTER;
+      case MINER_HOUSE, MINE -> VillagerOccupation.MINER;
       default -> VillagerOccupation.UNEMPLOYED;
       };
    }

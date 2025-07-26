@@ -87,7 +87,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
       this.getNavigation().setCanFloat(true);
       this.getNavigation().setRequiredPathLength(48.0F);
-      this.setCanPickUpLoot(true);
+      // this.setCanPickUpLoot(true);
       this.lifetimeRandom = RandomSource.create();
    }
 

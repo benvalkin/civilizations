@@ -44,13 +44,16 @@ public class SurfaceAreaRequirement implements IBuildingRequirement {
       public Component getDescription() {
          int numberToDisplay = Math.clamp(actualArea, 0, requiredArea);
          return Component
-               .translatable("menu.building.management.requirements.surface_area.description", numberToDisplay)
+               .translatable(
+                     "menu.building.management.requirements.surface_area.description",
+                     numberToDisplay,
+                     requiredArea)
                .withColor(Colors.MENU_TEXT_DARK);
       }
 
       @Override
       public Component getTooltipDescription() {
-         return Component.translatable("menu.building.management.requirements.surface_area.tooltip", actualArea);
+         return Component.translatable("menu.building.management.requirements.surface_area.tooltip", requiredArea);
       }
    }
 }

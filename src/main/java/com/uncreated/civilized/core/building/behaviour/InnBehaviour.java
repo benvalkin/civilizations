@@ -8,7 +8,6 @@ import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerNpcRole;
-import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 import com.uncreated.civilized.util.random.DailyEventScheduler;
@@ -57,7 +56,6 @@ public class InnBehaviour extends BuildingBehaviour {
             VISITOR_ROLES.getRandomValue(villager.getRandom()).orElse(VillagerNpcRole.TRAVELLER);
       villager.getInfo().getNpcRoles().add(visitorRole);
       villager.getInfo().setHomeBuildingId(building.getBuildingId());
-      villager.getInfo().setOccupation(VillagerOccupation.TRAVELLER);
       ServerVillagerStore.INSTANCE.setDirty();
       ServerVillagerStore.INSTANCE.replicateChange(villager.getInfo(), StoreOperation.UPDATE);
 

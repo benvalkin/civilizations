@@ -99,6 +99,26 @@ public class BuildingRequirementRegistry {
 
          registerRequirements(
                registry,
+               BuildingRequirementList.forBuilding(BuildingType.MINER_HOUSE, 1)
+                     .add(new SpaceRequirement(20))
+                     .add(new EnclosedWallsRequirement())
+                     .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
+                     .add(new ChestsPresentRequirement(1, false))
+                     .add(new SignsPresentRequirement(1, false))
+                     .create());
+
+         registerRequirements(
+               registry,
+               BuildingRequirementList.forBuilding(BuildingType.MINER_HOUSE, 2)
+                     .add(new SpaceRequirement(30))
+                     .add(new EnclosedWallsRequirement())
+                     .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
+                     .add(new ChestsPresentRequirement(1, false))
+                     .add(new SignsPresentRequirement(1, false))
+                     .create());
+
+         registerRequirements(
+               registry,
                BuildingRequirementList.forBuilding(BuildingType.CROP_FARM, 1)
                      .add(new SurfaceAreaRequirement(40))
                      .add(new SignsPresentRequirement(1, false))
@@ -108,6 +128,13 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.GROVE, 1)
                      .add(new SurfaceAreaRequirement(80))
+                     .add(new SignsPresentRequirement(1, false))
+                     .create());
+
+         registerRequirements(
+               registry,
+               BuildingRequirementList.forBuilding(BuildingType.MINE, 1)
+                     .add(new SurfaceAreaRequirement(9))
                      .add(new SignsPresentRequirement(1, false))
                      .create());
       });

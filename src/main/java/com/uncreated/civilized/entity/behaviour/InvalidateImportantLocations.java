@@ -132,6 +132,8 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
          worksiteType = BuildingType.CROP_FARM;
       } else if (villagerInfo.getOccupation() == VillagerOccupation.WOODCUTTER) {
          worksiteType = BuildingType.GROVE;
+      } else if (villagerInfo.getOccupation() == VillagerOccupation.MINER) {
+         worksiteType = BuildingType.MINE;
       } else
          worksiteType = BuildingType.CROP_FARM;
 
