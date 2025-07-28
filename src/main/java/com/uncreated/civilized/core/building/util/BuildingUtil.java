@@ -6,6 +6,7 @@ import static com.uncreated.civilized.ui.menu.building.worksite.residence.tabs.M
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -67,14 +68,14 @@ public class BuildingUtil {
 
    public static Optional<Building> findUnoccupiedWorksite(
          UUID settlementId,
-         BuildingType requiredBuildingType,
+         Predicate<BuildingType> filter,
          BuildingStore buildingStore,
          VillagerStore villagerStore) {
 
       return buildingStore.all()
             .stream()
             .filter(
-                  b -> b.getSettlementId().equals(settlementId) && b.getBuildingType() == requiredBuildingType
+                  b -> b.getSettlementId().equals(settlementId) && filter.test(b.getBuildingType())
                         && !isWorksiteFull(b, villagerStore))
             .findFirst();
    }

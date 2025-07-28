@@ -51,6 +51,7 @@ public enum BuildingType {
       case FARMER_HOUSE, CROP_FARM -> VillagerOccupation.FARMER;
       case WOODCUTTER_HOUSE, GROVE -> VillagerOccupation.WOODCUTTER;
       case MINER_HOUSE, MINE -> VillagerOccupation.MINER;
+         case RANCHER_HOUSE, CATTLE_FARM, CHICKEN_FARM, SHEEP_FARM, HOG_FARM -> VillagerOccupation.RANCHER;
       default -> VillagerOccupation.UNEMPLOYED;
       };
    }

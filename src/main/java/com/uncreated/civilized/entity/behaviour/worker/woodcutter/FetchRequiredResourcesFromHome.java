@@ -1,6 +1,7 @@
 package com.uncreated.civilized.entity.behaviour.worker.woodcutter;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 
@@ -15,21 +16,21 @@ import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.util.ContainerHelper;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
 
    private static final Logger LOGGER = LogUtils.getLogger();
+   private final Predicate<ItemStack> itemSearch;
 
-   private Building storehouse;
    private Building home;
    private List<ChestBlockEntity> chestsAtHome;
    private MediumDistanceTravelTask travelHelper;
 
-   public FetchRequiredResourcesFromHome() {
+   public FetchRequiredResourcesFromHome(Predicate<ItemStack> itemSearch) {
       super(
             ImmutableMap.of(
                   MemoryModuleType.LOOK_TARGET,
@@ -38,6 +39,7 @@ public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
                   MemoryStatus.VALUE_ABSENT,
                   AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get(),
                   MemoryStatus.VALUE_ABSENT));
+      this.itemSearch = itemSearch;
    }
 
    @Override
@@ -65,7 +67,7 @@ public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
       LOGGER.info("Villager going to fetch resources.");
       done = false;
 
-      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.HOME, 2);
+      travelHelper = new MediumDistanceTravelTask(villager, villager.getBrain().getMemory(MemoryModuleType.HOME).orElseThrow().pos(), 2);
    }
 
    @Override
@@ -98,7 +100,7 @@ public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
                ContainerHelper.transferNicely(
                      chest,
                      villager.getWorkInputInventory(),
-                     i -> i.is(ItemTags.SAPLINGS),
+                     itemSearch,
                      transferQuota - successfullyTransfered);
 
          if (successfullyTransfered >= transferQuota)
@@ -115,7 +117,7 @@ public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
 
    private boolean homeChestsHaveResources(List<ChestBlockEntity> chestsAtHome) {
       for (var chest : chestsAtHome) {
-         if (chest.hasAnyMatching(i -> i.is(ItemTags.SAPLINGS)))
+         if (chest.hasAnyMatching(itemSearch))
             return true;
       }
       return false;

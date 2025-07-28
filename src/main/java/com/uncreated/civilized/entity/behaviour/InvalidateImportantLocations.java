@@ -2,6 +2,7 @@ package com.uncreated.civilized.entity.behaviour;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 
@@ -51,8 +52,10 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
          villager.getBrain()
                .setMemory(MemoryModuleType.HOME, new GlobalPos(level.dimension(), home.get().getBlockPos()));
 
-         if (villagerInfo.getOccupation() != VillagerOccupation.UNEMPLOYED) // take care not to make villagers think they can work if they are unemployed
-            villager.getBrain().setMemory(AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(), villagerInfo.getOccupation());
+         if (villagerInfo.getOccupation() != VillagerOccupation.UNEMPLOYED) // take care not to make villagers think
+                                                                            // they can work if they are unemployed
+            villager.getBrain()
+                  .setMemory(AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(), villagerInfo.getOccupation());
       } else {
          villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
          villager.getBrain().eraseMemory(MemoryModuleType.HOME);
@@ -127,19 +130,23 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       if (currentWorksite.isPresent())
          return currentWorksite;
 
-      BuildingType worksiteType;
+      Predicate<BuildingType> filter;
       if (villagerInfo.getOccupation() == VillagerOccupation.FARMER) {
-         worksiteType = BuildingType.CROP_FARM;
+         filter = b -> b == BuildingType.CROP_FARM;
       } else if (villagerInfo.getOccupation() == VillagerOccupation.WOODCUTTER) {
-         worksiteType = BuildingType.GROVE;
+         filter = b -> b == BuildingType.GROVE;
       } else if (villagerInfo.getOccupation() == VillagerOccupation.MINER) {
-         worksiteType = BuildingType.MINE;
+         filter = b -> b == BuildingType.MINE;
+      } else if (villagerInfo.getOccupation() == VillagerOccupation.RANCHER) {
+         filter =
+               b -> b == BuildingType.CATTLE_FARM || b == BuildingType.CHICKEN_FARM || b == BuildingType.SHEEP_FARM
+                     || b == BuildingType.HOG_FARM;
       } else
-         worksiteType = BuildingType.CROP_FARM;
+         return Optional.empty();
 
       return BuildingUtil.findUnoccupiedWorksite(
             villagerInfo.getSettlementId(),
-            worksiteType,
+            filter,
             ServerBuildingsStore.INSTANCE,
             ServerVillagerStore.INSTANCE);
    }

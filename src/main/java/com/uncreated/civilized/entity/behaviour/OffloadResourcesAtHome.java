@@ -73,7 +73,10 @@ public class OffloadResourcesAtHome extends WorkTaskBehaviour {
       LOGGER.info("Villager going to offload resources.");
       offloaded = false;
 
-      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.HOME, 3);
+      travelHelper =
+            new MediumDistanceTravelTask(
+                  villager,
+                  villager.getBrain().getMemory(MemoryModuleType.HOME).orElseThrow().pos(), 3);
    }
 
    @Override

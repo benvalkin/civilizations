@@ -61,7 +61,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
-      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.JOB_SITE, 5);
+      travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 5);
    }
 
    @Override

@@ -65,7 +65,7 @@ public class MineOres extends WorkTaskBehaviour {
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
       foundOres = false;
-      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.JOB_SITE, 2);
+      travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 2);
    }
 
    @Override
@@ -77,10 +77,9 @@ public class MineOres extends WorkTaskBehaviour {
 
    @Override
    protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
-      return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT);
+      return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT)
+            && villager.getBrain().checkMemory(AIRegistry.MM_CAN_OFFLOAD.get(), MemoryStatus.VALUE_ABSENT);
    }
-
-   private int toolHits = 0;
 
    private int applyWorkSpeedMultiplier(int requiredToolHits) {
       return requiredToolHits / workSpeedMultiplier;
@@ -94,21 +93,13 @@ public class MineOres extends WorkTaskBehaviour {
          return;
       }
 
-      if (gameTime - lastWorkTime > 30) {
+      if (gameTime - lastWorkTime > applyWorkSpeedMultiplier(30)) {
 
          lastWorkTime = gameTime;
 
-         toolHits++;
          villager.swing(InteractionHand.MAIN_HAND, true);
 
-         int requiredToolHits = 3;
-
-         if (toolHits >= applyWorkSpeedMultiplier(requiredToolHits)) {
-
-            mineOreVein(level, villager, gameTime);
-
-            toolHits = 0;
-         }
+         mineOreVein(level, villager, gameTime);
       }
    }
 

@@ -12,7 +12,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.InteractWith;
-import net.minecraft.world.entity.ai.behavior.InteractWithDoor;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RunOne;
@@ -49,7 +48,7 @@ public class CivilizedVillagerActivities {
       return ImmutableList.of(
             Pair.of(0, new MoveToTargetSink()),
             Pair.of(0, new Swim(0.8F)),
-            Pair.of(0, InteractWithDoor.create()),
+            Pair.of(0, InteractWithDoorAndGate.create()),
             Pair.of(0, new LookAtTargetSink(45, 90)),
             Pair.of(0, new InvalidateImportantLocations()));
    }

@@ -25,6 +25,7 @@ import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.entity.pathfinding.VillagerGroundPathNavigation;
 import com.uncreated.civilized.entity.stats.ClothingTextureRegistry;
 import com.uncreated.civilized.entity.stats.HairTextureRegistry;
 import com.uncreated.civilized.entity.stats.SkinTextureRegistry;
@@ -50,7 +51,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
@@ -84,7 +85,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    public CivilizedVillager(EntityType<? extends AgeableMob> entityType, Level level) {
       super(entityType, level);
-      ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
+      ((VillagerGroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
       this.getNavigation().setCanFloat(true);
       this.getNavigation().setRequiredPathLength(48.0F);
       // this.setCanPickUpLoot(true);
@@ -254,6 +255,11 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
          Minecraft.getInstance().setScreen(screen);
       }
       return InteractionResult.SUCCESS;
+   }
+
+   @Override
+   protected PathNavigation createNavigation(Level level) {
+      return new VillagerGroundPathNavigation(this, level);
    }
 
    @Override

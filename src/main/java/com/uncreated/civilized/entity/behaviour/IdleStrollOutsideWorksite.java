@@ -1,6 +1,5 @@
 package com.uncreated.civilized.entity.behaviour;
 
-import net.minecraft.core.GlobalPos;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -16,9 +15,10 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class IdleStrollAroundWorksite extends Behavior<CivilizedVillager> {
+public class IdleStrollOutsideWorksite extends Behavior<CivilizedVillager> {
    public static final Logger LOGGER = LogUtils.getLogger();
    private final int maxHorizontalDist;
    private final int maxVerticalDist;
@@ -27,7 +27,7 @@ public class IdleStrollAroundWorksite extends Behavior<CivilizedVillager> {
    private Building workSite;
    private MediumDistanceTravelTask travelHelper;
 
-   public IdleStrollAroundWorksite(int maxHorizontalDist, int maxVerticalDist, float strollSpeedModifier) {
+   public IdleStrollOutsideWorksite(int maxHorizontalDist, int maxVerticalDist, float strollSpeedModifier) {
       super(
             ImmutableMap.of(
                   MemoryModuleType.LOOK_TARGET,
@@ -53,7 +53,16 @@ public class IdleStrollAroundWorksite extends Behavior<CivilizedVillager> {
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       nextWorkTime = gameTime;
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
-      travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), maxHorizontalDist + 1);
+
+      AABB tooCloseBounds = workSite.getBounds().getEncapsulatingAABB();
+      AABB closeEnoughBounds = tooCloseBounds.inflate(4);
+
+      travelHelper =
+            new MediumDistanceTravelTask(
+                  villager,
+                  workSite.getBlockPos(),
+                  (v, d, closEnough) -> closeEnoughBounds.contains(v.position()),
+                  Math.max((int) closeEnoughBounds.getXsize() / 2, (int) closeEnoughBounds.getZsize() / 2));
    }
 
    @Override
@@ -69,20 +78,40 @@ public class IdleStrollAroundWorksite extends Behavior<CivilizedVillager> {
          return;
       }
 
+      AABB innerBounds = workSite.getBounds().getEncapsulatingAABB().inflate(1);
+      AABB outerBounds = workSite.getBounds().getEncapsulatingAABB().inflate(1 + maxHorizontalDist);
+
       if (tickTime >= nextWorkTime) {
          nextWorkTime += villager.getRandom().nextInt(5 * 20, 15 * 20);
 
-         Vec3 wanderPos;
-         if (workSite.getBounds().contains(villager.blockPosition())) {
+         Vec3 wanderPos = null;
+         for (int i = 0; i < 20; i++) {
             wanderPos = LandRandomPos.getPos(villager, maxHorizontalDist, maxVerticalDist);
-         } else {
-            wanderPos =
-                  LandRandomPos.getPosTowards(
-                        villager,
-                        maxHorizontalDist,
-                        maxVerticalDist,
-                        workSite.getBlockPos().getBottomCenter());
+            if (wanderPos == null)
+               continue;
+
+            if (outerBounds.contains(wanderPos) && !innerBounds.contains(wanderPos))
+               break;
          }
+
+         if (wanderPos != null && innerBounds.contains(wanderPos))
+            wanderPos = null;
+
+         // if (wanderPos != null && innerBounds.contains(wanderPos)) {
+         // wanderPos =
+         // LandRandomPos.getPosAway(
+         // villager,
+         // maxHorizontalDist,
+         // maxVerticalDist,
+         // workSite.getBlockPos().getBottomCenter());
+         // } else if (wanderPos != null && !outerBounds.contains(wanderPos)) {
+         // wanderPos =
+         // LandRandomPos.getPosTowards(
+         // villager,
+         // maxHorizontalDist,
+         // maxVerticalDist,
+         // workSite.getBlockPos().getBottomCenter());
+         // }
 
          if (wanderPos != null)
             villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(wanderPos, speedModifier, 2));

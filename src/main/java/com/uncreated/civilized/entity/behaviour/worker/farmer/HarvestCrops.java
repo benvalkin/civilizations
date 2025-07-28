@@ -3,13 +3,15 @@ package com.uncreated.civilized.entity.behaviour.worker.farmer;
 import java.util.List;
 import java.util.Optional;
 
-import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
+import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
@@ -34,8 +36,8 @@ public class HarvestCrops extends WorkTaskBehaviour {
    private long lastWorkTime;
    private final List<BlockPos> farmland = Lists.newArrayList();
    private final List<BlockPos> maturesCrops = Lists.newArrayList();
-   private BlockPos cropFieldCenter;
    private MediumDistanceTravelTask travelHelper;
+   private Building workSite;
 
    public HarvestCrops() {
       super(
@@ -50,14 +52,6 @@ public class HarvestCrops extends WorkTaskBehaviour {
 
    @Override
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
-
-      Optional<GlobalPos> jobSiteBlockPos = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
-      if (jobSiteBlockPos.isEmpty() || !jobSiteBlockPos.get().pos().closerThan(villager.blockPosition(), 6)) {
-         return false;
-      }
-
-      this.cropFieldCenter = jobSiteBlockPos.get().pos();
-
       findFarmland(level);
       return !maturesCrops.isEmpty();
    }
@@ -65,7 +59,8 @@ public class HarvestCrops extends WorkTaskBehaviour {
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
-      travelHelper = new MediumDistanceTravelTask(villager, MemoryModuleType.JOB_SITE, 5);
+      workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
+      travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 5);
       LOGGER.info("Villager started harvesting crops.");
    }
 
@@ -151,22 +146,17 @@ public class HarvestCrops extends WorkTaskBehaviour {
    }
 
    private void findFarmland(ServerLevel serverLevel) {
-      BlockPos.MutableBlockPos mutableBlockPos = cropFieldCenter.mutable();
       farmland.clear();
       maturesCrops.clear();
-      for (int x = -4; x <= 4; x++) {
-         for (int y = -1; y <= 1; y++) {
-            for (int z = -4; z <= 4; z++) {
-               mutableBlockPos.set(cropFieldCenter.getX() + x, cropFieldCenter.getY() + y, cropFieldCenter.getZ() + z);
-               if (isMatureCrop(mutableBlockPos, serverLevel)) {
-                  maturesCrops.add(mutableBlockPos.immutable());
-               }
-               if (isFarmland(mutableBlockPos.below(), serverLevel)) {
-                  farmland.add(mutableBlockPos.immutable());
-               }
-            }
+
+      workSite.getBounds().traverseBlocksWithinTerminateYChecksIfCanSeeSky(b -> {
+         if (isMatureCrop(b, serverLevel)) {
+            maturesCrops.add(b);
          }
-      }
+         if (isFarmland(b.below(), serverLevel)) {
+            farmland.add(b);
+         }
+      }, serverLevel);
    }
 
    private boolean isFarmland(BlockPos blockPos, ServerLevel serverLevel) {
