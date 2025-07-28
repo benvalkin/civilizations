@@ -2,6 +2,8 @@ package com.uncreated.civilized.entity.behaviour;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.function.TriFunction;
+
 import com.uncreated.civilized.entity.CivilizedVillager;
 
 import lombok.Getter;
@@ -18,42 +20,53 @@ public class MediumDistanceTravelTask {
    private static final int CHECK_INTERVAL_SECONDS = 5;
 
    private CivilizedVillager villager;
-   private MemoryModuleType<GlobalPos> finalDestination;
+   private GlobalPos finalDestination;
+   private final TriFunction<CivilizedVillager, GlobalPos, Integer, Boolean> closeEnoughTest;
    private float speedModifier;
    private int closeEnoughDistance;
    private long tooFarDistance;
    private long tooLongUnreachableTicks;
 
-   private GlobalPos globalPos;
    private long lastCheckTime;
    @Getter
    private boolean journeySuccessful;
 
    public MediumDistanceTravelTask(
          CivilizedVillager villager,
-         MemoryModuleType<GlobalPos> finalDestination,
+         BlockPos finalDestination,
+         TriFunction<CivilizedVillager, GlobalPos, Integer, Boolean> closeEnoughTest,
          float speedModifier,
          int closeEnoughDistance,
          long tooFarDistance,
          long tooLongUnreachableTicks) {
       this.villager = villager;
-      this.finalDestination = finalDestination;
+      this.finalDestination = new GlobalPos(villager.level().dimension(), finalDestination);
       this.speedModifier = speedModifier;
+      this.closeEnoughTest = closeEnoughTest;
       this.closeEnoughDistance = closeEnoughDistance;
       this.tooFarDistance = tooFarDistance;
       this.tooLongUnreachableTicks = tooLongUnreachableTicks;
-      this.globalPos = villager.getBrain().getMemory(finalDestination).orElseThrow();
    }
 
-   public MediumDistanceTravelTask(CivilizedVillager villager, MemoryModuleType<GlobalPos> finalDestination) {
-      this(villager, finalDestination, 0.4f, 2, 300, 1500);
+   public MediumDistanceTravelTask(CivilizedVillager villager, BlockPos finalDestination) {
+      this(villager, finalDestination, manhattanDistTest(), 0.4f, 2, 300, 1500);
+   }
+
+   public MediumDistanceTravelTask(CivilizedVillager villager, BlockPos finalDestination, int closeEnoughDistance) {
+      this(villager, finalDestination, manhattanDistTest(), 0.4f, closeEnoughDistance, 300, 1500);
    }
 
    public MediumDistanceTravelTask(
          CivilizedVillager villager,
-         MemoryModuleType<GlobalPos> finalDestination,
+         BlockPos finalDestination,
+         TriFunction<CivilizedVillager, GlobalPos, Integer, Boolean> closeEnoughTest,
          int closeEnoughDistance) {
-      this(villager, finalDestination, 0.4f, closeEnoughDistance, 300, 1500);
+      this(villager, finalDestination, closeEnoughTest, 0.4f, closeEnoughDistance, 300, 1500);
+   }
+
+   private static TriFunction<CivilizedVillager, GlobalPos, Integer, Boolean> manhattanDistTest() {
+      return (villager, destination, closeEnoughDistance) -> destination.pos()
+            .distManhattan(villager.blockPosition()) <= closeEnoughDistance;
    }
 
    protected Level getServerLevel() {
@@ -61,7 +74,7 @@ public class MediumDistanceTravelTask {
    }
 
    protected boolean closeEnoughToPoi() {
-      return globalPos.pos().distManhattan(villager.blockPosition()) <= closeEnoughDistance;
+      return closeEnoughTest.apply(villager, finalDestination, closeEnoughDistance);
    }
 
    public void walkToPoi(long gameTicks) {
@@ -79,9 +92,9 @@ public class MediumDistanceTravelTask {
       lastCheckTime = gameTicks;
 
       Optional<Long> optional = villager.getBrain().getMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-      if (globalPos.dimension() == getServerLevel().dimension() && (!optional.isPresent()
+      if (finalDestination.dimension() == getServerLevel().dimension() && (!optional.isPresent()
             || getServerLevel().getGameTime() - (Long) optional.get() <= tooLongUnreachableTicks)) {
-         if (globalPos.pos().distManhattan(villager.blockPosition()) > tooFarDistance) {
+         if (finalDestination.pos().distManhattan(villager.blockPosition()) > tooFarDistance) {
             Vec3 nextIntermediatePos = null;
             int attempts = 0;
 
@@ -92,7 +105,7 @@ public class MediumDistanceTravelTask {
                            villager,
                            15,
                            7,
-                           Vec3.atBottomCenterOf(globalPos.pos()),
+                           Vec3.atBottomCenterOf(finalDestination.pos()),
                            (float) (Math.PI / 2));
                if (++attempts == 1000) {
                   villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
@@ -109,7 +122,7 @@ public class MediumDistanceTravelTask {
             villager.getBrain()
                   .setMemory(
                         MemoryModuleType.WALK_TARGET,
-                        new WalkTarget(globalPos.pos(), speedModifier, closeEnoughDistance));
+                        new WalkTarget(finalDestination.pos(), speedModifier, closeEnoughDistance));
          }
       } else {
          villager.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);

@@ -27,6 +27,10 @@ public class ItemRegistry {
          ITEMS.registerItem(
                "woodcutter_house",
                properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.WOODCUTTER_HOUSE));
+   public static final DeferredItem<Item> RANCHER_HOUSE =
+         ITEMS.registerItem(
+               "rancher_house",
+               properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.RANCHER_HOUSE));
    public static final DeferredItem<Item> MINER_HOUSE =
          ITEMS.registerItem(
                "miner_house",
@@ -39,6 +43,10 @@ public class ItemRegistry {
          ITEMS.registerItem("grove", properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.GROVE));
    public static final DeferredItem<Item> MINE =
          ITEMS.registerItem("mine", properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.MINE));
+   public static final DeferredItem<Item> CATTLE_FARM =
+         ITEMS.registerItem(
+               "cattle_farm",
+               properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.CATTLE_FARM));
 
    public static final DeferredItem<Item> SETTLEMENT_MANDATE =
          ITEMS.registerItem("settlement_mandate", properties -> new SettlementMandateItem(properties.stacksTo(1)));

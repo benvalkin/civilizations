@@ -1,6 +1,7 @@
 package com.uncreated.civilized.util;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -59,14 +60,14 @@ public class ContainerHelper {
    public static int transferNicely(
          Container fromContainer,
          Container toContainer,
-         Function<ItemStack, Boolean> searchFunction,
+         Predicate<ItemStack> searchFunction,
          int upTo) {
       int containerSize = fromContainer.getContainerSize();
       int addedSoFar = 0;
 
       for (int i = 0; i < containerSize; i++) {
          ItemStack item = fromContainer.getItem(i);
-         if (!searchFunction.apply(item))
+         if (!searchFunction.test(item))
             continue;
 
          ItemStack toAdd = item.copy();
