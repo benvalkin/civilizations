@@ -1,8 +1,9 @@
-package com.uncreated.civilized.entity.behaviour;
+package com.uncreated.civilized.entity.behaviour.worker.common;
 
 import java.util.List;
 import java.util.Optional;
 
+import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -37,7 +38,7 @@ public class OffloadResourcesAtHome extends WorkTaskBehaviour {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.WALK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
-                  AIRegistry.MM_CAN_OFFLOAD.get(),
+                  AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(),
                   MemoryStatus.VALUE_PRESENT));
    }
 
@@ -104,8 +105,8 @@ public class OffloadResourcesAtHome extends WorkTaskBehaviour {
       transferInventoryToChests(villager.getWorkInputInventory());
 
       offloaded = true;
-      villager.getBrain().eraseMemory(AIRegistry.MM_CAN_OFFLOAD.get());
-      villager.getBrain().eraseMemory(AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get());
+      villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get());
+      villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
    }
 
    private void transferInventoryToChests(Container inventory) {

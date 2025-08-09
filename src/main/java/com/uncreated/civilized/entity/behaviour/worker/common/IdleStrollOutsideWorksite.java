@@ -1,5 +1,6 @@
-package com.uncreated.civilized.entity.behaviour;
+package com.uncreated.civilized.entity.behaviour.worker.common;
 
+import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;

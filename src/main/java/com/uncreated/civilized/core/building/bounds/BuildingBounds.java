@@ -163,6 +163,7 @@ public class BuildingBounds {
    }
 
    public List<BlockEntity> getBlockEntitiesInsideBuilding(@NotNull Level level) {
+
       List<BlockEntity> entitiesInside = Lists.newArrayList();
       traverseBlocksWithin(blockPos -> {
          BlockEntity entity = level.getBlockEntity(blockPos);

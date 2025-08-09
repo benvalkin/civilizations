@@ -19,9 +19,11 @@ public abstract class BuildingBehaviour {
    public static BuildingBehaviour create(Building building) {
       return switch (building.getBuildingType()) {
       case INN -> new InnBehaviour(building);
+      case INN -> new InnBehaviour(building);
       default -> new InertBuildingBehaviour(building);
       };
    }
 
-   public abstract void serverTick(ServerLevel level, long gameTime);
+   public void start(ServerLevel level, long gameTime) {}
+   public void serverTick(ServerLevel level, long gameTime) {}
 }

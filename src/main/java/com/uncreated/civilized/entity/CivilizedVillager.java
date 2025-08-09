@@ -77,6 +77,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    private final SimpleContainer workInputInventory = new SimpleContainer(8);
    private final SimpleContainer workOutputInventory = new SimpleContainer(8);
+   private final SimpleContainer logisticsInventory = new SimpleContainer(8);
 
    private long lifetimeSeed;
 
@@ -153,12 +154,16 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       if (tag.contains("WorkInput", 9)) {
          workInputInventory.fromTag(tag.getList("WorkInput", 10), levelRegistry);
       }
+      if (tag.contains("Logistics", 9)) {
+         logisticsInventory.fromTag(tag.getList("Logistics", 10), levelRegistry);
+      }
 
    }
 
    public void writeInventoryToTag(CompoundTag tag, HolderLookup.Provider levelRegistry) {
       tag.put("Inventory", workOutputInventory.createTag(levelRegistry));
       tag.put("WorkInput", workInputInventory.createTag(levelRegistry));
+      tag.put("Logistics", logisticsInventory.createTag(levelRegistry));
    }
 
    @Getter
@@ -206,6 +211,9 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
 
    public @NotNull SimpleContainer getWorkOutputInventory() {
       return workOutputInventory;
+   }
+   public @NotNull SimpleContainer getLogisticsInventory() {
+      return logisticsInventory;
    }
 
    @Override
@@ -275,8 +283,8 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
                   AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(),
                   AIRegistry.MM_DIALOGUE_TARGET.get(),
                   AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(),
-                  AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get(),
-                  AIRegistry.MM_CAN_OFFLOAD.get(),
+                  AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get(),
+                  AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(),
                   MemoryModuleType.JOB_SITE,
                   MemoryModuleType.HOME,
                   MemoryModuleType.PATH,

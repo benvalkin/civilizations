@@ -121,7 +121,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
             level.destroyBlock(pos, false);
             toolHits = 0;
 
-            villager.getBrain().setMemory(AIRegistry.MM_CAN_OFFLOAD.get(), true);
+            villager.getBrain().setMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), true);
          }
       }
    }

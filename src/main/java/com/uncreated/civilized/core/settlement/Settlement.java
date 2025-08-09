@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
@@ -60,6 +61,9 @@ public class Settlement {
    private List<UUID> citizenIds = Lists.newArrayList();
    @Builder.Default
    public SettlementLevel settlementLevel = SettlementLevel.OUTPOST;
+
+   @Builder.Default
+   private LogisticsManager logisticsManager = new LogisticsManager();
 
    public Settlement.Packet toPacket() {
       return new Settlement.Packet(this, StoreOperation.UPDATE);

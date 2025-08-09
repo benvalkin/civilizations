@@ -40,7 +40,7 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
                   MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get(),
+                  AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get(),
                   MemoryStatus.VALUE_PRESENT));
       this.animalMobType = animalMobType;
    }
@@ -57,7 +57,7 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
 
       Stream<ItemStack> animalFoodItemsInventory = getAnimalFoodItemsInventory(villager, breedableAnimals.getFirst());
       if (animalFoodItemsInventory.mapToInt(ItemStack::getCount).sum() < 2) {
-         villager.getBrain().eraseMemory(AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get());
+         villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
          return false;
       }
 

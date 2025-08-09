@@ -47,7 +47,7 @@ public class MineOres extends WorkTaskBehaviour {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
                   MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_CAN_OFFLOAD.get(),
+                  AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(),
                   MemoryStatus.VALUE_ABSENT),
             20 * 60 * 4,
             20 * 60 * 4);
@@ -72,13 +72,13 @@ public class MineOres extends WorkTaskBehaviour {
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
       if (foundOres)
-         villager.getBrain().setMemory(AIRegistry.MM_CAN_OFFLOAD.get(), true);
+         villager.getBrain().setMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), true);
    }
 
    @Override
    protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
       return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT)
-            && villager.getBrain().checkMemory(AIRegistry.MM_CAN_OFFLOAD.get(), MemoryStatus.VALUE_ABSENT);
+            && villager.getBrain().checkMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), MemoryStatus.VALUE_ABSENT);
    }
 
    private int applyWorkSpeedMultiplier(int requiredToolHits) {

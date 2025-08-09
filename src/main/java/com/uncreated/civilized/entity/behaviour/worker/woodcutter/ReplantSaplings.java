@@ -101,7 +101,7 @@ public class ReplantSaplings extends WorkTaskBehaviour {
 
          Optional<ItemStack> saplingStack = getSaplingsInInventory(villager);
          if (saplingStack.isEmpty()) {
-            villager.getBrain().eraseMemory(AIRegistry.MM_HAS_RESOURCES_FOR_WORK.get());
+            villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
             return;
          }
 

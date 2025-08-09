@@ -1,8 +1,13 @@
-package com.uncreated.civilized.entity.behaviour.worker.woodcutter;
+package com.uncreated.civilized.entity.behaviour.worker.common;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
+import com.uncreated.civilized.core.building.logistics.PendingShipment;
+import com.uncreated.civilized.core.building.logistics.imports.ImportOrders;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import com.uncreated.civilized.core.settlement.Settlement;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -21,16 +26,17 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
-public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
+public class FetchResourcesFromStorehouse extends WorkTaskBehaviour {
 
    private static final Logger LOGGER = LogUtils.getLogger();
    private final Predicate<ItemStack> itemSearch;
 
    private Building home;
-   private List<ChestBlockEntity> chestsAtHome;
+   private Building storehouse;
    private MediumDistanceTravelTask travelHelper;
+   private Collection<PendingShipment> pendingShipments;
 
-   public FetchRequiredResourcesFromHome(Predicate<ItemStack> itemSearch) {
+   public FetchResourcesFromStorehouse(Predicate<ItemStack> itemSearch) {
       super(
             ImmutableMap.of(
                   MemoryModuleType.LOOK_TARGET,
@@ -46,19 +52,21 @@ public class FetchRequiredResourcesFromHome extends WorkTaskBehaviour {
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
 
       home = ServerBuildingsStore.INSTANCE.find(villager.getInfo().getHomeBuildingId()).orElse(null);
-      if (home == null) {
+      if (home == null)
          return false;
-      }
 
-      chestsAtHome =
-            home.getBounds()
-                  .getBlockEntitiesInsideBuilding(level)
-                  .stream()
-                  .filter(b -> b instanceof ChestBlockEntity)
-                  .map(b -> (ChestBlockEntity) b)
-                  .toList();
+      Settlement settlement = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId());
+      storehouse = ServerBuildingsStore.INSTANCE.findStorehouse().orElse(null);
+      if (storehouse == null)
+         return false;
 
-      return homeChestsHaveResources(chestsAtHome);
+
+      ImportOrders importOrders = settlement.getLogisticsManager().getImportOrders(home);
+
+      pendingShipments = importOrders.all().stream().map(order -> order.getNextShipment(storehouse, home, level)).toList();
+
+      if (pendingShipments.stream().noneMatch(s -> s.isShouldProceed()))
+
    }
 
    @Override

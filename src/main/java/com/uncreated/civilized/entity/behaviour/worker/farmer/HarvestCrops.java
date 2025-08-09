@@ -121,7 +121,7 @@ public class HarvestCrops extends WorkTaskBehaviour {
                villager.playSound(SoundEvents.CROP_BREAK, 1.0f, 1.0f);
                toolHits = 0;
 
-               villager.getBrain().setMemory(AIRegistry.MM_CAN_OFFLOAD.get(), true);
+               villager.getBrain().setMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), true);
             }
          }
       }
