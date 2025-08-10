@@ -3,6 +3,10 @@ package com.uncreated.civilized.entity.behaviour.worker.woodcutter;
 import java.util.List;
 import java.util.Optional;
 
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -53,6 +57,11 @@ public class ReplantSaplings extends WorkTaskBehaviour {
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
 
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
+
+      Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
+      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("all_saplings", i -> i.is(ItemTags.SAPLINGS), LogisticsOrder.Origin.AUTOMATIC, 32, 8);
+      logisticsManager.registerOrder(home, importOrder, 10);
 
       findValidPlantingBlocks(level);
       return !validPlantingBlocks.isEmpty(); // only start when it is possible to replant saplings

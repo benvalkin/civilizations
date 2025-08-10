@@ -5,6 +5,11 @@ import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+
+import java.util.Collection;
+import java.util.List;
 
 public enum BuildingType {
    NONE,
@@ -81,6 +86,15 @@ public enum BuildingType {
       return switch (this) {
       case GROVE, CROP_FARM, CATTLE_FARM, HOG_FARM, SHEEP_FARM, CHICKEN_FARM, QUARRY, MINE -> true;
       default -> false;
+      };
+   }
+
+   public Collection<Item> getAnimalFoodItems() {
+      return switch (this) {
+         case RANCHER_HOUSE, SHEEP_FARM -> List.of(Items.WHEAT);
+         case CHICKEN_FARM -> List.of(Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, Items.BEETROOT_SEEDS);
+          case HOG_FARM -> List.of(Items.CARROT, Items.POTATO, Items.BEETROOT);
+         default -> List.of();
       };
    }
 }

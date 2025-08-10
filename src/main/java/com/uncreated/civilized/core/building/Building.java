@@ -109,10 +109,10 @@ public class Building {
 
    public String toStringLite() {
       return String.format(
-            "{buildingId: %s buildingType: %s blockPos: %s occupants: %s}",
-            buildingId,
+            "{buildingType: %s buildingId: %s blockPos: %s occupants: %s}",
             buildingType,
-            getBlockPos(),
+              buildingId.toString().substring(0, 6),
+              getBlockPos(),
             occupantIds.size());
    }
 

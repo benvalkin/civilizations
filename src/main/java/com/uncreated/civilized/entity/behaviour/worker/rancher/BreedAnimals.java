@@ -4,6 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import net.minecraft.world.item.Items;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -54,6 +59,11 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
       if (breedableAnimals.size() < 2) {
          return false;
       }
+
+      Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
+      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("animal_food", i -> workSite.getBuildingType().getAnimalFoodItems().stream().anyMatch(i::is), LogisticsOrder.Origin.AUTOMATIC, 12, 2);
+      logisticsManager.registerOrder(home, importOrder, 10);
 
       Stream<ItemStack> animalFoodItemsInventory = getAnimalFoodItemsInventory(villager, breedableAnimals.getFirst());
       if (animalFoodItemsInventory.mapToInt(ItemStack::getCount).sum() < 2) {

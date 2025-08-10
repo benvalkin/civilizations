@@ -19,7 +19,6 @@ public abstract class BuildingBehaviour {
    public static BuildingBehaviour create(Building building) {
       return switch (building.getBuildingType()) {
       case INN -> new InnBehaviour(building);
-      case INN -> new InnBehaviour(building);
       default -> new InertBuildingBehaviour(building);
       };
    }
