@@ -87,6 +87,10 @@ public abstract class BuildingStore extends SavedData {
       return all().stream().filter(b -> b.getBounds().isOverlapping(bounds)).findFirst();
    }
 
+   public Optional<Building> findStorehouse(UUID settlementId) {
+      return all().stream().filter(b -> b.getBuildingType() == BuildingType.STOREHOUSE && b.getSettlementId().equals(settlementId)).findFirst();
+   }
+
    public Optional<Building> delete(BlockPos blockPos) {
       Optional<Building> removed = Optional.ofNullable(buildings.remove(blockPos));
       setDirty();

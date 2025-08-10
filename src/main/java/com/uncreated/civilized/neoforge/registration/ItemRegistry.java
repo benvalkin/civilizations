@@ -17,6 +17,9 @@ public class ItemRegistry {
    // Create a Deferred Register to hold Items which will all be registered under the "civilized" namespace
    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CIVILIZED_MOD_ID);
 
+   public static final DeferredItem<Item> STOREHOUSE =
+         ITEMS.registerItem("storehouse", properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.STOREHOUSE));
+
    public static final DeferredItem<Item> INN =
          ITEMS.registerItem("inn", properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.INN));
    public static final DeferredItem<Item> FARMER_HOUSE =
