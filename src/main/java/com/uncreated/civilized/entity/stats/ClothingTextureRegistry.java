@@ -49,12 +49,12 @@ public class ClothingTextureRegistry {
    }
 
    private static String getResourceKey(String cultureName, String villagerOccupation, String gender) {
-      return Path.of(ROOT_PREFIX, cultureName, villagerOccupation, gender).toString();
+      return String.format("%s/%s/%s/%s", ROOT_PREFIX, cultureName, villagerOccupation, gender);
    }
 
    private static ResourceLocation getResourceLocation(String resourceKey, String textureFileName) {
       return ResourceLocation
-            .fromNamespaceAndPath(CIVILIZED_MOD_ID, Path.of(resourceKey, textureFileName + ".png").toString());
+            .fromNamespaceAndPath(CIVILIZED_MOD_ID, resourceKey + "/" + textureFileName + ".png");
    }
 
    public static Map.Entry<Integer, ResourceLocation> getRandomClothingTexture(

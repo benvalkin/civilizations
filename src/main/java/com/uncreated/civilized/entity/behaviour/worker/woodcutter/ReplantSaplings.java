@@ -86,16 +86,16 @@ public class ReplantSaplings extends WorkTaskBehaviour {
    }
 
    @Override
-   protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
+   protected void tick(ServerLevel level, CivilizedVillager villager, long gameTime) {
 
       if (!travelHelper.isJourneySuccessful()) {
-         travelHelper.walkToPoi(tickTime);
+         travelHelper.walkToPoi(gameTime);
          return;
       }
 
-      if (tickTime - lastWorkTime > 15) {
+      if (gameTime - lastWorkTime > 15) {
 
-         lastWorkTime = tickTime;
+         lastWorkTime = gameTime;
 
          findValidPlantingBlocks(level);
 
@@ -111,6 +111,7 @@ public class ReplantSaplings extends WorkTaskBehaviour {
          Optional<ItemStack> saplingStack = getSaplingsInInventory(villager);
          if (saplingStack.isEmpty()) {
             villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
+            doStop(level, villager, gameTime);
             return;
          }
 

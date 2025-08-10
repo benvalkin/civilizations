@@ -1,6 +1,7 @@
 package com.uncreated.civilized.core.building.logistics.orders.exports;
 
 import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
+import com.uncreated.civilized.core.building.logistics.orders.ExportOrder;
 import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
 import lombok.Getter;
 import net.minecraft.world.item.ItemStack;
@@ -8,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.function.Predicate;
 
 @Getter
-public class ExportPercentageOfSource extends LogisticsOrder {
+public class ExportPercentageOfSource extends ExportOrder {
 
    private final float requiredPercentageAtDestination;
 

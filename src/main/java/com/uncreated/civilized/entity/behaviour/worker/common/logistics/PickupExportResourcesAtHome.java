@@ -60,6 +60,10 @@ public class PickupExportResourcesAtHome extends ExchangeResourcesAtBuilding {
    protected void exchangeResources(ServerLevel level, CivilizedVillager villager, long tickTime) {
       boolean holdingExportResources = false;
 
+      dumpInventoryToChests(villager.getWorkInputInventory());
+      dumpInventoryToChests(villager.getWorkOutputInventory());
+      dumpInventoryToChests(villager.getLogisticsInventory());
+
       for (LogisticsOrder order : settlement.getLogisticsManager().getExportOrders(targetBuilding).orders()) {
 
          PendingShipment shipment = order.getNextShipment(targetBuilding, storehouse, level);
@@ -69,7 +73,6 @@ public class PickupExportResourcesAtHome extends ExchangeResourcesAtBuilding {
 
       // add back any items that are also mandated by import orders
       for (LogisticsOrder order : settlement.getLogisticsManager().getImportOrders(targetBuilding).orders()) {
-
          PendingShipment shipment = order.getNextShipment(storehouse, targetBuilding, level);
          order.returnShipment(villager, shipment);
       }

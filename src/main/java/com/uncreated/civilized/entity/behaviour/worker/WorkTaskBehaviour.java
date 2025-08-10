@@ -29,4 +29,9 @@ public class WorkTaskBehaviour extends Behavior<CivilizedVillager> {
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       villager.getBrain().eraseMemory(AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get());
    }
+
+   @Override
+   protected boolean canStillUse(ServerLevel level, CivilizedVillager entity, long gameTime) {
+      return true;
+   }
 }

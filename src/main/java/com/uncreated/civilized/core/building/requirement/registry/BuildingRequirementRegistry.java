@@ -48,19 +48,28 @@ public class BuildingRequirementRegistry {
 
          registerRequirements(
                registry,
-               BuildingRequirementList.forBuilding(BuildingType.INN, 1)
-                     .add(new SpaceRequirement(50))
-                     .add(new EnclosedWallsRequirement())
-                     .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 200))
-                     .add(new ChestsPresentRequirement(1, false))
-                     .add(new BedsPresentRequirement(4, false))
+               BuildingRequirementList.forBuilding(BuildingType.STOREHOUSE, 1)
+                     .add(new SpaceRequirement(30))
+                     .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 40))
+                     .add(new ChestsPresentRequirement(8, false))
                      .add(new SignsPresentRequirement(1, false))
                      .create());
 
          registerRequirements(
+                 registry,
+                 BuildingRequirementList.forBuilding(BuildingType.INN, 1)
+                         .add(new SpaceRequirement(50))
+                         .add(new EnclosedWallsRequirement())
+                         .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 200))
+                         .add(new ChestsPresentRequirement(1, false))
+                         .add(new BedsPresentRequirement(4, false))
+                         .add(new SignsPresentRequirement(1, false))
+                         .create());
+
+         registerRequirements(
                registry,
                BuildingRequirementList.forBuilding(BuildingType.FARMER_HOUSE, 1)
-                     .add(new SpaceRequirement(20))
+                     .add(new SpaceRequirement(15))
                      .add(new EnclosedWallsRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))
@@ -80,7 +89,7 @@ public class BuildingRequirementRegistry {
          registerRequirements(
                registry,
                BuildingRequirementList.forBuilding(BuildingType.WOODCUTTER_HOUSE, 1)
-                     .add(new SpaceRequirement(20))
+                     .add(new SpaceRequirement(15))
                      .add(new EnclosedWallsRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))
@@ -100,7 +109,7 @@ public class BuildingRequirementRegistry {
          registerRequirements(
                registry,
                BuildingRequirementList.forBuilding(BuildingType.RANCHER_HOUSE, 1)
-                     .add(new SpaceRequirement(20))
+                     .add(new SpaceRequirement(15))
                      .add(new EnclosedWallsRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))
@@ -120,7 +129,7 @@ public class BuildingRequirementRegistry {
          registerRequirements(
                registry,
                BuildingRequirementList.forBuilding(BuildingType.MINER_HOUSE, 1)
-                     .add(new SpaceRequirement(20))
+                     .add(new SpaceRequirement(15))
                      .add(new EnclosedWallsRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))

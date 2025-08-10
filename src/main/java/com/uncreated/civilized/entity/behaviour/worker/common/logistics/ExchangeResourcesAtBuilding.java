@@ -60,12 +60,11 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
       LOGGER.info("Villager going to offload resources at {}.", targetBuilding.toStringLite());
-      done = false;
 
       travelHelper =
             new MediumDistanceTravelTask(
                   villager,
-                  villager.getBrain().getMemory(MemoryModuleType.HOME).orElseThrow().pos(), 3);
+                  targetBuilding.getBlockPos(), 3);
    }
 
    @Override
@@ -73,13 +72,6 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
       super.stop(level, villager, gameTime);
       LOGGER.info("Villager finished offloading resources at {}.", targetBuilding.toStringLite());
    }
-
-   @Override
-   protected boolean canStillUse(ServerLevel level, CivilizedVillager entity, long gameTime) {
-      return !done;
-   }
-
-   private boolean done = false;
 
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
@@ -91,7 +83,7 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
 
       exchangeResources(level, villager, tickTime);
 
-      done = true;
+      doStop(level, villager, tickTime);
    }
 
    protected abstract void exchangeResources(ServerLevel level, CivilizedVillager villager, long tickTime);
@@ -106,6 +98,8 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
          if (item.isEmpty())
             continue;
 
+         Item itemType = item.getItem();
+
          for (var chest : chestsAtTarget) {
             // try to add item to chest
             ItemStack remainder = ContainerHelper.addItemNicely(chest, item);
@@ -113,7 +107,7 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
 
             // if there is no remainder, we successfully inserted the stack
             if (remainder.isEmpty()) {
-               itemTypesDumped.add(remainder.getItem());
+               itemTypesDumped.add(itemType);
                break;
             }
          }
