@@ -25,6 +25,6 @@ public class ExportAll extends LogisticsOrder {
    protected int getItemCountForNextShipment(
            AggregateItemStack sourceStock,
            AggregateItemStack destinationStock) {
-      return 64
+      return 64;
    }
 }
