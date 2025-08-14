@@ -5,6 +5,8 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.logistics.PendingShipment;
 import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.task.PendingRequiredItems;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.entity.CivilizedVillager;
@@ -70,10 +72,14 @@ public class PickupExportResourcesAtHome extends ExchangeResourcesAtBuilding {
             holdingExportResources = true;
       }
 
-      // add back any items that are also mandated by import orders
+      // add back any items that are also mandated by import orders and task requirements
       for (StorehouseOrder order : settlement.getLogisticsManager().getImportOrders(targetBuilding).orders()) {
          PendingShipment shipment = order.getNextShipment(storehouse, targetBuilding, level);
          order.returnShipment(villager, shipment);
+      }
+      for (TaskItemRequirement requirement : settlement.getLogisticsManager().getTaskItemRequirements(targetBuilding).orders()) {
+         PendingRequiredItems shipment = requirement.getRequiredItemsToTake(targetBuilding, villager, level);
+         requirement.returnItems(villager, shipment);
       }
 
       villager.getBrain().setMemory(AIRegistry.MM_HOLDING_EXPORT_RESOURCES.get(), holdingExportResources);

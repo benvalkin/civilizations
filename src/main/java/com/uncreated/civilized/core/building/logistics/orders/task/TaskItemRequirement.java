@@ -2,6 +2,7 @@ package com.uncreated.civilized.core.building.logistics.orders.task;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
+import com.uncreated.civilized.core.building.logistics.PendingShipment;
 import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.util.ContainerHelper;
@@ -61,6 +62,29 @@ public abstract class TaskItemRequirement extends LogisticsOrder {
                     ContainerHelper.transferNicely(
                             source,
                             villager.getWorkInputInventory(),
+                            itemSearch,
+                            quota);
+
+            quota -= transferred;
+
+            if (quota <= 0)
+                break;
+        }
+
+        return quota < pendingRequiredItems.amount();
+    }
+
+    public boolean returnItems(
+            CivilizedVillager villager,
+            PendingRequiredItems pendingRequiredItems) {
+
+        int quota = pendingRequiredItems.amount();
+
+        for (Container source : pendingRequiredItems.stock().getSourceChests()) {
+            int transferred =
+                    ContainerHelper.transferNicely(
+                            source,
+                            villager.getLogisticsInventory(),
                             itemSearch,
                             quota);
 
