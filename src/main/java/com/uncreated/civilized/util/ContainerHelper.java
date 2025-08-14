@@ -1,8 +1,9 @@
 package com.uncreated.civilized.util;
 
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.function.Predicate;
 
+import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
@@ -85,7 +86,29 @@ public class ContainerHelper {
       return addedSoFar;
    }
 
-   public enum ContainerTransferOutcome {
-      SUCCESS, PARTIAL_SUCCESS, TRANSFER_FAILURE
+   public static Optional<ItemSearchResult> findItem(Container container, Predicate<ItemStack> itemSearch) {
+
+      for (int i = 0 ; i < container.getContainerSize(); i++) {
+         ItemStack item = container.getItem(i);
+         if (itemSearch.test(item))
+            return Optional.of(new ItemSearchResult(item, i));
+      }
+
+      return Optional.empty();
    }
+
+   public static AggregateItemStack countItems(Container container, Predicate<ItemStack> itemSearch) {
+
+      AggregateItemStack result = new AggregateItemStack();
+
+      for (int i = 0 ; i < container.getContainerSize(); i++) {
+         ItemStack item = container.getItem(i);
+         if (itemSearch.test(item))
+            result.add(item);
+      }
+
+      return result;
+   }
+
+   public record ItemSearchResult(ItemStack itemStack, int slot) {}
 }

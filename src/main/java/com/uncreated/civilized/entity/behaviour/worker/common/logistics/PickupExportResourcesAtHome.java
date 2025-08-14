@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.logistics.PendingShipment;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrders;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.entity.CivilizedVillager;
@@ -64,7 +63,7 @@ public class PickupExportResourcesAtHome extends ExchangeResourcesAtBuilding {
       dumpInventoryToChests(villager.getWorkOutputInventory());
       dumpInventoryToChests(villager.getLogisticsInventory());
 
-      for (LogisticsOrder order : settlement.getLogisticsManager().getExportOrders(targetBuilding).orders()) {
+      for (StorehouseOrder order : settlement.getLogisticsManager().getExportOrders(targetBuilding).orders()) {
 
          PendingShipment shipment = order.getNextShipment(targetBuilding, storehouse, level);
          if (order.takeShipment(villager, shipment))
@@ -72,7 +71,7 @@ public class PickupExportResourcesAtHome extends ExchangeResourcesAtBuilding {
       }
 
       // add back any items that are also mandated by import orders
-      for (LogisticsOrder order : settlement.getLogisticsManager().getImportOrders(targetBuilding).orders()) {
+      for (StorehouseOrder order : settlement.getLogisticsManager().getImportOrders(targetBuilding).orders()) {
          PendingShipment shipment = order.getNextShipment(storehouse, targetBuilding, level);
          order.returnShipment(villager, shipment);
       }

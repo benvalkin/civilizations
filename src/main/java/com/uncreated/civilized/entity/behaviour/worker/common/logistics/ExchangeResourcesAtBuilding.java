@@ -59,7 +59,7 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
-      LOGGER.info("Villager going to offload resources at {}.", targetBuilding.toStringLite());
+      LOGGER.info("Villager going to exchange resources at {}.", targetBuilding.toStringLite());
 
       travelHelper =
             new MediumDistanceTravelTask(
@@ -70,7 +70,7 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
-      LOGGER.info("Villager finished offloading resources at {}.", targetBuilding.toStringLite());
+      LOGGER.info("Villager finished exchange resources at {}.", targetBuilding.toStringLite());
    }
 
    @Override

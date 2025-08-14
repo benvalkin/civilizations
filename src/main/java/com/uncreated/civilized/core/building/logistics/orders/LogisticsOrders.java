@@ -8,17 +8,17 @@ import java.util.Set;
 import com.uncreated.civilized.core.building.Building;
 import lombok.Getter;
 
-public class LogisticsOrders {
+public class LogisticsOrders<T extends LogisticsOrder> {
    @Getter
    private final Building building;
-   private final HashMap<String, LogisticsOrder> orders;
+   private final HashMap<String, T> orders;
 
    public LogisticsOrders(Building building) {
       this.building = building;
       this.orders = new HashMap<>();
    }
 
-   public void add(LogisticsOrder order) {
+   public void add(T order) {
 
       orders.putIfAbsent(order.getKey(), order);
       orders.computeIfPresent(order.getKey(), (buildingId, existing) -> {
@@ -33,9 +33,9 @@ public class LogisticsOrders {
       });
    }
 
-   public Collection<LogisticsOrder> orders() {
+   public Collection<T> orders() {
       Set<String> expiredKeys = new HashSet<>();
-      for (LogisticsOrder order : orders.values()) {
+      for (T order : orders.values()) {
          if (order.isExpired())
             expiredKeys.add(order.getKey());
       }

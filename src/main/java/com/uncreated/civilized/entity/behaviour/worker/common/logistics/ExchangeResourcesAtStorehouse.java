@@ -3,8 +3,8 @@ package com.uncreated.civilized.entity.behaviour.worker.common.logistics;
 import java.util.Optional;
 
 import com.uncreated.civilized.core.building.logistics.PendingShipment;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
 import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrders;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportOrder;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import org.slf4j.Logger;
@@ -66,12 +66,12 @@ public class ExchangeResourcesAtStorehouse extends ExchangeResourcesAtBuilding {
       dumpInventoryToChests(villager.getLogisticsInventory());
       villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_EXPORT_RESOURCES.get());
 
-      LogisticsOrders importOrders = settlement.getLogisticsManager().getImportOrders(home);
+      LogisticsOrders<ImportOrder> importOrders = settlement.getLogisticsManager().getImportOrders(home);
       boolean holdingImportResources = false;
-      for (LogisticsOrder order : importOrders.orders()) {
+      for (ImportOrder order : importOrders.orders()) {
 
          PendingShipment shipment = order.getNextShipment(targetBuilding, home, level);
-         if (!shipment.isShouldShip())
+         if (!shipment.shouldShip())
             continue;
 
          if (order.takeShipment(villager, shipment))

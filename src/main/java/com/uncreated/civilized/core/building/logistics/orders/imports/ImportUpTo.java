@@ -1,8 +1,6 @@
 package com.uncreated.civilized.core.building.logistics.orders.imports;
 
 import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
-import com.uncreated.civilized.core.building.logistics.orders.ImportOrder;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
 
 import lombok.Getter;
 import net.minecraft.world.item.ItemStack;

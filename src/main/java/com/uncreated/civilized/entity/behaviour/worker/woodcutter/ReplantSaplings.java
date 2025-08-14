@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
 import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import org.slf4j.Logger;
 
@@ -60,8 +62,12 @@ public class ReplantSaplings extends WorkTaskBehaviour {
 
       Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
       LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
-      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("all_saplings", i -> i.is(ItemTags.SAPLINGS), LogisticsOrder.Origin.AUTOMATIC, 32, 8);
-      logisticsManager.registerOrder(home, importOrder, 10);
+      TaskItemRequirement toolRequirement = new TaskConsumableItemRequirement("replant_saplings", i -> i.is(ItemTags.SAPLINGS), StorehouseOrder.Origin.AUTOMATIC, 16);
+      toolRequirement.setExpiryTime(10);
+      logisticsManager.registerOrder(home, toolRequirement);
+      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("any_saplings", i -> i.is(ItemTags.SAPLINGS), StorehouseOrder.Origin.AUTOMATIC, 32, 8);
+      importOrder.setExpiryTime(10);
+      logisticsManager.registerOrder(home, importOrder);
 
       findValidPlantingBlocks(level);
       return !validPlantingBlocks.isEmpty(); // only start when it is possible to replant saplings

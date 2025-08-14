@@ -3,6 +3,14 @@ package com.uncreated.civilized.entity.behaviour.worker.woodcutter;
 import java.util.List;
 import java.util.Optional;
 
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.task.ToolRequirement;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import com.uncreated.civilized.util.ContainerHelper;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.AxeItem;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -37,6 +45,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
    private MediumDistanceTravelTask travelHelper;
 
    int workSpeedMultiplier = 2;
+   private ItemStack handHeld;
 
    public CutDownTrees() {
       super(
@@ -54,6 +63,23 @@ public class CutDownTrees extends WorkTaskBehaviour {
 
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
 
+      Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
+      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      ToolRequirement toolRequirement = new ToolRequirement("cut_down_trees", AxeItem.class, StorehouseOrder.Origin.AUTOMATIC);
+      toolRequirement.setExpiryTime(10);
+      logisticsManager.registerOrder(home, toolRequirement);
+      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("axe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1);
+      importOrder.setExpiryTime(10);
+      logisticsManager.registerOrder(home, importOrder);
+
+      Optional<ContainerHelper.ItemSearchResult> tool = ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
+      if (tool.isEmpty()) {
+         // todo: send notification that the villager is missing tool
+         villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
+         return false;
+      }
+      this.handHeld = tool.get().itemStack();
+
       findBlocksToHarvest(level);
       return !logsToHarvest.isEmpty(); // only start when there are logs to harvest (not leaves)
    }
@@ -62,6 +88,12 @@ public class CutDownTrees extends WorkTaskBehaviour {
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
       travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 5);
+      villager.setItemSlot(EquipmentSlot.MAINHAND, handHeld);
+   }
+   @Override
+   protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.stop(level, villager, gameTime);
+      villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
    }
 
    @Override

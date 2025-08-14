@@ -1,23 +1,15 @@
 package com.uncreated.civilized.core.building.logistics.orders;
 
+import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
+import lombok.Getter;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.function.Predicate;
-
-import org.jetbrains.annotations.Nullable;
-
-import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
-import com.uncreated.civilized.core.building.logistics.PendingShipment;
-import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.util.ContainerHelper;
-
-import lombok.Getter;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 @Getter
 public abstract class LogisticsOrder {
@@ -36,10 +28,9 @@ public abstract class LogisticsOrder {
       this.origin = origin;
    }
 
-   public LogisticsOrder withExpiryTime(int expiryTimeMinutes) {
+   public void setExpiryTime(int expiryTimeMinutes) {
       this.expiryTimeMinutes = expiryTimeMinutes;
       this.startTime = Instant.now();
-      return this;
    }
 
    public boolean isExpired() {
@@ -47,86 +38,6 @@ public abstract class LogisticsOrder {
          return false;
 
       return Duration.between(startTime, Instant.now()).getSeconds() > expiryTimeMinutes * 60;
-   }
-
-   protected abstract boolean shouldShip(
-         AggregateItemStack sourceStock,
-         AggregateItemStack destinationStock);
-
-   protected abstract int getItemCountForNextShipment(
-         AggregateItemStack sourceStock,
-         AggregateItemStack destinationStock);
-
-   public PendingShipment getNextShipment(Building source, Building destination, Level level) {
-      Collection<Container> sourceChests =
-            source.getBounds()
-                  .getBlockEntitiesInsideBuilding(level)
-                  .stream()
-                  .filter(e -> e instanceof ChestBlockEntity)
-                  .map(e -> ((Container) e)).toList();
-
-      Collection<Container> destinationChests =
-            destination.getBounds()
-                  .getBlockEntitiesInsideBuilding(level)
-                  .stream()
-                  .filter(e -> e instanceof ChestBlockEntity)
-                    .map(e -> ((Container) e)).toList();
-
-      AggregateItemStack sourceStock = calculateStock(sourceChests);
-      AggregateItemStack destinationStock = calculateStock(destinationChests);
-
-      PendingShipment.StockInfo stockInfo = new PendingShipment.StockInfo(destinationChests, sourceChests, destinationStock, sourceStock);
-
-      int amountToShip = getItemCountForNextShipment(sourceStock, destinationStock);
-      boolean shouldShip = shouldShip(sourceStock, destinationStock) && amountToShip > 0;
-
-      return new PendingShipment(itemSearch, amountToShip, shouldShip, stockInfo);
-   }
-
-   public boolean takeShipment(
-         CivilizedVillager villager,
-         PendingShipment pendingShipment) {
-
-      int quota = pendingShipment.getAmount();
-
-      for (Container source : pendingShipment.getStock().getSourceChests()) {
-         int transferred =
-               ContainerHelper.transferNicely(
-                     source,
-                     villager.getLogisticsInventory(),
-                     itemSearch,
-                     quota);
-
-         quota -= transferred;
-
-         if (quota <= 0)
-            break;
-      }
-
-      return quota < pendingShipment.getAmount();
-   }
-
-   public boolean returnShipment(
-           CivilizedVillager villager,
-           PendingShipment pendingShipment) {
-
-      int quota = pendingShipment.getAmount();
-
-      for (Container source : pendingShipment.getStock().getDestinationChests()) {
-         int transferred =
-                 ContainerHelper.transferNicely(
-                         source,
-                         villager.getLogisticsInventory(),
-                         itemSearch,
-                         quota);
-
-         quota -= transferred;
-
-         if (quota <= 0)
-            break;
-      }
-
-      return quota < pendingShipment.getAmount();
    }
 
    protected AggregateItemStack calculateStock(Collection<Container> containers) {

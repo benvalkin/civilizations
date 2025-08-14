@@ -7,10 +7,8 @@ import com.google.common.collect.ImmutableMap;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
-import com.uncreated.civilized.core.building.logistics.orders.ExportOrder;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
 import com.uncreated.civilized.core.building.logistics.orders.exports.ExportAll;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
@@ -19,7 +17,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 public class OffloadWorkResourcesAtHome extends ExchangeResourcesAtBuilding {
 
@@ -47,11 +44,11 @@ public class OffloadWorkResourcesAtHome extends ExchangeResourcesAtBuilding {
 
       LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
       toExport.forEach(item -> {
-         ExportAll exportOrder = new ExportAll(item.toString(), i -> i.is(item), LogisticsOrder.Origin.AUTOMATIC);
-         logisticsManager.registerOrder(targetBuilding, exportOrder, 10);
+         ExportAll exportOrder = new ExportAll(item.toString(), i -> i.is(item), StorehouseOrder.Origin.AUTOMATIC);
+         exportOrder.setExpiryTime(10);
+         logisticsManager.registerOrder(targetBuilding, exportOrder);
       });
 
       villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get());
-      villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
    }
 }

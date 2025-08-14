@@ -3,7 +3,16 @@ package com.uncreated.civilized.entity.behaviour.worker.miner;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.task.ToolRequirement;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import com.uncreated.civilized.util.ContainerHelper;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.PickaxeItem;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -37,6 +46,7 @@ public class MineOres extends WorkTaskBehaviour {
    int workSpeedMultiplier = 2;
    private boolean foundOres = false;
    Map<BlockPos, Long> recentlyMinedBlocks;
+   private ItemStack handHeld;
 
    public MineOres() {
       super(
@@ -58,6 +68,23 @@ public class MineOres extends WorkTaskBehaviour {
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
 
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
+
+      Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
+      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      ToolRequirement toolRequirement = new ToolRequirement("mine_ores", PickaxeItem.class, StorehouseOrder.Origin.AUTOMATIC);
+      toolRequirement.setExpiryTime(10);
+      logisticsManager.registerOrder(home, toolRequirement);
+      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("pickaxe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1);
+      importOrder.setExpiryTime(10);
+      logisticsManager.registerOrder(home, importOrder);
+
+      Optional<ContainerHelper.ItemSearchResult> tool = ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
+      if (tool.isEmpty()) {
+         // todo: send notification that the villager is missing tool
+         return false;
+      }
+      this.handHeld = tool.get().itemStack();
+
       return true; // todo: setting worksite can move to start method in all work tasks
    }
 
@@ -66,6 +93,8 @@ public class MineOres extends WorkTaskBehaviour {
       super.start(level, villager, gameTime);
       foundOres = false;
       travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 2);
+
+      villager.setItemSlot(EquipmentSlot.MAINHAND, handHeld);
    }
 
    @Override
@@ -73,6 +102,8 @@ public class MineOres extends WorkTaskBehaviour {
       super.stop(level, villager, gameTime);
       if (foundOres)
          villager.getBrain().setMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), true);
+
+      villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
    }
 
    @Override
