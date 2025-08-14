@@ -82,6 +82,7 @@ public class WorkActivities {
                                 Pair.of(new PickupExportResourcesAtHome(), 20 * 30),
                                 Pair.of(new ExchangeResourcesAtStorehouse(), 20 * 30),
                                 Pair.of(new OffloadImportedResourcesAtHome(), 20 * 30),
+                                Pair.of(new PickupWorkResourcesFromHome(), 20 * 30),
                               Pair.of(new MineOres(), 60),
                               Pair.of(new OffloadWorkResourcesAtHome(), 60),
                               Pair.of(new IdleStrollAroundWorksite(5, 3, 0.25f), 20 * 30),

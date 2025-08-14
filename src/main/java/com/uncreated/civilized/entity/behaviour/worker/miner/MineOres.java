@@ -81,6 +81,7 @@ public class MineOres extends WorkTaskBehaviour {
       Optional<ContainerHelper.ItemSearchResult> tool = ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
       if (tool.isEmpty()) {
          // todo: send notification that the villager is missing tool
+         villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
          return false;
       }
       this.handHeld = tool.get().itemStack();

@@ -91,7 +91,7 @@ public enum BuildingType {
 
    public Collection<Item> getAnimalFoodItems() {
       return switch (this) {
-         case RANCHER_HOUSE, SHEEP_FARM -> List.of(Items.WHEAT);
+         case CATTLE_FARM, SHEEP_FARM -> List.of(Items.WHEAT);
          case CHICKEN_FARM -> List.of(Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, Items.BEETROOT_SEEDS);
           case HOG_FARM -> List.of(Items.CARROT, Items.POTATO, Items.BEETROOT);
          default -> List.of();

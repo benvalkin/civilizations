@@ -6,8 +6,11 @@ import java.util.Optional;
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
 import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
+import com.uncreated.civilized.core.building.logistics.orders.task.ToolRequirement;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.PickaxeItem;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -62,7 +65,10 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
 
       Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
       LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
-      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("animal_food", i -> workSite.getBuildingType().getAnimalFoodItems().stream().anyMatch(i::is), StorehouseOrder.Origin.AUTOMATIC, 12, 2);
+      TaskConsumableItemRequirement  toolRequirement = new TaskConsumableItemRequirement("breed_animals", i -> workSite.getBuildingType().getAnimalFoodItems().stream().anyMatch(i::is), StorehouseOrder.Origin.AUTOMATIC, 2, 16);
+      toolRequirement.setExpiryTime(10);
+      logisticsManager.registerOrder(home, toolRequirement);
+      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("animal_food", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 16, 2);
       importOrder.setExpiryTime(10);
       logisticsManager.registerOrder(home, importOrder);
 
