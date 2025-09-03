@@ -40,8 +40,8 @@ public class OffloadWorkResourcesAtHome extends ExchangeResourcesAtBuilding {
    protected void exchangeResources(ServerLevel level, CivilizedVillager villager, long tickTime) {
 
       dumpInventoryToChests(villager.getWorkInputInventory());
-      Set<Item> toExport = dumpInventoryToChests(villager.getWorkOutputInventory());
 
+      Set<Item> toExport = dumpInventoryToChests(villager.getWorkOutputInventory());
       LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
       toExport.forEach(item -> {
          ExportAll exportOrder = new ExportAll(item.toString(), i -> i.is(item), StorehouseOrder.Origin.AUTOMATIC);

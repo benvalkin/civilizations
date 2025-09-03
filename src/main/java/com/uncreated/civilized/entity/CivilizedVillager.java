@@ -91,6 +91,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       this.getNavigation().setRequiredPathLength(48.0F);
       // this.setCanPickUpLoot(true);
       this.lifetimeRandom = RandomSource.create();
+      this.setPersistenceRequired(); // prevent auto-despawning
    }
 
    public void initBrandNewVillager() {
