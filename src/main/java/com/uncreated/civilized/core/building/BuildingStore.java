@@ -1,13 +1,9 @@
 package com.uncreated.civilized.core.building;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
-import net.minecraft.server.level.ServerLevel;
-import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -17,23 +13,22 @@ import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public abstract class BuildingStore extends SavedData {
 
    protected static final Logger LOGGER = LogUtils.getLogger();
 
-   protected Map<UUID, Building> buildings;
+   protected BuildingDB buildings;
 
    public abstract Level getLevel();
 
    protected BuildingStore() {
-      buildings = new HashMap<>();
+      buildings = new BuildingDB();
    }
 
    public ImmutableList<Building> all() {
-      return ImmutableList.copyOf(buildings.values());
+      return buildings.all();
    }
 
    public Building createNew(UUID settlementId, UUID placerId, BuildingType buildingType, BuildingBounds bounds) {
@@ -46,54 +41,53 @@ public abstract class BuildingStore extends SavedData {
                   .bounds(bounds)
                   .build();
 
-      buildings.put(building.getBuildingId(), building);
+      buildings.add(building);
       setDirty();
+
       return building;
    }
 
-   public Optional<Building> find(BlockPos blockPos) {
-      return all().stream().filter(b -> b.getBlockPos().equals(blockPos)).findFirst();
-   }
-
-   public Building get(BlockPos blockPos) {
-      return find(blockPos).orElseThrow();
-   }
-
    public Optional<Building> find(@Nullable UUID buildingId) {
-      if (buildingId == null)
-         return Optional.empty();
-      return Optional.ofNullable(buildings.get(buildingId));
+      return buildings.find(buildingId);
    }
 
-   public List<Building> findForSettlement(@Nullable UUID settlementId) {
-      if (settlementId == null)
-         return List.of();
-      return buildings.values().stream().filter(b -> b.getSettlementId().equals(settlementId)).toList();
+   public Set<Building> findForSettlement(@Nullable UUID settlementId) {
+      return buildings.getSettlementsToBuildingsIndex().getValues(settlementId);
    }
 
    public Building get(@Nullable UUID buildingId) {
       return find(buildingId).orElseThrow();
    }
 
+   /**
+    * This method has bad performance on large databases.
+    */
+   @Deprecated()
    public Optional<Building> findEnclosingBuilding(BlockPos blockPos) {
-      return all().stream().filter(b -> b.getBounds().contains(blockPos)).findFirst();
+      // BAD IMPLEMENTATION: if the blockpos is on the edge of a a blockpos index "quadrant", it may not be found
+      return buildings.getNearbyBlockPosToBuildingsIndex()
+            .getValues(blockPos)
+            .stream()
+            .filter(b -> b.getBounds().contains(blockPos))
+            .findFirst();
    }
 
-   public Optional<Building> findFromPrimarySign(SignBlockEntity serverEntity) {
-      return all().stream().filter(b -> serverEntity == b.getPrimarySign((ServerLevel) serverEntity.getLevel())).findFirst();
-   }
-
+   /**
+    * This method has bad performance on large databases.
+    */
+   @Deprecated()
    public Optional<Building> findOverlappingBuilding(BuildingBounds bounds) {
-      return all().stream().filter(b -> b.getBounds().isOverlapping(bounds)).findFirst();
+      // BAD IMPLEMENTATION: if the blockpos is on the edge of a a blockpos index "quadrant", it may not be found
+      return buildings.getNearbyBlockPosToBuildingsIndex()
+            .getValues(bounds.getCenter())
+            .stream()
+            .filter(b -> b.getBounds().isOverlapping(bounds))
+            .findFirst();
    }
 
    public Optional<Building> findStorehouse(UUID settlementId) {
-      return all().stream().filter(b -> b.getBuildingType() == BuildingType.STOREHOUSE && b.getSettlementId().equals(settlementId)).findFirst();
-   }
-
-   public Optional<Building> delete(BlockPos blockPos) {
-      Optional<Building> removed = Optional.ofNullable(buildings.remove(blockPos));
-      setDirty();
-      return removed;
+      return findForSettlement(settlementId).stream()
+            .filter(b -> b.getBuildingType() == BuildingType.STOREHOUSE)
+            .findFirst();
    }
 }

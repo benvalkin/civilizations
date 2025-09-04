@@ -35,7 +35,7 @@ public class ClientVillagerStore extends VillagerStore {
       if (operation != StoreOperation.UPDATE)
          throw new IllegalArgumentException("Sync store operation " + operation + " not supported on client");
 
-      assert villagers.containsKey(villagerInfo.getVillagerId());
+      assert villagers.exists(villagerInfo.getVillagerId());
       PacketDistributor.sendToServer(villagerInfo.toPacket());
       NeoForge.EVENT_BUS.post(new VillagerInfoUpdatedEvent(villagerInfo, true));
    }
@@ -50,9 +50,9 @@ public class ClientVillagerStore extends VillagerStore {
       if (packet.storeOperation() == StoreOperation.ADD_OR_OVERWRITE
             || packet.storeOperation() == StoreOperation.INIT_NEW_CLIENT) {
 
-         if (existing.isEmpty())
-            INSTANCE.villagers.put(fromPacket.getVillagerId(), fromPacket);
-         else
+         if (existing.isEmpty()) {
+            INSTANCE.villagers.add(fromPacket);
+         } else
             existing.get().copyFrom(fromPacket);
 
          NeoForge.EVENT_BUS.post(new VillagerInfoUpdatedEvent(existing.orElse(fromPacket), true));
@@ -84,7 +84,7 @@ public class ClientVillagerStore extends VillagerStore {
          existing.get().copyFrom(info);
          return existing.get();
       }
-      villagers.put(info.getVillagerId(), info);
+      villagers.add(info);
       return info;
    }
 }

@@ -120,7 +120,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
    }
 
    protected List<VillagerInfo> getCandidateOccupants(Building building, Settlement settlement) {
-      return SettlementUtil.getCitizens(settlement, ClientVillagerStore.INSTANCE).stream().sorted((v1, v2) -> {
+      return ClientVillagerStore.INSTANCE.getCitizens(settlement.getSettlementId()).stream().sorted((v1, v2) -> {
          boolean v1IsOccupant = building.getBuildingId().equals(v1.getHomeBuildingId());
          boolean v2IsOccupant = building.getBuildingId().equals(v2.getHomeBuildingId());
          if (v1IsOccupant && v2IsOccupant)

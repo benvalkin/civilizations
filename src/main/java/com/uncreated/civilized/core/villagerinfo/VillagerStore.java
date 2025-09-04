@@ -1,8 +1,7 @@
 package com.uncreated.civilized.core.villagerinfo;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -16,21 +15,25 @@ public abstract class VillagerStore extends SavedData {
 
    protected static final Logger LOGGER = LogUtils.getLogger();
 
-   protected Map<UUID, VillagerInfo> villagers;
+   protected VillagerInfoDB villagers;
 
    protected VillagerStore() {
-      villagers = new HashMap<>();
+      villagers = new VillagerInfoDB();
    }
 
    public ImmutableList<VillagerInfo> all() {
-      return ImmutableList.copyOf(villagers.values());
+      return villagers.all();
    }
 
    public Optional<VillagerInfo> find(UUID villagerId) {
-      return Optional.ofNullable(villagers.get(villagerId));
+      return villagers.find(villagerId);
+   }
+
+   public Set<VillagerInfo> getCitizens(UUID settlementId) {
+      return villagers.getSettlementsToVillagersIndex().getValues(settlementId);
    }
 
    public VillagerInfo get(UUID villagerId) {
-      return find(villagerId).orElseThrow();
+      return villagers.get(villagerId);
    }
 }

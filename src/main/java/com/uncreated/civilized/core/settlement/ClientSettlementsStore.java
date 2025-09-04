@@ -37,7 +37,7 @@ public class ClientSettlementsStore extends SettlementsStore {
       if (operation != StoreOperation.UPDATE)
          throw new IllegalArgumentException("Sync store operation " + operation + " not supported on client");
 
-      assert settlements.containsKey(settlement.getSettlementId());
+      assert settlements.exists(settlement.getSettlementId());
       PacketDistributor.sendToServer(settlement.toPacket());
       NeoForge.EVENT_BUS.post(new SettlementUpdatedEvent(settlement, true));
    }
@@ -53,7 +53,7 @@ public class ClientSettlementsStore extends SettlementsStore {
             || packet.storeOperation() == StoreOperation.INIT_NEW_CLIENT) {
 
          if (existing.isEmpty())
-            INSTANCE.settlements.put(fromPacket.getSettlementId(), fromPacket);
+            INSTANCE.settlements.add(fromPacket);
          else
             existing.get().copyFrom(fromPacket);
 

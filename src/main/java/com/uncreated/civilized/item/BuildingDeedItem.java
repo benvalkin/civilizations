@@ -3,7 +3,10 @@ package com.uncreated.civilized.item;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
+import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
+import com.uncreated.civilized.core.settlement.Settlement;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.building.requirement.EnclosedWallsRequirement;

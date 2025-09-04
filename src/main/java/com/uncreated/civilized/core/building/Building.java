@@ -27,7 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 
 @Getter
-@Builder
+@Builder(builderMethodName = "builder")
 @ToString
 public class Building {
 
@@ -35,14 +35,18 @@ public class Building {
          StreamCodec.ofMember(Building::encode, Building::decode);
 
    public static Building decode(FriendlyByteBuf buffer) {
-      return Building.builder()
-            .buildingId(buffer.readUUID())
-            .settlementId(buffer.readUUID())
-            .placerId(buffer.readUUID())
-            .buildingType(buffer.readEnum(BuildingType.class))
-            .bounds(BuildingBounds.decode(buffer))
-            .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
-            .build();
+      Building result =
+            Building.builder()
+                  .buildingId(buffer.readUUID())
+                  .settlementId(buffer.readUUID())
+                  .placerId(buffer.readUUID())
+                  .buildingType(buffer.readEnum(BuildingType.class))
+                  .bounds(BuildingBounds.decode(buffer))
+                  .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
+                  .build();
+
+      result.behaviour.applyNbt(buffer.readNbt());
+      return result;
    }
 
    // The stream encoder reference
@@ -53,6 +57,7 @@ public class Building {
       buffer.writeEnum(buildingType);
       bounds.encode(buffer);
       buffer.writeCollection(occupantIds, (buf, o) -> buf.writeUUID(o));
+      buffer.writeNbt(behaviour.toNbt());
    }
 
    public static final String FIELD_BUILDING_ID = "instance_uuid";
@@ -64,6 +69,7 @@ public class Building {
    public static final String FIELD_CENTER_POS = "center_pos";
    public static final String FIELD_LOWER_CORNER_POS = "lower_corner_pos";
    public static final String FIELD_UPPER_CORNER_POS = "upper_corner_pos";
+   public static final String FIELD_BEHAVIOUR_DATA = "behaviour_data";
 
    private UUID buildingId;
    private UUID settlementId;
@@ -91,6 +97,7 @@ public class Building {
       buildingType = other.buildingType;
       bounds = other.bounds;
       occupantIds = other.occupantIds; // BAD IMPLEMENTATION: this is sus if we are saving the list reference anywhere
+      behaviour.applyNbt(other.behaviour.toNbt());
    }
 
    public BlockPos getBlockPos() {
@@ -111,8 +118,8 @@ public class Building {
       return String.format(
             "{buildingType: %s buildingId: %s blockPos: %s occupants: %s}",
             buildingType,
-              buildingId.toString().substring(0, 6),
-              getBlockPos(),
+            buildingId.toString().substring(0, 6),
+            getBlockPos(),
             occupantIds.size());
    }
 
@@ -121,7 +128,8 @@ public class Building {
       return new CustomBuildingBuilder();
    }
 
-   private static class CustomBuildingBuilder extends BuildingBuilder {
+   public static class CustomBuildingBuilder extends BuildingBuilder {
+
       @Override
       public Building build() {
          var building = super.build();

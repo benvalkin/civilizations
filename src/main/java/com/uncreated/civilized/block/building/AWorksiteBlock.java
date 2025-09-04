@@ -5,9 +5,8 @@ import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import com.uncreated.civilized.block.building.entity.AWorksiteBlockEntity;
-import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.mojang.logging.LogUtils;
+import com.uncreated.civilized.block.building.entity.AWorksiteBlockEntity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -67,7 +66,7 @@ public abstract class AWorksiteBlock extends BaseEntityBlock {
       if (level.isClientSide())
          return;
 
-      ServerBuildingsStore.INSTANCE.delete(pos);
+      // ServerBuildingsStore.INSTANCE.delete(pos);
    }
 
    public abstract @NotNull AWorksiteBlockEntity newBuildingBlockEntity(BlockPos blockPos, BlockState blockState);

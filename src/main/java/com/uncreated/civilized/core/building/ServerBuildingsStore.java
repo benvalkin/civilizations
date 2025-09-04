@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
+import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
 
 import lombok.Getter;
@@ -58,7 +58,7 @@ public class ServerBuildingsStore extends BuildingStore {
    }
 
    public void onServerTick(MinecraftServer server, boolean hasTickTime) {
-      for (Building building : buildings.values()) {
+      for (Building building : buildings.all()) {
 
          if (building.getBehaviour() == null)
             continue;
@@ -75,7 +75,7 @@ public class ServerBuildingsStore extends BuildingStore {
    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
 
       ListTag tags = new ListTag();
-      for (Building building : buildings.values()) {
+      for (Building building : buildings.all()) {
          CompoundTag item = new CompoundTag();
          item.putUUID(Building.FIELD_BUILDING_ID, building.getBuildingId());
          item.putUUID(Building.FIELD_SETTLEMENT_ID, building.getSettlementId());
@@ -92,6 +92,7 @@ public class ServerBuildingsStore extends BuildingStore {
             occupantIds.add(occupantTag);
          }
          item.put(Building.FIELD_LIST_OCCUPANTS, occupantIds);
+         item.put(Building.FIELD_BEHAVIOUR_DATA, building.getBehaviour().toNbt());
          tags.add(item);
       }
 
@@ -131,14 +132,15 @@ public class ServerBuildingsStore extends BuildingStore {
 
          builder.occupantIds(occupantIds);
          Building building = builder.build();
-         store.buildings.put(building.getBuildingId(), building);
+         building.getBehaviour().applyNbt(itemTag.getCompound(Building.FIELD_BEHAVIOUR_DATA));
+         store.buildings.add(building);
       }
 
       return store;
    }
 
    public void replicateChange(Building building, StoreOperation operation) {
-      assert buildings.containsKey(building.getBuildingId());
+      assert buildings.exists(building.getBuildingId());
       PacketDistributor.sendToAllPlayers(building.toPacket(operation));
       NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, level, false));
       if (operation == StoreOperation.DELETE)
@@ -146,7 +148,7 @@ public class ServerBuildingsStore extends BuildingStore {
    }
 
    public void replicateFullToNewClient(ServerPlayer player) {
-      for (Building building : buildings.values()) {
+      for (Building building : buildings.all()) {
          PacketDistributor.sendToPlayer(player, building.toPacket(StoreOperation.INIT_NEW_CLIENT));
       }
    }
@@ -161,9 +163,9 @@ public class ServerBuildingsStore extends BuildingStore {
       if (packet.storeOperation() == StoreOperation.ADD_OR_OVERWRITE
             || packet.storeOperation() == StoreOperation.INIT_NEW_CLIENT) {
 
-         if (existing.isEmpty())
-            INSTANCE.buildings.put(fromPacket.getBuildingId(), fromPacket);
-         else
+         if (existing.isEmpty()) {
+            INSTANCE.buildings.add(fromPacket);
+         } else
             existing.get().copyFrom(fromPacket);
 
          INSTANCE.replicateChange(fromPacket, packet.storeOperation());
@@ -182,9 +184,9 @@ public class ServerBuildingsStore extends BuildingStore {
       }
 
       if (packet.storeOperation() == StoreOperation.DELETE) {
-         Building removed = INSTANCE.buildings.remove(existing.get().getBuildingId());
-         if (removed != null) {
-            INSTANCE.replicateChange(removed, StoreOperation.DELETE);
+         Optional<Building> removed = INSTANCE.buildings.remove(existing.get().getBuildingId());
+         if (removed.isPresent()) {
+            INSTANCE.replicateChange(removed.get(), StoreOperation.DELETE);
             INSTANCE.setDirty();
          }
       } else if (packet.storeOperation() == StoreOperation.UPDATE) {

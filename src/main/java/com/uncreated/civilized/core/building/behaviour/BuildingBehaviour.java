@@ -1,5 +1,6 @@
 package com.uncreated.civilized.core.building.behaviour;
 
+import net.minecraft.nbt.CompoundTag;
 import org.slf4j.Logger;
 
 import com.uncreated.civilized.core.building.Building;
@@ -25,4 +26,10 @@ public abstract class BuildingBehaviour {
 
    public void start(ServerLevel level, long gameTime) {}
    public void serverTick(ServerLevel level, long gameTime) {}
+   public void applyNbt(CompoundTag compoundTag) {
+
+   }
+   public CompoundTag toNbt() {
+      return new CompoundTag();
+   }
 }

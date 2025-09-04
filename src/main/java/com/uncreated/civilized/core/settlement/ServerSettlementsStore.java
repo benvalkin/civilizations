@@ -4,19 +4,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import lombok.Getter;
-import net.minecraft.world.level.Level;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.settlement.events.SettlementUpdatedEvent;
 
+import lombok.Getter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -48,7 +48,7 @@ public class ServerSettlementsStore extends SettlementsStore {
    }
 
    public void onServerTick(MinecraftServer server, boolean hasTickTime) {
-      for (Settlement settlement : settlements.values()) {
+      for (Settlement settlement : settlements.all()) {
          try {
             settlement.serverTick(server.overworld().getLevel(), server.overworld().getGameTime());
          } catch (Exception ex) {
@@ -61,7 +61,7 @@ public class ServerSettlementsStore extends SettlementsStore {
    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
 
       ListTag tags = new ListTag();
-      for (Settlement settlement : settlements.values()) {
+      for (Settlement settlement : settlements.all()) {
          CompoundTag item = new CompoundTag();
          item.putUUID(Settlement.FIELD_SETTLEMENT_ID, settlement.getSettlementId());
          item.putUUID(Settlement.FIELD_OWNER_ID, settlement.getOwnerId());
@@ -107,20 +107,20 @@ public class ServerSettlementsStore extends SettlementsStore {
 
          builder.citizenIds(citizenIds);
          Settlement settlement = builder.build();
-         store.settlements.put(settlement.getSettlementId(), settlement);
+         store.settlements.add(settlement);
       }
 
       return store;
    }
 
    public void replicateChange(Settlement settlement, StoreOperation operation) {
-      assert settlements.containsKey(settlement.getSettlementId());
+      assert settlements.exists(settlement.getSettlementId());
       PacketDistributor.sendToAllPlayers(settlement.toPacket(operation));
       NeoForge.EVENT_BUS.post(new SettlementUpdatedEvent(settlement, false));
    }
 
    public void replicateFullToNewClient(ServerPlayer player) {
-      for (Settlement settlement : settlements.values()) {
+      for (Settlement settlement : settlements.all()) {
          PacketDistributor.sendToPlayer(player, settlement.toPacket(StoreOperation.INIT_NEW_CLIENT));
       }
    }
@@ -136,7 +136,7 @@ public class ServerSettlementsStore extends SettlementsStore {
             || packet.storeOperation() == StoreOperation.INIT_NEW_CLIENT) {
 
          if (existing.isEmpty())
-            INSTANCE.settlements.put(fromPacket.getSettlementId(), fromPacket);
+            INSTANCE.settlements.add(fromPacket);
          else
             existing.get().copyFrom(fromPacket);
 
@@ -156,9 +156,9 @@ public class ServerSettlementsStore extends SettlementsStore {
       }
 
       if (packet.storeOperation() == StoreOperation.DELETE) {
-         Settlement removed = INSTANCE.settlements.remove(existing.get().getSettlementId());
-         if (removed != null) {
-            INSTANCE.replicateChange(removed, StoreOperation.DELETE);
+         Optional<Settlement> removed = INSTANCE.settlements.remove(existing.get().getSettlementId());
+         if (removed.isPresent()) {
+            INSTANCE.replicateChange(removed.get(), StoreOperation.DELETE);
             INSTANCE.setDirty();
          }
       } else if (packet.storeOperation() == StoreOperation.UPDATE) {

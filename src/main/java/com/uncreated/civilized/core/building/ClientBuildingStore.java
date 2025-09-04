@@ -35,7 +35,7 @@ public class ClientBuildingStore extends BuildingStore {
    }
 
    public void syncToServer() {
-      for (Building building : buildings.values()) {
+      for (Building building : buildings.all()) {
          PacketDistributor.sendToServer(building.toPacket());
       }
    }
@@ -44,7 +44,7 @@ public class ClientBuildingStore extends BuildingStore {
       if (operation != StoreOperation.UPDATE && operation != StoreOperation.DELETE)
          throw new IllegalArgumentException("Sync store operation " + operation + " not supported on client");
 
-      assert buildings.containsKey(building.getBuildingId());
+      assert buildings.exists(building.getBuildingId());
       PacketDistributor.sendToServer(building.toPacket(operation));
       NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, getLevel(), true));
       if (operation == StoreOperation.DELETE)
@@ -61,9 +61,9 @@ public class ClientBuildingStore extends BuildingStore {
       if (packet.storeOperation() == StoreOperation.ADD_OR_OVERWRITE
             || packet.storeOperation() == StoreOperation.INIT_NEW_CLIENT) {
 
-         if (existing.isEmpty())
-            INSTANCE.buildings.put(fromPacket.getBuildingId(), fromPacket);
-         else
+         if (existing.isEmpty()) {
+            INSTANCE.buildings.add(fromPacket);
+         } else
             existing.get().copyFrom(fromPacket);
 
          NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));

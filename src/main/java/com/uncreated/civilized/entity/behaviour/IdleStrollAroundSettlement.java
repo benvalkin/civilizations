@@ -2,6 +2,7 @@ package com.uncreated.civilized.entity.behaviour;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 
@@ -27,7 +28,7 @@ public class IdleStrollAroundSettlement extends Behavior<CivilizedVillager> {
    private final int maxVerticalDist;
    private final float speedModifier;
    private long nextStrolTime;
-   private List<Building> settlementBuildings;
+   private Set<Building> settlementBuildings;
    private Building home;
 
    public IdleStrollAroundSettlement(int maxHorizontalDist, int maxVerticalDist, float strollSpeedModifier) {

@@ -43,7 +43,7 @@ public class ServerVillagerStore extends VillagerStore {
    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
 
       ListTag tags = new ListTag();
-      for (VillagerInfo villagerInfo : villagers.values()) {
+      for (VillagerInfo villagerInfo : villagers.all()) {
          CompoundTag item = new CompoundTag();
          item.putUUID(VillagerInfo.FIELD_VILLAGER_ID, villagerInfo.getVillagerId());
          item.putBoolean(VillagerInfo.FIELD_IS_DECEASED, villagerInfo.isDeceased());
@@ -103,20 +103,20 @@ public class ServerVillagerStore extends VillagerStore {
                      .collect(Collectors.toList()));
 
          VillagerInfo villagerInfo = builder.build();
-         store.villagers.put(villagerInfo.getVillagerId(), villagerInfo);
+         store.villagers.add(villagerInfo);
       }
 
       return store;
    }
 
    public void replicateChange(VillagerInfo villagerInfo, StoreOperation operation) {
-      assert villagers.containsKey(villagerInfo.getVillagerId());
+      assert villagers.exists(villagerInfo.getVillagerId());
       PacketDistributor.sendToAllPlayers(villagerInfo.toPacket(operation));
       NeoForge.EVENT_BUS.post(new VillagerInfoUpdatedEvent(villagerInfo, false));
    }
 
    public void replicateFullToNewClient(ServerPlayer player) {
-      for (VillagerInfo villagerInfo : villagers.values()) {
+      for (VillagerInfo villagerInfo : villagers.all()) {
          PacketDistributor.sendToPlayer(player, villagerInfo.toPacket(StoreOperation.INIT_NEW_CLIENT));
       }
    }
@@ -131,9 +131,9 @@ public class ServerVillagerStore extends VillagerStore {
       if (packet.storeOperation() == StoreOperation.ADD_OR_OVERWRITE
             || packet.storeOperation() == StoreOperation.INIT_NEW_CLIENT) {
 
-         if (existing.isEmpty())
-            INSTANCE.villagers.put(fromPacket.getVillagerId(), fromPacket);
-         else
+         if (existing.isEmpty()) {
+            INSTANCE.villagers.add(fromPacket);
+         } else
             existing.get().copyFrom(fromPacket);
 
          INSTANCE.setDirty();
@@ -152,9 +152,9 @@ public class ServerVillagerStore extends VillagerStore {
       }
 
       if (packet.storeOperation() == StoreOperation.DELETE) {
-         VillagerInfo removed = INSTANCE.villagers.remove(existing.get().getVillagerId());
-         if (removed != null) {
-            INSTANCE.replicateChange(removed, StoreOperation.DELETE);
+         Optional<VillagerInfo> removed = INSTANCE.villagers.remove(existing.get().getVillagerId());
+         if (removed.isPresent()) {
+            INSTANCE.replicateChange(removed.get(), StoreOperation.DELETE);
             INSTANCE.setDirty();
          }
       } else if (packet.storeOperation() == StoreOperation.UPDATE) {
@@ -172,11 +172,11 @@ public class ServerVillagerStore extends VillagerStore {
       newVillager.firstName(names.getFirst()).lastName(names.getSecond());
 
       VillagerInfo info = newVillager.build();
-      villagers.put(info.getVillagerId(), info);
+      villagers.add(info);
       return info;
    }
 
    public Optional<VillagerInfo> delete(CivilizedVillager villager) {
-      return Optional.ofNullable(villagers.remove(villager.getVillagerId()));
+      return villagers.remove(villager.getVillagerId());
    }
 }
