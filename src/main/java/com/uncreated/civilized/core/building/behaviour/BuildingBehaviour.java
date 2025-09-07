@@ -22,6 +22,7 @@ public abstract class BuildingBehaviour {
       case INN -> new InnBehaviour(building);
       case CROP_FARM -> new CropFarmBehaviour(building);
       case GROVE -> new GroveBehaviour(building);
+      case CATTLE_FARM, SHEEP_FARM, HOG_FARM, CHICKEN_FARM -> new AnimalFarmBehaviour(building);
       default -> new InertBuildingBehaviour(building);
       };
    }

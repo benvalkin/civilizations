@@ -23,20 +23,20 @@ public class CropFarmBehaviour extends BuildingBehaviour {
    }
 
    public void applyNbt(CompoundTag compoundTag) {
-      readCropSlot(0, compoundTag);
-      readCropSlot(1, compoundTag);
-      readCropSlot(2, compoundTag);
+      readItemSlot(0, compoundTag);
+      readItemSlot(1, compoundTag);
+      readItemSlot(2, compoundTag);
    }
 
    public CompoundTag toNbt() {
       CompoundTag tag = new CompoundTag();
-      writeCropSlot(0, tag);
-      writeCropSlot(1, tag);
-      writeCropSlot(2, tag);
+      writeItemSlot(0, tag);
+      writeItemSlot(1, tag);
+      writeItemSlot(2, tag);
       return tag;
    }
 
-   private void readCropSlot(int i, CompoundTag compoundTag) {
+   private void readItemSlot(int i, CompoundTag compoundTag) {
       String tagKey = FIELD_CROP_SLOT + i;
       if (compoundTag.contains(tagKey))
          cropSlots[i] = ItemStack.parseOptional(building.getRegistryAccess(), compoundTag.getCompound(tagKey));
@@ -44,7 +44,7 @@ public class CropFarmBehaviour extends BuildingBehaviour {
          cropSlots[i] = ItemStack.EMPTY;
    }
 
-   private void writeCropSlot(int i, CompoundTag tag) {
+   private void writeItemSlot(int i, CompoundTag tag) {
       String tagKey = FIELD_CROP_SLOT + i;
       ItemStack itemStack = cropSlots[i];
       if (itemStack.isEmpty())
