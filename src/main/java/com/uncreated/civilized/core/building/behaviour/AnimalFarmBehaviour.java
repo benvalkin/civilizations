@@ -74,6 +74,10 @@ public class AnimalFarmBehaviour extends BuildingBehaviour {
       }
    }
 
+   public boolean isCorrectFood(ItemStack stack) {
+      return Arrays.stream(foodSlots).anyMatch(i -> ItemStack.isSameItem(i, stack));
+   }
+
    public ItemStack getFoodSlot(int i) {
       return foodSlots[i];
    }

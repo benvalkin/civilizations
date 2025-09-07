@@ -47,4 +47,8 @@ public class GroveBehaviour extends BuildingBehaviour {
 
       tag.put(FIELD_SAPLING, sapling.save(building.getRegistryAccess()));
    }
+
+   public boolean isCorrectSapling(ItemStack stack) {
+      return ItemStack.isSameItem(sapling, stack);
+   }
 }

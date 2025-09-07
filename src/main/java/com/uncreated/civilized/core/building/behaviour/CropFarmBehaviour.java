@@ -61,6 +61,10 @@ public class CropFarmBehaviour extends BuildingBehaviour {
       }
    }
 
+   public boolean isCorrectCrop(ItemStack stack) {
+      return Arrays.stream(cropSlots).anyMatch(i -> ItemStack.isSameItem(i, stack));
+   }
+
    public ItemStack getCropSlot(int i) {
       return cropSlots[i];
    }

@@ -3,20 +3,18 @@ package com.uncreated.civilized.entity.behaviour.worker.rancher;
 import java.util.List;
 import java.util.Optional;
 
-import com.uncreated.civilized.core.building.logistics.LogisticsManager;
-import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
-import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
-import com.uncreated.civilized.core.building.logistics.orders.task.ToolRequirement;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.PickaxeItem;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.behaviour.AnimalFarmBehaviour;
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
@@ -24,6 +22,7 @@ import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Animal;
@@ -64,11 +63,25 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
       }
 
       Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
-      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
-      TaskConsumableItemRequirement  toolRequirement = new TaskConsumableItemRequirement("breed_animals", i -> workSite.getBuildingType().getAnimalFoodItems().stream().anyMatch(i::is), StorehouseOrder.Origin.AUTOMATIC, 2, 16);
-      toolRequirement.setExpiryTime(10);
-      logisticsManager.registerOrder(home, toolRequirement);
-      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("animal_food", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 16, 2);
+      LogisticsManager logisticsManager =
+            ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      AnimalFarmBehaviour behaviour = (AnimalFarmBehaviour) workSite.getBehaviour();
+      TaskConsumableItemRequirement taskItemRequirement =
+            new TaskConsumableItemRequirement(
+                  "breed_animals",
+                  behaviour::isCorrectFood,
+                  StorehouseOrder.Origin.AUTOMATIC,
+                  2,
+                  16);
+      taskItemRequirement.setExpiryTime(10);
+      logisticsManager.registerOrder(home, taskItemRequirement);
+      ImportWhenStockpilesLow importOrder =
+            new ImportWhenStockpilesLow(
+                  "animal_food",
+                  taskItemRequirement.getItemSearch(),
+                  StorehouseOrder.Origin.AUTOMATIC,
+                  16,
+                  2);
       importOrder.setExpiryTime(10);
       logisticsManager.registerOrder(home, importOrder);
 
@@ -127,7 +140,8 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
             return;
          }
 
-         Optional<ItemStack> animalFoodItemsInventory = getAnimalFoodItemsInventory(villager, animal.get()).stream().findAny();
+         Optional<ItemStack> animalFoodItemsInventory =
+               getAnimalFoodItemsInventory(villager, animal.get()).stream().findAny();
          if (animalFoodItemsInventory.isEmpty()) {
             doStop(level, villager, gameTime);
             return;

@@ -10,6 +10,13 @@ import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.behaviour.CropFarmBehaviour;
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
@@ -56,6 +63,30 @@ public class PlantCrops extends WorkTaskBehaviour {
 
       if (emptyFarmland.isEmpty())
          return false;
+
+      // import new seeds only if there is empty farmland
+      Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
+      LogisticsManager logisticsManager =
+            ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      CropFarmBehaviour behaviour = (CropFarmBehaviour) workSite.getBehaviour();
+      TaskItemRequirement taskItemRequirement =
+            new TaskConsumableItemRequirement(
+                  "plant_crops",
+                  behaviour::isCorrectCrop,
+                  StorehouseOrder.Origin.AUTOMATIC,
+                  16);
+      taskItemRequirement.setExpiryTime(10);
+      logisticsManager.registerOrder(home, taskItemRequirement);
+      ImportWhenStockpilesLow importOrder =
+            new ImportWhenStockpilesLow(
+                  "seeds",
+                  taskItemRequirement.getItemSearch(),
+                  StorehouseOrder.Origin.AUTOMATIC,
+                  32,
+                  8);
+      importOrder.setExpiryTime(10);
+      logisticsManager.registerOrder(home, importOrder);
+
       if (!(hasSeedsInInventory(villager.getWorkInputInventory())
             || hasSeedsInInventory(villager.getWorkOutputInventory())))
          return false;

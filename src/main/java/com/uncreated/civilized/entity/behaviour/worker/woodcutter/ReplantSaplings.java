@@ -3,12 +3,6 @@ package com.uncreated.civilized.entity.behaviour.worker.woodcutter;
 import java.util.List;
 import java.util.Optional;
 
-import com.uncreated.civilized.core.building.logistics.LogisticsManager;
-import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
-import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
-import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -16,6 +10,13 @@ import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.behaviour.GroveBehaviour;
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
+import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
+import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
@@ -61,11 +62,24 @@ public class ReplantSaplings extends WorkTaskBehaviour {
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
 
       Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
-      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
-      TaskItemRequirement toolRequirement = new TaskConsumableItemRequirement("replant_saplings", i -> i.is(ItemTags.SAPLINGS), StorehouseOrder.Origin.AUTOMATIC, 16);
-      toolRequirement.setExpiryTime(10);
-      logisticsManager.registerOrder(home, toolRequirement);
-      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("any_saplings", i -> i.is(ItemTags.SAPLINGS), StorehouseOrder.Origin.AUTOMATIC, 32, 8);
+      LogisticsManager logisticsManager =
+            ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      GroveBehaviour behaviour = (GroveBehaviour) workSite.getBehaviour();
+      TaskItemRequirement taskItemRequirement =
+            new TaskConsumableItemRequirement(
+                  "replant_saplings",
+                  behaviour::isCorrectSapling,
+                  StorehouseOrder.Origin.AUTOMATIC,
+                  16);
+      taskItemRequirement.setExpiryTime(10);
+      logisticsManager.registerOrder(home, taskItemRequirement);
+      ImportWhenStockpilesLow importOrder =
+            new ImportWhenStockpilesLow(
+                  "saplings",
+                  taskItemRequirement.getItemSearch(),
+                  StorehouseOrder.Origin.AUTOMATIC,
+                  32,
+                  8);
       importOrder.setExpiryTime(10);
       logisticsManager.registerOrder(home, importOrder);
 
