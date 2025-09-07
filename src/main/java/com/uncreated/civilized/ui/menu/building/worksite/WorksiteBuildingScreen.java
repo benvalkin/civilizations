@@ -1,18 +1,18 @@
-package com.uncreated.civilized.ui.menu.building.worksite.residence;
+package com.uncreated.civilized.ui.menu.building.worksite;
 
 import java.util.List;
 
+import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
-import com.uncreated.civilized.ui.menu.building.BuildingMenu;
 import com.uncreated.civilized.ui.menu.building.BuildingSettingsTab;
-import com.uncreated.civilized.ui.menu.building.worksite.residence.tabs.ManageWorkersTab;
-import com.uncreated.civilized.ui.menu.building.worksite.residence.tabs.WorksiteInfoTab;
+import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
+import com.uncreated.civilized.ui.menu.building.worksite.tabs.WorksiteInfoTab;
 import com.uncreated.civilized.ui.tabs.ATab;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
 
 public class WorksiteBuildingScreen extends ABuildingScreen {
 
@@ -20,26 +20,15 @@ public class WorksiteBuildingScreen extends ABuildingScreen {
    private Button tab2;
    private Button tab3;
 
-   private BuildingMenu menu;
-
-   public WorksiteBuildingScreen(BuildingMenu menu, Inventory playerInventory, Component title) {
-      super(menu, playerInventory, title);
-      this.menu = menu;
+   public WorksiteBuildingScreen(Building building, Settlement settlement, Component title) {
+      super(building, settlement, title);
    }
 
    @Override
    protected List<ATab> createTabs(int contentLeftPos, int contentTopPos, int tabWidth, int tabHeight) {
 
       return List.of(
-            new WorksiteInfoTab(
-                  0,
-                  contentLeftPos,
-                  contentTopPos,
-                  tabWidth,
-                  tabHeight,
-                  this.font,
-                  menu.getBuilding(),
-                  menu.getSettlement()),
+            new WorksiteInfoTab(0, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, building, settlement),
             new ManageWorkersTab(
                   1,
                   contentLeftPos,
@@ -47,8 +36,8 @@ public class WorksiteBuildingScreen extends ABuildingScreen {
                   tabWidth,
                   tabHeight,
                   this.font,
-                  menu.getBuilding(),
-                  menu.getSettlement()),
+                  building,
+                  settlement),
             new BuildingSettingsTab(
                   2,
                   contentLeftPos,
@@ -56,8 +45,8 @@ public class WorksiteBuildingScreen extends ABuildingScreen {
                   tabWidth,
                   tabHeight,
                   this.font,
-                  menu.getBuilding(),
-                  menu.getSettlement()));
+                  building,
+                  settlement));
    }
 
    @Override
@@ -65,17 +54,17 @@ public class WorksiteBuildingScreen extends ABuildingScreen {
 
       return List.of(
             Button.builder(Component.literal("I"), this::onClickTab1)
-                  .pos(leftPos + 60, topPos + 120)
+                  .pos(leftPos - 18, topPos)
                   .size(18, 18)
                   .tooltip(Tooltip.create(Component.translatable("menu.building.worksite.info.tab.heading"))),
 
             Button.builder(Component.literal("W"), this::onClickTab2)
-                  .pos(leftPos + 60, topPos + 140)
+                  .pos(leftPos - 18, topPos + 20)
                   .size(18, 18)
                   .tooltip(Tooltip.create(Component.translatable("menu.building.worksite.workers.tab.heading"))),
 
             Button.builder(Component.literal("S"), this::onClickTab3)
-                  .pos(leftPos + 60, topPos + 160)
+                  .pos(leftPos - 18, topPos + 40)
                   .size(18, 18)
                   .tooltip(Tooltip.create(Component.translatable("menu.building.settings.tab.heading"))));
    }

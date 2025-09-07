@@ -1,18 +1,17 @@
 package com.uncreated.civilized.block.building.entity;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
+import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.block.building.CropFarmBlock;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
-import com.mojang.logging.LogUtils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -88,7 +87,8 @@ public abstract class AWorksiteBlockEntity extends BaseContainerBlockEntity {
    public void serverRegisterBuilding(UUID placerId) {
 
       var settlement =
-            ServerSettlementsStore.INSTANCE.findFromOwner(placerId).orElse(ServerSettlementsStore.INSTANCE.createNew(placerId));
+            ServerSettlementsStore.INSTANCE.findFromOwner(placerId)
+                  .orElse(ServerSettlementsStore.INSTANCE.createNew(placerId));
 
       Building building =
             ServerBuildingsStore.INSTANCE.createNew(
@@ -100,10 +100,6 @@ public abstract class AWorksiteBlockEntity extends BaseContainerBlockEntity {
       LOGGER.info("Registered new building {} ({}).", building.getBuildingType(), building.getBuildingId());
 
       triggerBlockUpdate();
-   }
-
-   public List<UUID> getAssignedWorkerIds() {
-      return ServerBuildingsStore.INSTANCE.get(getBlockPos()).getOccupantIds();
    }
 
    public abstract @NotNull BuildingType getBuildingType();

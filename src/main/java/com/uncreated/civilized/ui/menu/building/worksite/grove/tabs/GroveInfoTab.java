@@ -1,25 +1,37 @@
-package com.uncreated.civilized.ui.menu.building.worksite.residence.tabs;
+package com.uncreated.civilized.ui.menu.building.worksite.grove.tabs;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.compress.utils.Lists;
+
 import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.behaviour.GroveBehaviour;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
+import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.Slot;
+import net.neoforged.neoforge.network.PacketDistributor;
 
-public class WorksiteInfoTab extends ABuildingScreenTab {
+public class GroveInfoTab extends ABuildingScreenTab {
 
    private List<VillagerInfo> workers;
+   private final Button chooseSaplings;
 
-   public WorksiteInfoTab(
+   public GroveInfoTab(
          int index,
          int x,
          int y,
@@ -39,6 +51,33 @@ public class WorksiteInfoTab extends ABuildingScreenTab {
             building,
             settlement);
       this.workers = createOccupantsList();
+
+      chooseSaplings =
+            Button.builder(
+                  Component.translatable("menu.building.worksite.grove.edit_allowed_saplings"),
+                  // notice how if the button's 'x' is set to the parent's width, the button seems to render right to
+                  // left...
+                  // is this a feature??
+                  this::onPressModifyItems).pos(x, height - 18).size(80, 18).build();
+   }
+
+   private void onPressModifyItems(Button button) {
+      PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(building.getBuildingId(), 1));
+   }
+
+   protected Container createContainer() {
+      return new SimpleContainer(1);
+   }
+
+   @Override
+   protected List<Slot> createAndArrangeItemSlots(Container container) {
+
+      GroveBehaviour groveBehaviour = (GroveBehaviour) building.getBehaviour();
+      container.setItem(0, groveBehaviour.getSapling());
+
+      ArrayList<Slot> slots = Lists.newArrayList();
+      slots.add(new Slot(container, 0, getX() + 18, getHeight() - 60));
+      return slots;
    }
 
    @Override
@@ -67,11 +106,23 @@ public class WorksiteInfoTab extends ABuildingScreenTab {
                Colors.MENU_TEXT_DARK,
                false);
       }
+
+      chooseSaplings.render(graphics, mouseX, mouseY, partialTicks);
+
+      graphics.drawString(
+            font,
+            Component.translatable("menu.building.worksite.grove.allowed_saplings.heading"),
+            getX(),
+            getHeight() - 70,
+            Colors.MENU_TEXT_DARK,
+            false);
+
+      renderItems(graphics, mouseX, mouseY, partialTicks);
    }
 
    @Override
    public List<? extends GuiEventListener> children() {
-      return List.of();
+      return List.of(chooseSaplings);
    }
 
    private List<VillagerInfo> createOccupantsList() {

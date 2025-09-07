@@ -19,8 +19,11 @@ public abstract class ATab extends AbstractContainerWidget implements IRefreshab
       this.font = font;
    }
 
-   @Override
-   protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+   protected void init() {
+
+   }
+
+   protected void onClose() {
 
    }
 
@@ -34,7 +37,15 @@ public abstract class ATab extends AbstractContainerWidget implements IRefreshab
       return 1;
    }
 
+   public void tick() {
+   }
+
    public void refresh() {
+
+   }
+
+   @Override
+   protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
    }
 }

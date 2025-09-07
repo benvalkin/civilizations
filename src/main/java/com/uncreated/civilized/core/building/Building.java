@@ -19,7 +19,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -31,10 +32,10 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 @ToString
 public class Building {
 
-   public static StreamCodec<FriendlyByteBuf, Building> CODEC =
+   public static StreamCodec<RegistryFriendlyByteBuf, Building> CODEC =
          StreamCodec.ofMember(Building::encode, Building::decode);
 
-   public static Building decode(FriendlyByteBuf buffer) {
+   public static Building decode(RegistryFriendlyByteBuf buffer) {
       Building result =
             Building.builder()
                   .buildingId(buffer.readUUID())
@@ -43,6 +44,7 @@ public class Building {
                   .buildingType(buffer.readEnum(BuildingType.class))
                   .bounds(BuildingBounds.decode(buffer))
                   .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
+                  .registryAccess(buffer.registryAccess())
                   .build();
 
       result.behaviour.applyNbt(buffer.readNbt());
@@ -50,7 +52,7 @@ public class Building {
    }
 
    // The stream encoder reference
-   public void encode(FriendlyByteBuf buffer) {
+   public void encode(RegistryFriendlyByteBuf buffer) {
       buffer.writeUUID(buildingId);
       buffer.writeUUID(settlementId);
       buffer.writeUUID(placerId);
@@ -81,6 +83,7 @@ public class Building {
    private BuildingBehaviour behaviour;
    @Setter
    private @Nullable BlockPos primarySignPos;
+   private HolderLookup.Provider registryAccess;
 
    public Packet toPacket() {
       return new Packet(this, StoreOperation.UPDATE);
@@ -148,14 +151,14 @@ public class Building {
       public static final CustomPacketPayload.Type<Packet> SYNC_TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "sync_building"));
 
-      public static StreamCodec<FriendlyByteBuf, Packet> STREAM_CODEC =
+      public static StreamCodec<RegistryFriendlyByteBuf, Packet> STREAM_CODEC =
             StreamCodec.ofMember(Packet::encode, Packet::decode);
 
-      public static Packet decode(FriendlyByteBuf buffer) {
+      public static Packet decode(RegistryFriendlyByteBuf buffer) {
          return new Packet(Building.decode(buffer), buffer.readEnum(StoreOperation.class));
       }
 
-      public void encode(FriendlyByteBuf buffer) {
+      public void encode(RegistryFriendlyByteBuf buffer) {
          building.encode(buffer);
          buffer.writeEnum(storeOperation);
       }

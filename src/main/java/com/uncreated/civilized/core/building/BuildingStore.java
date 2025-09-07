@@ -39,6 +39,7 @@ public abstract class BuildingStore extends SavedData {
                   .buildingType(buildingType)
                   .placerId(placerId)
                   .bounds(bounds)
+                  .registryAccess(getLevel().registryAccess())
                   .build();
 
       buildings.add(building);
@@ -59,26 +60,18 @@ public abstract class BuildingStore extends SavedData {
       return find(buildingId).orElseThrow();
    }
 
-   /**
-    * This method has bad performance on large databases.
-    */
-   @Deprecated()
    public Optional<Building> findEnclosingBuilding(BlockPos blockPos) {
-      // BAD IMPLEMENTATION: if the blockpos is on the edge of a a blockpos index "quadrant", it may not be found
-      return buildings.getNearbyBlockPosToBuildingsIndex()
+      // BAD IMPLEMENTATION: if the blockpos is on the edge of a blockpos index "quadrant", it may not be found
+      return buildings.getProximityIndex()
             .getValues(blockPos)
             .stream()
             .filter(b -> b.getBounds().contains(blockPos))
             .findFirst();
    }
 
-   /**
-    * This method has bad performance on large databases.
-    */
-   @Deprecated()
    public Optional<Building> findOverlappingBuilding(BuildingBounds bounds) {
-      // BAD IMPLEMENTATION: if the blockpos is on the edge of a a blockpos index "quadrant", it may not be found
-      return buildings.getNearbyBlockPosToBuildingsIndex()
+      // BAD IMPLEMENTATION: if the blockpos is on the edge of a blockpos index "quadrant", it may not be found
+      return buildings.getProximityIndex()
             .getValues(bounds.getCenter())
             .stream()
             .filter(b -> b.getBounds().isOverlapping(bounds))

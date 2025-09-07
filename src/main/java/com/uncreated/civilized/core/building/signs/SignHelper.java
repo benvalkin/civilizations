@@ -1,6 +1,6 @@
 package com.uncreated.civilized.core.building.signs;
 
-import static com.uncreated.civilized.ui.menu.building.worksite.residence.tabs.ManageWorkersTab.MAX_ASSIGNED_WORKERS;
+import static com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab.MAX_ASSIGNED_WORKERS;
 
 import java.util.Arrays;
 import java.util.List;

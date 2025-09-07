@@ -213,6 +213,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    public @NotNull SimpleContainer getWorkOutputInventory() {
       return workOutputInventory;
    }
+
    public @NotNull SimpleContainer getLogisticsInventory() {
       return logisticsInventory;
    }

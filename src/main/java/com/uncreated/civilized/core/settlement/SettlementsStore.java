@@ -1,18 +1,12 @@
 package com.uncreated.civilized.core.settlement;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.logging.LogUtils;
-import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -46,7 +40,7 @@ public abstract class SettlementsStore extends SavedData {
    }
 
    public Optional<Settlement> find(UUID settlementId) {
-      return Optional.ofNullable(settlements.get(settlementId));
+      return settlements.find(settlementId);
    }
 
    public Settlement get(UUID settlementId) {

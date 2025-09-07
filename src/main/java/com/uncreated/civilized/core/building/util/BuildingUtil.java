@@ -1,22 +1,18 @@
 package com.uncreated.civilized.core.building.util;
 
 import static com.uncreated.civilized.ui.menu.building.residence.tabs.ManageResidentsTab.MAX_ASSIGNED_RESIDENTS;
-import static com.uncreated.civilized.ui.menu.building.worksite.residence.tabs.ManageWorkersTab.MAX_ASSIGNED_WORKERS;
+import static com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab.MAX_ASSIGNED_WORKERS;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingStore;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerStore;
-
-import net.minecraft.core.BlockPos;
 
 public class BuildingUtil {
 

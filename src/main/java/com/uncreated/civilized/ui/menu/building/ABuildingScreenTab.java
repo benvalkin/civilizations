@@ -3,13 +3,13 @@ package com.uncreated.civilized.ui.menu.building;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.style.Colors;
-import com.uncreated.civilized.ui.tabs.ATab;
+import com.uncreated.civilized.ui.tabs.ATabWithViewableItemSlots;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
-public abstract class ABuildingScreenTab extends ATab {
+public abstract class ABuildingScreenTab extends ATabWithViewableItemSlots {
 
    private final Component tabTitle;
    protected final Building building;
@@ -33,12 +33,13 @@ public abstract class ABuildingScreenTab extends ATab {
 
    @Override
    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+      int fontStartX = (width - font.width(tabTitle)) / 2;
       graphics.drawWordWrap(
             font,
             tabTitle,
-            getX() + (width - font.width(tabTitle)) / 2,
+            getX() + fontStartX,
             getY(),
-            width,
+            width - fontStartX,
             Colors.MENU_TEXT_DARK,
             false);
    }

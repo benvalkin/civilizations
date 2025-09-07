@@ -119,7 +119,8 @@ public class ServerBuildingsStore extends BuildingStore {
                            new BuildingBounds(
                                  BlockPos.of(itemTag.getLong(Building.FIELD_CENTER_POS)),
                                  BlockPos.of(itemTag.getLong(Building.FIELD_LOWER_CORNER_POS)),
-                                 BlockPos.of(itemTag.getLong(Building.FIELD_UPPER_CORNER_POS))));
+                                 BlockPos.of(itemTag.getLong(Building.FIELD_UPPER_CORNER_POS))))
+                     .registryAccess(lookupProvider);
 
          ListTag occupantIdsTag = itemTag.getList(Building.FIELD_LIST_OCCUPANTS, Tag.TAG_COMPOUND);
          List<UUID> occupantIds = Lists.newArrayList();

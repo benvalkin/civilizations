@@ -8,7 +8,7 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.ui.menu.building.BuildingMenu;
+import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.items.ChooseCropsMenu;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -51,7 +51,7 @@ public class SettlementMandateItem extends Item {
 
             @Override
             public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-               return new BuildingMenu(i, inventory, new SimpleContainer(9), settlement, enclosingBuilding.get());
+               return new ChooseCropsMenu(i, inventory, new SimpleContainer(9), settlement, enclosingBuilding.get());
             }
 
             @Override

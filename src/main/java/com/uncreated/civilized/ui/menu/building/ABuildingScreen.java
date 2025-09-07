@@ -4,33 +4,53 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.List;
 
-import com.uncreated.civilized.ui.style.Colors;
+import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.worksite.WorksiteBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.CropFarmBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.worksite.grove.GroveBuildingScreen;
 import com.uncreated.civilized.ui.tabs.AMenuScreenWithTabs;
 import com.uncreated.civilized.ui.tabs.ATab;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Inventory;
 
-public abstract class ABuildingScreen extends AMenuScreenWithTabs<BuildingMenu> {
-   private static final ResourceLocation CONTAINER_LOCATION =
+public abstract class ABuildingScreen extends AMenuScreenWithTabs {
+   private static final ResourceLocation MENU_TEXTURE =
          ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_menu.png");
 
-   public ABuildingScreen(BuildingMenu menu, Inventory playerInventory, Component title) {
-      super(menu, playerInventory, title);
-      this.imageWidth = 400;
-      this.imageHeight = 400;
-   }
+   protected final Building building;
+   protected final Settlement settlement;
+   protected int contentLeftPos;
+   protected int contentTopPos;
+   protected int contentWidth;
+   protected int contentHeight;
 
-   private final int tabWidth = 200;
-   private final int tabHeight = 170;
+   public ABuildingScreen(Building building, Settlement settlement, Component title) {
+      super(title, 340, 200);
+      this.building = building;
+      this.settlement = settlement;
+   }
 
    @Override
    protected final List<ATab> createTabs() {
-      return createTabs(getContentLeftPos(), getContentTopPos(), tabWidth, tabHeight);
+      int marginX = 25;
+      int marginY = 20;
+      contentLeftPos = leftPos + marginX;
+      contentTopPos = topPos + marginY;
+      contentWidth = width - (width - imageWidth) - marginX * 2;
+      contentHeight = height - (height - imageHeight) / 2 - marginY; // not sure why contentHeight doesn't need to be
+                                                                     // multiplied
+      // by 2...
+
+      return createTabs(contentLeftPos, contentTopPos, contentWidth, contentHeight);
    }
 
    protected abstract List<ATab> createTabs(int contentLeftPos, int contentTopPos, int tabWidth, int tabHeight);
@@ -39,61 +59,39 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs<BuildingMenu> 
 
    protected void init() {
       super.init();
-      this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
-      this.titleLabelY = 130;
-      // net.minecraft.client.gui.components.
 
       createTabButtons().forEach(builder -> addRenderableWidget(builder.build()));
 
       changeToDefaultTabIfNotSet();
-
-      // autoAssignOccupants =
-      // addRenderableWidget(
-      // Checkbox.builder(Component.literal("Auto assign residents"), this.font)
-      // .pos(leftPos + MARGIN_X, topPos + 160)
-      // .selected(true)
-      // .build());
    }
 
    @Override
-   protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-      graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, Colors.MENU_TEXT_DARK, false);
-   }
-
-   @Override
-   protected void renderBg(GuiGraphics p_283137_, float p_282476_, int p_281600_, int p_283194_) {
+   protected void renderBg(GuiGraphics graphics, float mouseX, int mouseY, int partialTicks) {
       int i = (this.width - this.imageWidth) / 2;
       int j = (this.height - this.imageHeight) / 2;
-      p_283137_.blit(
-            RenderType::guiTextured,
-            CONTAINER_LOCATION,
-            i,
-            j,
-            0.0F,
-            0.0F,
-            this.imageWidth,
-            this.imageHeight,
-            400,
-            400);
+      graphics
+            .blit(RenderType::guiTextured, MENU_TEXTURE, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 384, 384);
    }
 
-   @Override
-   public int getContentLeftPos() {
-      return leftPos + 100;
-   } // BAD IMPLEMENTATION: we don't methods and an interface for this
+   public static ABuildingScreen factory(Building building, Settlement settlement) {
 
-   @Override
-   public int getContentTopPos() {
-      return topPos + 145;
-   }
+      BuildingType buildingType = building.getBuildingType();
+      Component component = buildingType.translationDark().withStyle(ChatFormatting.UNDERLINE);
 
-   @Override
-   public int getContentWidth() {
-      return tabWidth;
-   }
+      if (buildingType == BuildingType.INN)
+         return new InnBuildingScreen(building, settlement, component);
+      if (buildingType.isPermanentResidence())
+         return new ResidenceBuildingScreen(building, settlement, component);
+      if (buildingType.isWorksite()) {
 
-   @Override
-   public int getContentHeight() {
-      return tabHeight;
+         if (buildingType == BuildingType.CROP_FARM)
+            return new CropFarmBuildingScreen(building, settlement, component);
+         if (buildingType == BuildingType.GROVE)
+            return new GroveBuildingScreen(building, settlement, component);
+
+         return new WorksiteBuildingScreen(building, settlement, component);
+      }
+
+      return new ResidenceBuildingScreen(building, settlement, component);
    }
 }

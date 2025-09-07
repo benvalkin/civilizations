@@ -1,4 +1,4 @@
-package com.uncreated.civilized.ui.menu.building.worksite.residence.tabs;
+package com.uncreated.civilized.ui.menu.building.worksite.tabs;
 
 import java.util.List;
 
