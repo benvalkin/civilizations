@@ -126,6 +126,11 @@ public class VillagerDialogueScreen extends Screen {
          addRenderableWidget(button);
       }
 
+      staggeredDialogueCurrentIndex = 0;
+      timeUntilNextStaggeredChar = 5;
+      staggerDone = false;
+      responseButtons.forEach(b -> b.visible = false);
+
       clientNotifyServerScreenOpen(villager);
    }
 
@@ -170,6 +175,52 @@ public class VillagerDialogueScreen extends Screen {
       this.renderLabels(graphics, mouseX, mouseY, partialTicks);
    }
 
+   private int staggeredDialogueCurrentIndex;
+   private int timeUntilNextStaggeredChar;
+   private boolean staggerDone;
+
+   @Override
+   public void tick() {
+
+      if (timeUntilNextStaggeredChar == 0) {
+
+         String currentStaggeredText = "";
+         char nextCharToRender = ' ';
+
+         int charsPerStagger = 2;
+         for (int i = 0; i < charsPerStagger; i++) {
+
+            staggeredDialogueCurrentIndex++;
+
+            currentStaggeredText = dialogue.getVillagerSpeech().getString(staggeredDialogueCurrentIndex);
+
+            nextCharToRender = currentStaggeredText.charAt(currentStaggeredText.length() - 1);
+
+            if (",;-!.?".indexOf(nextCharToRender) != -1)
+               break;
+         }
+
+         timeUntilNextStaggeredChar = switch (nextCharToRender) {
+         case ',', ';' -> 5;
+         case '-', '!', '.', '?' -> 10;
+         default -> 0;
+         };
+
+         if (staggerDone) {
+            responseButtons.forEach(b -> b.visible = true);
+         }
+
+         if (!staggerDone && currentStaggeredText.length() >= dialogue.getVillagerSpeech().getString().length()) {
+            staggerDone = true;
+            timeUntilNextStaggeredChar = 15; // when stagger is done, wait a bit before showing response options
+         }
+
+         return;
+      }
+
+      timeUntilNextStaggeredChar--;
+   }
+
    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
       StringRenderHelper.drawCenterAlignedWordWrap(
             graphics,
@@ -182,11 +233,11 @@ public class VillagerDialogueScreen extends Screen {
             true);
 
       int villagerSpeechHeight =
-            StringRenderHelper.drawCenterAlignedWordWrap(
+            StringRenderHelper.drawLeftAlignedWordWrap(
                   graphics,
                   this.font,
-                  dialogue.getVillagerSpeech(),
-                  leftPos + contentWidth / 2,
+                  Component.literal(dialogue.getVillagerSpeech().getString(staggeredDialogueCurrentIndex)),
+                  leftPos,
                   topPos + 30,
                   contentWidth,
                   Colors.MENU_TEXT_VILLAGER_DIALOGUE,

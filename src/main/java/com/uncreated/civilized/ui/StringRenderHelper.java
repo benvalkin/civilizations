@@ -29,6 +29,24 @@ public class StringRenderHelper {
       }
       return numberOfWraps * font.lineHeight;
    }
+
+   public static int drawLeftAlignedWordWrap(
+         GuiGraphics guiGraphics,
+         Font font,
+         Component message,
+         int x,
+         int y,
+         int maxWidth,
+         int color,
+         boolean dropShadow) {
+      int numberOfWraps = 0;
+      for (FormattedCharSequence formattedcharsequence : font.split(message, maxWidth)) {
+         guiGraphics.drawString(font, formattedcharsequence, x, y + numberOfWraps * font.lineHeight, color, dropShadow);
+         numberOfWraps++;
+      }
+      return numberOfWraps * font.lineHeight;
+   }
+
    public static int getHeightOfWrappedText(Font font, Component message, int maxWidth) {
       return font.split(message, maxWidth).size() * font.lineHeight;
    }
