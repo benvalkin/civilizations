@@ -13,6 +13,8 @@ import com.uncreated.civilized.core.building.requirement.blockcount.BlockTypeReq
 import com.uncreated.civilized.core.building.requirement.blockcount.BuildingBlockTypes;
 import com.uncreated.civilized.core.building.requirement.blockcount.specific.BedsPresentRequirement;
 import com.uncreated.civilized.core.building.requirement.blockcount.specific.ChestsPresentRequirement;
+import com.uncreated.civilized.core.building.requirement.blockcount.specific.CraftingTablesPresentRequirement;
+import com.uncreated.civilized.core.building.requirement.blockcount.specific.FurnacesPresentRequirement;
 import com.uncreated.civilized.core.building.requirement.blockcount.specific.SignsPresentRequirement;
 
 import net.minecraft.core.Registry;
@@ -56,15 +58,15 @@ public class BuildingRequirementRegistry {
                      .create());
 
          registerRequirements(
-                 registry,
-                 BuildingRequirementList.forBuilding(BuildingType.INN, 1)
-                         .add(new SpaceRequirement(50))
-                         .add(new EnclosedWallsRequirement())
-                         .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 200))
-                         .add(new ChestsPresentRequirement(1, false))
-                         .add(new BedsPresentRequirement(4, false))
-                         .add(new SignsPresentRequirement(1, false))
-                         .create());
+               registry,
+               BuildingRequirementList.forBuilding(BuildingType.INN, 1)
+                     .add(new SpaceRequirement(50))
+                     .add(new EnclosedWallsRequirement())
+                     .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 200))
+                     .add(new ChestsPresentRequirement(1, false))
+                     .add(new BedsPresentRequirement(4, false))
+                     .add(new SignsPresentRequirement(1, false))
+                     .create());
 
          registerRequirements(
                registry,
@@ -142,6 +144,30 @@ public class BuildingRequirementRegistry {
                      .add(new SpaceRequirement(30))
                      .add(new EnclosedWallsRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
+                     .add(new ChestsPresentRequirement(1, false))
+                     .add(new SignsPresentRequirement(1, false))
+                     .create());
+
+         registerRequirements(
+               registry,
+               BuildingRequirementList.forBuilding(BuildingType.BAKER_HOUSE, 1)
+                     .add(new SpaceRequirement(15))
+                     .add(new EnclosedWallsRequirement())
+                     .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
+                     .add(new CraftingTablesPresentRequirement(1, false))
+                     .add(new FurnacesPresentRequirement(1, false))
+                     .add(new ChestsPresentRequirement(1, false))
+                     .add(new SignsPresentRequirement(1, false))
+                     .create());
+
+         registerRequirements(
+               registry,
+               BuildingRequirementList.forBuilding(BuildingType.BAKER_HOUSE, 2)
+                     .add(new SpaceRequirement(30))
+                     .add(new EnclosedWallsRequirement())
+                     .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
+                     .add(new CraftingTablesPresentRequirement(1, false))
+                     .add(new FurnacesPresentRequirement(2, false))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
                      .create());
