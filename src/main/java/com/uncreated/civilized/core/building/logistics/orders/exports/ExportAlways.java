@@ -9,22 +9,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 @Getter
-public class ExportExcessOf extends ExportOrder {
+public class ExportAlways extends ExportOrder {
 
-   protected final int minimumToKeep;
-
-   public ExportExcessOf(Level level, String key, Predicate<ItemStack> itemSearch, Origin origin, int minimumToKeep) {
+   public ExportAlways(Level level, String key, Predicate<ItemStack> itemSearch, Origin origin) {
       super(level, key, itemSearch, origin);
-      this.minimumToKeep = minimumToKeep;
    }
 
    @Override
    protected boolean shouldShip(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return sourceStock.getCount() > minimumToKeep;
+      return true;
    }
 
    @Override
    protected int getItemCountForNextShipment(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return Math.clamp(sourceStock.getCount() - minimumToKeep, 0, 64);
+      return 64;
    }
 }

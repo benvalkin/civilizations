@@ -5,11 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
+import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrders;
 import com.uncreated.civilized.core.building.logistics.orders.exports.ExportOrder;
 import com.uncreated.civilized.core.building.logistics.orders.imports.ImportOrder;
-import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrders;
 import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
 
 public class LogisticsManager {
@@ -56,6 +54,7 @@ public class LogisticsManager {
    }
 
    public LogisticsOrders<TaskItemRequirement> getTaskItemRequirements(Building building) {
-      return Optional.ofNullable(taskItemRequirements.get(building.getBuildingId())).orElse(new LogisticsOrders<>(building));
+      return Optional.ofNullable(taskItemRequirements.get(building.getBuildingId()))
+            .orElse(new LogisticsOrders<>(building));
    }
 }

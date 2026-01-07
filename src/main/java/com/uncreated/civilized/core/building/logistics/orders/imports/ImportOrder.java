@@ -1,12 +1,14 @@
 package com.uncreated.civilized.core.building.logistics.orders.imports;
 
-import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import net.minecraft.world.item.ItemStack;
-
 import java.util.function.Predicate;
 
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+
 public abstract class ImportOrder extends StorehouseOrder {
-    public ImportOrder(String key, Predicate<ItemStack> itemSearch, Origin origin) {
-        super(key, itemSearch, origin);
-    }
+   public ImportOrder(Level level, String key, Predicate<ItemStack> itemSearch, Origin origin) {
+      super(level, key, itemSearch, origin);
+   }
 }
