@@ -14,6 +14,7 @@ import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
+import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodMenu;
 import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.items.ChooseCropsMenu;
 import com.uncreated.civilized.ui.menu.building.worksite.grove.items.ChooseSaplingsMenu;
 
@@ -72,6 +73,10 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
                   i,
                   inventory,
                   player) -> new ChooseSaplingsMenu(i, inventory, new SimpleContainer(1), settlement, building.get());
+            case CATTLE_FARM, SHEEP_FARM, HOG_FARM, CHICKEN_FARM -> (
+                  i,
+                  inventory,
+                  player) -> new ChooseAnimalFoodMenu(i, inventory, new SimpleContainer(3), settlement, building.get());
             default -> throw new IllegalArgumentException();
             };
 

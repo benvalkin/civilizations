@@ -92,6 +92,8 @@ public abstract class AWorksiteBlockEntity extends BaseContainerBlockEntity {
 
       Building building =
             ServerBuildingsStore.INSTANCE.createNew(
+                  level.registryAccess(),
+                  level.dimension(),
                   settlement.getSettlementId(),
                   placerId,
                   getBuildingType(),

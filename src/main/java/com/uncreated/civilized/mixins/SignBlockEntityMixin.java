@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.uncreated.civilized.core.building.signs.SignHelper;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.signs.SignHelper;
 import com.uncreated.civilized.neoforge.registration.attachments.DataAttachments;
 
 import net.minecraft.core.BlockPos;
@@ -84,7 +84,7 @@ public abstract class SignBlockEntityMixin extends BlockEntity {
    @Unique
    private Optional<Building> tryLinkWithEnclosingBuilding(ServerLevel level) {
 
-      Optional<Building> enclosingBuilding = ServerBuildingsStore.INSTANCE.findEnclosingBuilding(getBlockPos());
+      Optional<Building> enclosingBuilding = ServerBuildingsStore.INSTANCE.findEnclosingBuilding(getBlockPos(), level);
       if (enclosingBuilding.isEmpty())
          return Optional.empty();
 
@@ -104,7 +104,8 @@ public abstract class SignBlockEntityMixin extends BlockEntity {
       } else {
          // blank signs will be given the special tag if there isn't another linked sign
          if (SignHelper.signIsBlank(frontText))
-            frontText = SignHelper.createSpecialSignText(); // note: manually setting text does not trigger a block update
+            frontText = SignHelper.createSpecialSignText(); // note: manually setting text does not trigger a block
+                                                            // update
       }
 
       // at this point, the special tag should be set if this sign is intended to be linked.

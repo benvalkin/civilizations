@@ -31,12 +31,13 @@ public class CreativeTab {
                         output.accept(ItemRegistry.SETTLEMENT_MANDATE.get());
                         output.accept(ItemRegistry.COIN.get());
                         output.accept(ItemRegistry.COIN_STACK.get());
-                         output.accept(ItemRegistry.STOREHOUSE.get());
-                         output.accept(ItemRegistry.INN.get());
+                        output.accept(ItemRegistry.STOREHOUSE.get());
+                        output.accept(ItemRegistry.INN.get());
                         output.accept(ItemRegistry.FARMER_HOUSE.get());
                         output.accept(ItemRegistry.WOODCUTTER_HOUSE.get());
                         output.accept(ItemRegistry.RANCHER_HOUSE.get());
                         output.accept(ItemRegistry.MINER_HOUSE.get());
+                        output.accept(ItemRegistry.BAKER_HOUSE.get());
                         output.accept(ItemRegistry.CROP_FARM.get());
                         output.accept(ItemRegistry.GROVE.get());
                         output.accept(ItemRegistry.CATTLE_FARM.get());

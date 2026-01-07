@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.behaviour.GroveBehaviour;
+import com.uncreated.civilized.core.building.state.GroveState;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
@@ -72,7 +72,7 @@ public class GroveInfoTab extends ABuildingScreenTab {
    @Override
    protected List<Slot> createAndArrangeItemSlots(Container container) {
 
-      GroveBehaviour groveBehaviour = (GroveBehaviour) building.getBehaviour();
+      GroveState groveBehaviour = (GroveState) building.getState();
       container.setItem(0, groveBehaviour.getSapling());
 
       ArrayList<Slot> slots = Lists.newArrayList();

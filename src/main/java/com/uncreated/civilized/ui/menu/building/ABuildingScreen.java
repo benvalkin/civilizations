@@ -10,6 +10,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.WorksiteBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.AnimalFarmBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.CropFarmBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.grove.GroveBuildingScreen;
 import com.uncreated.civilized.ui.tabs.AMenuScreenWithTabs;
@@ -88,6 +89,8 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs {
             return new CropFarmBuildingScreen(building, settlement, component);
          if (buildingType == BuildingType.GROVE)
             return new GroveBuildingScreen(building, settlement, component);
+         if (buildingType.isAnimalFarm())
+            return new AnimalFarmBuildingScreen(building, settlement, component);
 
          return new WorksiteBuildingScreen(building, settlement, component);
       }

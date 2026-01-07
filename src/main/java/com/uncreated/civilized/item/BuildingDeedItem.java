@@ -3,12 +3,13 @@ package com.uncreated.civilized.item;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
-import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
-import com.uncreated.civilized.core.settlement.Settlement;
 import org.apache.commons.compress.utils.Lists;
 
+import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
+import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.requirement.EnclosedWallsRequirement;
 import com.uncreated.civilized.core.building.requirement.IBuildingRequirement;
 import com.uncreated.civilized.core.building.requirement.IBuildingRequirementResult;
@@ -17,10 +18,6 @@ import com.uncreated.civilized.core.building.requirement.SurfaceAreaRequirement;
 import com.uncreated.civilized.core.building.requirement.blockcount.BlockCountRequirement;
 import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementList;
 import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementRegistry;
-import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
-import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingType;
-import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.ui.menu.building.EstablishBuildingScreen;
 import com.uncreated.civilized.ui.style.Colors;
 
@@ -85,7 +82,7 @@ public class BuildingDeedItem extends Item {
          BuildingBoundsDragTool.stopDragging();
 
          Optional<Building> overlappingOther =
-               ClientBuildingStore.INSTANCE.findOverlappingBuilding(boundsResult.bounds());
+               ClientBuildingStore.INSTANCE.findOverlappingBuilding(boundsResult.bounds(), context.getLevel());
          if (overlappingOther.isPresent()) {
             player.displayClientMessage(
                   Component

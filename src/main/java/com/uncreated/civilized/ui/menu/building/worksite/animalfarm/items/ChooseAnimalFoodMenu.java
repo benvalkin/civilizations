@@ -4,7 +4,7 @@ import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.behaviour.AnimalFarmBehaviour;
+import com.uncreated.civilized.core.building.state.AnimalFarmState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
@@ -46,7 +46,8 @@ public class ChooseAnimalFoodMenu extends ItemManagementMenu {
       this.addSlot(new AnimalFoodEyedropperSlot(building.getBuildingType(), container, 1, 123 + 2 * 18, 52));
       this.addSlot(new AnimalFoodEyedropperSlot(building.getBuildingType(), container, 2, 123 + 4 * 18, 52));
 
-      AnimalFarmBehaviour animalFarmBehaviour = (AnimalFarmBehaviour) building.getBehaviour();
+      AnimalFarmState animalFarmBehaviour = (AnimalFarmState) building.getState();
+      animalFarmBehaviour.tryApplyDefaults();
       this.container.setItem(0, animalFarmBehaviour.getFoodSlot(0));
       this.container.setItem(1, animalFarmBehaviour.getFoodSlot(1));
       this.container.setItem(2, animalFarmBehaviour.getFoodSlot(2));
@@ -64,7 +65,7 @@ public class ChooseAnimalFoodMenu extends ItemManagementMenu {
       if (!(player instanceof ServerPlayer serverPlayer))
          return;
 
-      if (!(building.getBehaviour() instanceof AnimalFarmBehaviour animalFarmBehaviour))
+      if (!(building.getState() instanceof AnimalFarmState animalFarmBehaviour))
          return;
 
       animalFarmBehaviour.setFoodSlot(0, container.getItem(0));

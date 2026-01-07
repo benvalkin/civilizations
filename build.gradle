@@ -119,6 +119,11 @@ dependencies {
     // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
     // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
 
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0' // Use the latest stable version
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0' // Use the latest stable version
+    testImplementation 'org.mockito:mockito-core:5.11.0' // Use the latest stable version
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0' // For JUnit 5 integration
+
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
     // The group id is ignored when searching -- in this case, it is "blank"
@@ -189,4 +194,8 @@ idea {
         downloadSources = true
         downloadJavadoc = true
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

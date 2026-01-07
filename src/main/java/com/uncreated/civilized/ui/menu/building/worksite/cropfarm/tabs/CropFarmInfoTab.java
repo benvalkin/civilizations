@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.behaviour.CropFarmBehaviour;
+import com.uncreated.civilized.core.building.state.CropFarmState;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
@@ -72,8 +72,8 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
    @Override
    protected List<Slot> createAndArrangeItemSlots(Container container) {
 
-      CropFarmBehaviour cropFarmBehaviour = (CropFarmBehaviour) building.getBehaviour();
-      cropFarmBehaviour.tryApplyCropDefaults();
+      CropFarmState cropFarmBehaviour = (CropFarmState) building.getState();
+      cropFarmBehaviour.tryApplyDefaults();
       container.setItem(0, cropFarmBehaviour.getCropSlot(0));
       container.setItem(1, cropFarmBehaviour.getCropSlot(1));
       container.setItem(2, cropFarmBehaviour.getCropSlot(2));

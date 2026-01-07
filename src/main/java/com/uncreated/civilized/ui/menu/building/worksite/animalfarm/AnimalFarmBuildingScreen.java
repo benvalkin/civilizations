@@ -12,9 +12,9 @@ import com.uncreated.civilized.ui.tabs.ATab;
 
 import net.minecraft.network.chat.Component;
 
-public class CropFarmBuildingScreen extends WorksiteBuildingScreen {
+public class AnimalFarmBuildingScreen extends WorksiteBuildingScreen {
 
-   public CropFarmBuildingScreen(Building building, Settlement settlement, Component title) {
+   public AnimalFarmBuildingScreen(Building building, Settlement settlement, Component title) {
       super(building, settlement, title);
    }
 

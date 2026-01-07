@@ -40,16 +40,18 @@ public class AIRegistry {
    public static final Supplier<MemoryModuleType<Boolean>> MM_HAS_NON_IDLE_WORK_TASK =
          MEMORY_MODULES
                .register("has_non_idle_work_task_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
-   public static final Supplier<MemoryModuleType<Boolean>> MM_HOLDING_WORK_OUTPUT_RESOURCES =
-         MEMORY_MODULES.register("holding_work_output_resources", () -> new MemoryModuleType<>(Optional.empty()));
-   public static final Supplier<MemoryModuleType<Boolean>> MM_HOLDING_WORK_INPUT_RESOURCES =
-         MEMORY_MODULES.register("holding_work_input_resources", () -> new MemoryModuleType<>(Optional.empty()));
-   public static final Supplier<MemoryModuleType<Boolean>> MM_HOLDING_IMPORT_RESOURCES =
-         MEMORY_MODULES.register("holding_import_resources", () -> new MemoryModuleType<>(Optional.empty()));
-   public static final Supplier<MemoryModuleType<Boolean>> MM_HOLDING_EXPORT_RESOURCES =
-         MEMORY_MODULES.register("holding_export_resources", () -> new MemoryModuleType<>(Optional.empty()));
-   public static final Supplier<MemoryModuleType<Boolean>> MM_LOGISTICS_RUN_INTERVAL =
-           MEMORY_MODULES.register("logistics_run_interval", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_HAS_WORK_OUTPUT_RESOURCES =
+         MEMORY_MODULES.register("has_work_output_resources", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_HAS_WORK_INPUT_RESOURCES =
+         MEMORY_MODULES.register("has_work_input_resources", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_BUSY_OFFLOADING_IMPORTS =
+         MEMORY_MODULES.register("busy_offloading_imports", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_BUSY_OFFLOADING_EXPORTS =
+         MEMORY_MODULES.register("busy_offloading_exports", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_EXPORT_DESIRED =
+         MEMORY_MODULES.register("export_desired", () -> new MemoryModuleType<>(Optional.empty()));
+   public static final Supplier<MemoryModuleType<Boolean>> MM_IMPORT_DESIRED =
+         MEMORY_MODULES.register("import_desired", () -> new MemoryModuleType<>(Optional.empty()));
    public static final Supplier<MemoryModuleType<Player>> MM_DIALOGUE_TARGET =
          MEMORY_MODULES.register("dialogue_target_memory_module", () -> new MemoryModuleType<>(Optional.empty()));
 

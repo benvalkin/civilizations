@@ -4,7 +4,7 @@ import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.behaviour.GroveBehaviour;
+import com.uncreated.civilized.core.building.state.GroveState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
@@ -44,7 +44,7 @@ public class ChooseSaplingsMenu extends ItemManagementMenu {
 
       this.addSlot(new SaplingEyedropperSlot(container, 0, 123 + 2 * 18, 52));
 
-      GroveBehaviour groveBehaviour = (GroveBehaviour) building.getBehaviour();
+      GroveState groveBehaviour = (GroveState) building.getState();
       this.container.setItem(0, groveBehaviour.getSapling());
 
       this.addStandardInventorySlots(playerInventory, 87, 88);
@@ -60,7 +60,7 @@ public class ChooseSaplingsMenu extends ItemManagementMenu {
       if (!(player instanceof ServerPlayer serverPlayer))
          return;
 
-      if (!(building.getBehaviour() instanceof GroveBehaviour groveBehaviour))
+      if (!(building.getState() instanceof GroveState groveBehaviour))
          return;
 
       groveBehaviour.setSapling(container.getItem(0));

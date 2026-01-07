@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementRegistry;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.events.BuildingStoreEvents;
+import com.uncreated.civilized.core.settlement.entity.events.SettlementEntityEvents;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.events.SettlementStoreEvents;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
@@ -80,7 +80,7 @@ public class CivilizedMod {
       NeoForge.EVENT_BUS.register(this);
 
       NeoForge.EVENT_BUS.register(SettlementStoreEvents.class);
-      NeoForge.EVENT_BUS.register(BuildingStoreEvents.class);
+      NeoForge.EVENT_BUS.register(SettlementEntityEvents.class);
       NeoForge.EVENT_BUS.register(VillagerStoreEvents.class);
       NeoForge.EVENT_BUS.register(UIUpdateEvents.class);
 

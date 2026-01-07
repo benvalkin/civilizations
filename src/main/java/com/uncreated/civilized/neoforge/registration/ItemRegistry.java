@@ -18,7 +18,9 @@ public class ItemRegistry {
    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CIVILIZED_MOD_ID);
 
    public static final DeferredItem<Item> STOREHOUSE =
-         ITEMS.registerItem("storehouse", properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.STOREHOUSE));
+         ITEMS.registerItem(
+               "storehouse",
+               properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.STOREHOUSE));
 
    public static final DeferredItem<Item> INN =
          ITEMS.registerItem("inn", properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.INN));
@@ -38,6 +40,10 @@ public class ItemRegistry {
          ITEMS.registerItem(
                "miner_house",
                properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.MINER_HOUSE));
+   public static final DeferredItem<Item> BAKER_HOUSE =
+         ITEMS.registerItem(
+               "baker_house",
+               properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.BAKER_HOUSE));
    public static final DeferredItem<Item> CROP_FARM =
          ITEMS.registerItem(
                "crop_farm",

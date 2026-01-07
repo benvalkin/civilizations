@@ -38,7 +38,8 @@ public class SettlementMandateItem extends Item {
       BlockPos clicked = context.getClickedPos();
       BlockPos clickedAir = clicked.mutable().move(context.getClickedFace());
 
-      Optional<Building> enclosingBuilding = ServerBuildingsStore.INSTANCE.findEnclosingBuilding(clickedAir);
+      Optional<Building> enclosingBuilding =
+            ServerBuildingsStore.INSTANCE.findEnclosingBuilding(clickedAir, context.getLevel());
       if (enclosingBuilding.isPresent()) {
 
          Settlement settlement = ServerSettlementsStore.INSTANCE.get(enclosingBuilding.get().getSettlementId());

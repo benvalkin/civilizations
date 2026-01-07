@@ -3,10 +3,9 @@ package com.uncreated.civilized.ui.menu.building.item.management;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.behaviour.CropFarmBehaviour;
+import com.uncreated.civilized.core.building.state.CropFarmState;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
-import com.uncreated.civilized.ui.menu.building.worksite.grove.items.ChooseSaplingsMenu;
 
 import lombok.Getter;
 import net.minecraft.server.level.ServerPlayer;
@@ -67,7 +66,7 @@ public abstract class ItemManagementMenu extends AbstractContainerMenu {
       if (!(player instanceof ServerPlayer serverPlayer))
          return;
 
-      if (!(building.getBehaviour() instanceof CropFarmBehaviour cropFarmBehaviour))
+      if (!(building.getState() instanceof CropFarmState cropFarmBehaviour))
          return;
 
       cropFarmBehaviour.setCropSlot(0, container.getItem(0));

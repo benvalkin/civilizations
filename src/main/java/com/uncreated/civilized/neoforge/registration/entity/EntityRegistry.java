@@ -3,6 +3,7 @@ package com.uncreated.civilized.neoforge.registration.entity;
 import java.util.function.Supplier;
 
 import com.uncreated.civilized.CivilizedMod;
+import com.uncreated.civilized.core.building.entity.LegacyBuildingEntity;
 import com.uncreated.civilized.entity.CivilizedVillager;
 
 import net.minecraft.core.registries.Registries;
@@ -13,7 +14,8 @@ import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class EntityRegistry {
-   public static final DeferredRegister.Entities ENTITIES = DeferredRegister.createEntities(CivilizedMod.CIVILIZED_MOD_ID);
+   public static final DeferredRegister.Entities ENTITIES =
+         DeferredRegister.createEntities(CivilizedMod.CIVILIZED_MOD_ID);
    public static final Supplier<EntityType<CivilizedVillager>> CIVILIZED_VILLAGER =
          ENTITIES.register(
                "civilized_villager",
@@ -41,4 +43,18 @@ public class EntityRegistry {
                            ResourceKey.create(
                                  Registries.ENTITY_TYPE,
                                  ResourceLocation.fromNamespaceAndPath("civilized", "civilized_villager"))));
+
+   public static final Supplier<EntityType<LegacyBuildingEntity>> BUILDING_ENTITY =
+         ENTITIES.register(
+               "building_entity",
+               // The entity type, created using a builder.
+               () -> EntityType.Builder
+                     .of((EntityType.EntityFactory<LegacyBuildingEntity>) LegacyBuildingEntity::new, MobCategory.MISC)
+                     .canSpawnFarFromPlayer()
+                     .clientTrackingRange(1) // client doesn't need to load in building entities
+                     .build(
+                           ResourceKey.create(
+                                 Registries.ENTITY_TYPE,
+                                 ResourceLocation.fromNamespaceAndPath("civilized", "building_entity"))));
+
 }

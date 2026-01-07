@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.behaviour.AnimalFarmBehaviour;
+import com.uncreated.civilized.core.building.state.AnimalFarmState;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
@@ -69,7 +69,7 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
    @Override
    protected List<Slot> createAndArrangeItemSlots(Container container) {
 
-      AnimalFarmBehaviour animalFarmBehaviour = (AnimalFarmBehaviour) building.getBehaviour();
+      AnimalFarmState animalFarmBehaviour = (AnimalFarmState) building.getState();
       animalFarmBehaviour.tryApplyDefaults();
       container.setItem(0, animalFarmBehaviour.getFoodSlot(0));
       container.setItem(1, animalFarmBehaviour.getFoodSlot(1));
