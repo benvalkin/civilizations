@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.building.behaviour;
+package com.uncreated.civilized.core.building.state;
 
 import java.util.Arrays;
 
@@ -8,13 +8,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class CropFarmBehaviour extends BuildingBehaviour {
+public class CropFarmState extends BuildingState {
 
    public static final String FIELD_CROP_SLOT = "crop_slot_";
 
    private final ItemStack[] cropSlots;
 
-   protected CropFarmBehaviour(Building building) {
+   protected CropFarmState(Building building) {
       super(building);
       cropSlots = new ItemStack[3];
       cropSlots[0] = ItemStack.EMPTY;
@@ -53,7 +53,7 @@ public class CropFarmBehaviour extends BuildingBehaviour {
       tag.put(tagKey, cropSlots[i].save(building.getRegistryAccess()));
    }
 
-   public void tryApplyCropDefaults() {
+   public void tryApplyDefaults() {
       if (Arrays.stream(cropSlots).allMatch(ItemStack::isEmpty)) {
          cropSlots[0] = new ItemStack(Items.WHEAT_SEEDS);
          cropSlots[1] = new ItemStack(Items.CARROT);

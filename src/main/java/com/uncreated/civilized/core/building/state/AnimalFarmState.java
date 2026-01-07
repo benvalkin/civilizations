@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.building.behaviour;
+package com.uncreated.civilized.core.building.state;
 
 import java.util.Arrays;
 
@@ -8,13 +8,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class AnimalFarmBehaviour extends BuildingBehaviour {
+public class AnimalFarmState extends BuildingState {
 
    public static final String FIELD_FOOD_SLOT = "food_slot_";
 
    private final ItemStack[] foodSlots;
 
-   protected AnimalFarmBehaviour(Building building) {
+   protected AnimalFarmState(Building building) {
       super(building);
       foodSlots = new ItemStack[3];
       foodSlots[0] = ItemStack.EMPTY;

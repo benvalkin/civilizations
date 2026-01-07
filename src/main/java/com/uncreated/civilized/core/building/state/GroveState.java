@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.building.behaviour;
+package com.uncreated.civilized.core.building.state;
 
 import com.uncreated.civilized.core.building.Building;
 
@@ -8,7 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class GroveBehaviour extends BuildingBehaviour {
+public class GroveState extends BuildingState {
 
    public static final String FIELD_SAPLING = "sapling";
 
@@ -18,7 +18,7 @@ public class GroveBehaviour extends BuildingBehaviour {
    @Setter
    private ItemStack sapling;
 
-   protected GroveBehaviour(Building building) {
+   protected GroveState(Building building) {
       super(building);
       sapling = DEFAULT_SAPLING;
    }

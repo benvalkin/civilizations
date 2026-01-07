@@ -1,12 +1,15 @@
 package com.uncreated.civilized.core.building.events;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.uncreated.civilized.CivilizedMod;
-import com.uncreated.civilized.core.building.signs.SignHelper;
 import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.entity.LoadedBuilding;
+import com.uncreated.civilized.core.building.entity.LoadedBuildings;
 import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
+import com.uncreated.civilized.core.building.signs.SignHelper;
 import com.uncreated.civilized.neoforge.registration.attachments.DataAttachments;
 
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -20,7 +23,11 @@ public class BuildingSignEvents {
    @SubscribeEvent
    public static void onBuildingUpdated(BuildingUpdatedEvent event) {
 
-      if (event.getLevel() == null || event.isClientside())
+      if (event.isClientside())
+         return;
+
+      Optional<LoadedBuilding> loadedBuilding = LoadedBuildings.checkLoaded(event.getBuilding());
+      if (loadedBuilding.isEmpty())
          return;
 
       Building building = event.getBuilding();
@@ -28,7 +35,7 @@ public class BuildingSignEvents {
       List<SignBlockEntity> signs =
             event.getBuilding()
                   .getBounds()
-                  .getBlockEntitiesInsideBuilding(event.getLevel())
+                  .getBlockEntitiesInsideBuilding(loadedBuilding.get().getLevel())
                   .stream()
                   .filter(b -> b instanceof SignBlockEntity)
                   .map(b -> (SignBlockEntity) b)
@@ -37,7 +44,7 @@ public class BuildingSignEvents {
       if (signs.isEmpty())
          return;
 
-      SignBlockEntity primarySign = building.getPrimarySign(event.getLevel());
+      SignBlockEntity primarySign = building.getPrimarySign(loadedBuilding.get().getLevel());
       if (primarySign == null) {
 
          // link primary sign if it has not been set yet (usually after creating a new building)
@@ -64,10 +71,15 @@ public class BuildingSignEvents {
    @SubscribeEvent
    private static void onBuildingDeleted(BuildingDeletedEvent event) {
 
-      if (event.isClientside() || event.getLevel() == null)
+
+      if (event.isClientside())
          return;
 
-      SignBlockEntity sign = event.getBuilding().getPrimarySign(event.getLevel());
+      Optional<LoadedBuilding> loadedBuilding = LoadedBuildings.checkLoaded(event.getBuilding());
+      if (loadedBuilding.isEmpty())
+         return;
+
+      SignBlockEntity sign = event.getBuilding().getPrimarySign(loadedBuilding.get().getLevel());
       if (sign == null)
          return;
 

@@ -6,7 +6,7 @@ import net.minecraft.world.level.Level;
 
 public class BuildingDeletedEvent extends BuildingUpdatedEvent {
 
-   public BuildingDeletedEvent(Building building, Level level, boolean isClientside) {
-      super(building, level, isClientside);
+   public BuildingDeletedEvent(Building building, boolean isClientside) {
+      super(building, isClientside);
    }
 }
