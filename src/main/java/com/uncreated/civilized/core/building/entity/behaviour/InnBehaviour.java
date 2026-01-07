@@ -1,9 +1,9 @@
-package com.uncreated.civilized.core.building.behaviour;
+package com.uncreated.civilized.core.building.entity.behaviour;
 
 import java.util.List;
 
 import com.uncreated.civilized.core.StoreOperation;
-import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.entity.LoadedBuilding;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
@@ -21,8 +21,8 @@ public class InnBehaviour extends BuildingBehaviour {
 
    private final DailyEventScheduler eventScheduler;
 
-   protected InnBehaviour(Building building) {
-      super(building);
+   protected InnBehaviour(LoadedBuilding entity) {
+      super(entity);
       eventScheduler = new DailyEventScheduler(3, 0, 14000, 0.4f);
    }
 
@@ -38,11 +38,11 @@ public class InnBehaviour extends BuildingBehaviour {
 
    private void trySpawnVisitor(ServerLevel level) {
 
-      List<VillagerInfo> occupants = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
+      List<VillagerInfo> occupants = BuildingUtil.getResidents(getBuilding(), ServerVillagerStore.INSTANCE);
       if (occupants.size() >= 4)
          return;
 
-      BlockPos insidePos = building.getBounds().findRandomInsideFloorBlock(level);
+      BlockPos insidePos = getBuilding().getBounds().findRandomInsideFloorBlock(level);
 
       CivilizedVillager villager =
             EntityRegistry.CIVILIZED_VILLAGER.get().spawn(level, insidePos, EntitySpawnReason.EVENT);
@@ -55,7 +55,7 @@ public class InnBehaviour extends BuildingBehaviour {
       VillagerNpcRole visitorRole =
             VISITOR_ROLES.getRandomValue(villager.getRandom()).orElse(VillagerNpcRole.TRAVELLER);
       villager.getInfo().getNpcRoles().add(visitorRole);
-      villager.getInfo().setHomeBuildingId(building.getBuildingId());
+      villager.getInfo().setHomeBuildingId(getBuilding().getBuildingId());
       ServerVillagerStore.INSTANCE.setDirty();
       ServerVillagerStore.INSTANCE.replicateChange(villager.getInfo(), StoreOperation.UPDATE);
 
