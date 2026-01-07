@@ -24,11 +24,6 @@ public class ClientSettlementsStore extends SettlementsStore {
    }
 
    @Override
-   public Level getLevel() {
-      return Minecraft.getInstance().level;
-   }
-
-   @Override
    public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
       throw new UnsupportedOperationException("Saving not supported on client.");
    }

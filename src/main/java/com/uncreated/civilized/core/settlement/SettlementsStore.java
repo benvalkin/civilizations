@@ -15,8 +15,6 @@ public abstract class SettlementsStore extends SavedData {
 
    protected static final Logger LOGGER = LogUtils.getLogger();
 
-   public abstract Level getLevel();
-
    protected SettlementDB settlements;
 
    protected SettlementsStore() {

@@ -2,8 +2,8 @@ package com.uncreated.civilized.core.building;
 
 import java.util.UUID;
 
+import com.uncreated.civilized.core.ChunkIndex;
 import com.uncreated.civilized.core.InMemoryDB;
-import com.uncreated.civilized.core.ProximityIndex;
 import com.uncreated.civilized.core.SetIndex;
 
 import lombok.Getter;
@@ -15,7 +15,7 @@ public class BuildingDB extends InMemoryDB<UUID, Building> {
    @Getter
    private final SetIndex<UUID, Building> settlementsToBuildingsIndex = new SetIndex<>();
    @Getter
-   private final ProximityIndex<Building> proximityIndex = new ProximityIndex<>(100);
+   private final ChunkIndex<Building> chunkIndex = new ChunkIndex<>();
 
    @Override
    protected UUID getKey(Building obj) {
@@ -25,13 +25,12 @@ public class BuildingDB extends InMemoryDB<UUID, Building> {
    @Override
    protected void index(Building obj) {
       settlementsToBuildingsIndex.add(obj.getSettlementId(), obj);
-      proximityIndex.add(obj.getBlockPos(), obj);
-
+      chunkIndex.add(obj.getBlockPos(), obj);
    }
 
    @Override
    protected void unindex(Building obj) {
       settlementsToBuildingsIndex.remove(obj.getSettlementId(), obj);
-      proximityIndex.remove(obj.getBlockPos(), obj);
+      chunkIndex.remove(obj.getBlockPos(), obj);
    }
 }

@@ -9,14 +9,12 @@ import org.apache.commons.compress.utils.Lists;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.settlement.events.SettlementUpdatedEvent;
 
-import lombok.Getter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -26,9 +24,6 @@ public class ServerSettlementsStore extends SettlementsStore {
 
    public static ServerSettlementsStore INSTANCE;
 
-   @Getter
-   private Level level;
-
    public static void loadServer(MinecraftServer server) {
       INSTANCE =
             server.overworld()
@@ -36,8 +31,6 @@ public class ServerSettlementsStore extends SettlementsStore {
                   .computeIfAbsent(
                         new SavedData.Factory<>(ServerSettlementsStore::createDefault, ServerSettlementsStore::load),
                         STORAGE_FILE_NAME);
-
-      INSTANCE.level = server.overworld().getLevel();
    }
 
    public static final String STORAGE_FILE_NAME = "civilized_settlements";
@@ -45,16 +38,6 @@ public class ServerSettlementsStore extends SettlementsStore {
    // Create new instance of saved data
    private static ServerSettlementsStore createDefault() {
       return new ServerSettlementsStore();
-   }
-
-   public void onServerTick(MinecraftServer server, boolean hasTickTime) {
-      for (Settlement settlement : settlements.all()) {
-         try {
-            settlement.serverTick(server.overworld().getLevel(), server.overworld().getGameTime());
-         } catch (Exception ex) {
-            LOGGER.error("Error while ticking settlement {}", settlement.getSettlementId(), ex);
-         }
-      }
    }
 
    @Override

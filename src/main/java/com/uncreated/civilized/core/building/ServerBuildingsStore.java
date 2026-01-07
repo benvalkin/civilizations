@@ -13,12 +13,14 @@ import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
 
-import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -32,43 +34,28 @@ public class ServerBuildingsStore extends BuildingStore {
    protected static final Logger LOGGER = LogUtils.getLogger();
    public static ServerBuildingsStore INSTANCE;
 
-   @Getter
-   private Level level;
+   private static Level tempLevel;
 
    protected ServerBuildingsStore() {
       super();
    }
 
    public static void loadServer(MinecraftServer server) {
+
+      tempLevel = server.overworld();
       INSTANCE =
             server.overworld()
                   .getDataStorage()
                   .computeIfAbsent(
                         new SavedData.Factory<>(ServerBuildingsStore::createDefault, ServerBuildingsStore::load),
                         STORAGE_FILE_NAME);
-
-      INSTANCE.level = server.overworld();
    }
 
    public static final String STORAGE_FILE_NAME = "civilized_buildings";
 
-   // Create new instance of saved data
+   // Create a new instance of saved data
    private static ServerBuildingsStore createDefault() {
       return new ServerBuildingsStore();
-   }
-
-   public void onServerTick(MinecraftServer server, boolean hasTickTime) {
-      for (Building building : buildings.all()) {
-
-         if (building.getBehaviour() == null)
-            continue;
-
-         try {
-            building.getBehaviour().serverTick(server.overworld().getLevel(), server.overworld().getGameTime());
-         } catch (Exception ex) {
-            LOGGER.error("Error while ticking building {}", building.getBuildingId(), ex);
-         }
-      }
    }
 
    @Override
@@ -77,6 +64,7 @@ public class ServerBuildingsStore extends BuildingStore {
       ListTag tags = new ListTag();
       for (Building building : buildings.all()) {
          CompoundTag item = new CompoundTag();
+         item.putString(Building.FIELD_DIMENSION, building.getDimension().location().toString());
          item.putUUID(Building.FIELD_BUILDING_ID, building.getBuildingId());
          item.putUUID(Building.FIELD_SETTLEMENT_ID, building.getSettlementId());
          item.putUUID(Building.FIELD_PLACER_ID, building.getPlacerId());
@@ -92,7 +80,7 @@ public class ServerBuildingsStore extends BuildingStore {
             occupantIds.add(occupantTag);
          }
          item.put(Building.FIELD_LIST_OCCUPANTS, occupantIds);
-         item.put(Building.FIELD_BEHAVIOUR_DATA, building.getBehaviour().toNbt());
+         item.put(Building.FIELD_BEHAVIOUR_DATA, building.getState().toNbt());
          tags.add(item);
       }
 
@@ -111,6 +99,11 @@ public class ServerBuildingsStore extends BuildingStore {
 
          Building.BuildingBuilder builder =
                Building.builder()
+                     .registryAccess(lookupProvider)
+                     .dimension(
+                           ResourceKey.create(
+                                 Registries.DIMENSION,
+                                 ResourceLocation.parse(itemTag.getString(Building.FIELD_DIMENSION))))
                      .buildingId(itemTag.getUUID(Building.FIELD_BUILDING_ID))
                      .settlementId(itemTag.getUUID(Building.FIELD_SETTLEMENT_ID))
                      .placerId(itemTag.getUUID(Building.FIELD_PLACER_ID))
@@ -119,8 +112,7 @@ public class ServerBuildingsStore extends BuildingStore {
                            new BuildingBounds(
                                  BlockPos.of(itemTag.getLong(Building.FIELD_CENTER_POS)),
                                  BlockPos.of(itemTag.getLong(Building.FIELD_LOWER_CORNER_POS)),
-                                 BlockPos.of(itemTag.getLong(Building.FIELD_UPPER_CORNER_POS))))
-                     .registryAccess(lookupProvider);
+                                 BlockPos.of(itemTag.getLong(Building.FIELD_UPPER_CORNER_POS))));
 
          ListTag occupantIdsTag = itemTag.getList(Building.FIELD_LIST_OCCUPANTS, Tag.TAG_COMPOUND);
          List<UUID> occupantIds = Lists.newArrayList();
@@ -133,7 +125,7 @@ public class ServerBuildingsStore extends BuildingStore {
 
          builder.occupantIds(occupantIds);
          Building building = builder.build();
-         building.getBehaviour().applyNbt(itemTag.getCompound(Building.FIELD_BEHAVIOUR_DATA));
+         building.getState().applyNbt(itemTag.getCompound(Building.FIELD_BEHAVIOUR_DATA));
          store.buildings.add(building);
       }
 
@@ -143,9 +135,10 @@ public class ServerBuildingsStore extends BuildingStore {
    public void replicateChange(Building building, StoreOperation operation) {
       assert buildings.exists(building.getBuildingId());
       PacketDistributor.sendToAllPlayers(building.toPacket(operation));
-      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, level, false));
+
+      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, false));
       if (operation == StoreOperation.DELETE)
-         NeoForge.EVENT_BUS.post(new BuildingDeletedEvent(building, level, false));
+         NeoForge.EVENT_BUS.post(new BuildingDeletedEvent(building, false));
    }
 
    public void replicateFullToNewClient(ServerPlayer player) {

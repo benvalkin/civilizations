@@ -67,13 +67,26 @@ public class BuildingBounds {
       };
    }
 
-   public void traverseBlocksWithin(Consumer<BlockPos> action) {
+   public void traverseBlocksWithin(Consumer<BoundsTraversal> action) {
       BlockPos.MutableBlockPos current = lowerCorner.mutable();
+
+      BoundsTraversal traversal = new BoundsTraversal(current);
 
       for (int x = lowerCorner.getX(); x <= upperCorner.getX(); x++) {
          for (int z = lowerCorner.getZ(); z <= upperCorner.getZ(); z++) {
+
+            traversal.resetSkipToNextXZ();
+
             for (int y = lowerCorner.getY(); y <= upperCorner.getY(); y++) {
-               action.accept(current.set(x, y, z));
+               traversal.setCurrentBlockPos(current.set(x, y, z));
+
+               action.accept(traversal);
+
+               if (traversal.shouldTerminate())
+                  return;
+
+               if (traversal.shouldSkipToNextXZ())
+                  break;
             }
          }
       }
@@ -165,8 +178,8 @@ public class BuildingBounds {
    public List<BlockEntity> getBlockEntitiesInsideBuilding(@NotNull Level level) {
 
       List<BlockEntity> entitiesInside = Lists.newArrayList();
-      traverseBlocksWithin(blockPos -> {
-         BlockEntity entity = level.getBlockEntity(blockPos);
+      traverseBlocksWithin(traversal -> {
+         BlockEntity entity = level.getBlockEntity(traversal.getCurrentBlockPos());
          if (entity == null)
             return;
 

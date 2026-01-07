@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import com.uncreated.civilized.ui.style.Colors;
 
 import lombok.Builder;
@@ -21,7 +21,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 
 @Getter
 @Builder
@@ -62,9 +61,6 @@ public class Settlement {
    @Builder.Default
    public SettlementLevel settlementLevel = SettlementLevel.OUTPOST;
 
-   @Builder.Default
-   private LogisticsManager logisticsManager = new LogisticsManager();
-
    public Settlement.Packet toPacket() {
       return new Settlement.Packet(this, StoreOperation.UPDATE);
    }
@@ -79,10 +75,6 @@ public class Settlement {
       displayName = other.displayName;
       citizenIds = other.citizenIds; // TECHDEBT: this is sus if we are saving the list reference anywhere
       settlementLevel = other.settlementLevel;
-   }
-
-   public void serverTick(ServerLevel level, long gameTime) {
-
    }
 
    public String toStringLite() {

@@ -7,10 +7,8 @@ import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -22,11 +20,6 @@ public class ClientBuildingStore extends BuildingStore {
 
    private ClientBuildingStore() {
       super();
-   }
-
-   @Override
-   public Level getLevel() {
-      return Minecraft.getInstance().level;
    }
 
    @Override
@@ -46,9 +39,9 @@ public class ClientBuildingStore extends BuildingStore {
 
       assert buildings.exists(building.getBuildingId());
       PacketDistributor.sendToServer(building.toPacket(operation));
-      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, getLevel(), true));
+      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(building, true));
       if (operation == StoreOperation.DELETE)
-         NeoForge.EVENT_BUS.post(new BuildingDeletedEvent(building, getLevel(), true));
+         NeoForge.EVENT_BUS.post(new BuildingDeletedEvent(building, true));
    }
 
    public static void receiveSyncFromServer(Building.Packet packet, IPayloadContext context) {
@@ -66,7 +59,7 @@ public class ClientBuildingStore extends BuildingStore {
          } else
             existing.get().copyFrom(fromPacket);
 
-         NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));
+         NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), true));
          return;
       }
 
@@ -86,8 +79,8 @@ public class ClientBuildingStore extends BuildingStore {
          existing.get().copyFrom(packet.building());
       }
 
-      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));
+      NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), true));
       if (packet.storeOperation() == StoreOperation.DELETE)
-         NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), INSTANCE.getLevel(), true));
+         NeoForge.EVENT_BUS.post(new BuildingUpdatedEvent(existing.orElse(fromPacket), true));
    }
 }

@@ -4,15 +4,18 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
-import com.uncreated.civilized.core.building.behaviour.BuildingBehaviour;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
+import com.uncreated.civilized.core.building.state.BuildingState;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -38,30 +41,33 @@ public class Building {
    public static Building decode(RegistryFriendlyByteBuf buffer) {
       Building result =
             Building.builder()
+                  .registryAccess(buffer.registryAccess())
+                  .dimension(buffer.readResourceKey(Registries.DIMENSION))
                   .buildingId(buffer.readUUID())
                   .settlementId(buffer.readUUID())
                   .placerId(buffer.readUUID())
                   .buildingType(buffer.readEnum(BuildingType.class))
                   .bounds(BuildingBounds.decode(buffer))
                   .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
-                  .registryAccess(buffer.registryAccess())
                   .build();
 
-      result.behaviour.applyNbt(buffer.readNbt());
+      result.state.applyNbt(buffer.readNbt());
       return result;
    }
 
    // The stream encoder reference
    public void encode(RegistryFriendlyByteBuf buffer) {
+      buffer.writeResourceKey(dimension);
       buffer.writeUUID(buildingId);
       buffer.writeUUID(settlementId);
       buffer.writeUUID(placerId);
       buffer.writeEnum(buildingType);
       bounds.encode(buffer);
       buffer.writeCollection(occupantIds, (buf, o) -> buf.writeUUID(o));
-      buffer.writeNbt(behaviour.toNbt());
+      buffer.writeNbt(state.toNbt());
    }
 
+   public static final String FIELD_DIMENSION = "dimension";
    public static final String FIELD_BUILDING_ID = "instance_uuid";
    public static final String FIELD_SETTLEMENT_ID = "settlement_id";
    public static final String FIELD_PLACER_ID = "placer_id";
@@ -73,6 +79,8 @@ public class Building {
    public static final String FIELD_UPPER_CORNER_POS = "upper_corner_pos";
    public static final String FIELD_BEHAVIOUR_DATA = "behaviour_data";
 
+   private HolderLookup.Provider registryAccess;
+   private ResourceKey<Level> dimension;
    private UUID buildingId;
    private UUID settlementId;
    private UUID placerId;
@@ -80,10 +88,9 @@ public class Building {
    private BuildingBounds bounds;
    @Builder.Default
    private List<UUID> occupantIds = Lists.newArrayList();
-   private BuildingBehaviour behaviour;
+   private BuildingState state;
    @Setter
    private @Nullable BlockPos primarySignPos;
-   private HolderLookup.Provider registryAccess;
 
    public Packet toPacket() {
       return new Packet(this, StoreOperation.UPDATE);
@@ -94,13 +101,14 @@ public class Building {
    }
 
    public void copyFrom(Building other) {
+      dimension = other.dimension;
       buildingId = other.buildingId;
       settlementId = other.settlementId;
       placerId = other.placerId;
       buildingType = other.buildingType;
       bounds = other.bounds;
       occupantIds = other.occupantIds; // BAD IMPLEMENTATION: this is sus if we are saving the list reference anywhere
-      behaviour.applyNbt(other.behaviour.toNbt());
+      state.applyNbt(other.state.toNbt());
    }
 
    public BlockPos getBlockPos() {
@@ -119,7 +127,8 @@ public class Building {
 
    public String toStringLite() {
       return String.format(
-            "{buildingType: %s buildingId: %s blockPos: %s occupants: %s}",
+            "{dimension: %s buildingType: %s buildingId: %s blockPos: %s occupants: %s}",
+              dimension,
             buildingType,
             buildingId.toString().substring(0, 6),
             getBlockPos(),
@@ -136,8 +145,8 @@ public class Building {
       @Override
       public Building build() {
          var building = super.build();
-         if (building.behaviour == null) {
-            building.behaviour = BuildingBehaviour.create(building);
+         if (building.state == null) {
+            building.state = BuildingState.create(building);
          }
 
          // TECHDEBT: someone could still try to use builder#behaviour() to set the behaviour, and this will override
@@ -167,5 +176,18 @@ public class Building {
       public Type<? extends CustomPacketPayload> type() {
          return SYNC_TYPE;
       }
+   }
+
+   @Override
+   public boolean equals(Object object) {
+      if (object == null || getClass() != object.getClass())
+         return false;
+      Building building = (Building) object;
+      return Objects.equals(buildingId, building.buildingId);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hashCode(buildingId);
    }
 }

@@ -3,6 +3,7 @@ package com.uncreated.civilized.core.building;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -12,6 +13,9 @@ import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
@@ -21,8 +25,6 @@ public abstract class BuildingStore extends SavedData {
 
    protected BuildingDB buildings;
 
-   public abstract Level getLevel();
-
    protected BuildingStore() {
       buildings = new BuildingDB();
    }
@@ -31,15 +33,22 @@ public abstract class BuildingStore extends SavedData {
       return buildings.all();
    }
 
-   public Building createNew(UUID settlementId, UUID placerId, BuildingType buildingType, BuildingBounds bounds) {
+   public Building createNew(
+         HolderLookup.Provider registryAccess,
+         ResourceKey<Level> dimension,
+         UUID settlementId,
+         UUID placerId,
+         BuildingType buildingType,
+         BuildingBounds bounds) {
       Building building =
             Building.builder()
+                  .registryAccess(registryAccess)
+                  .dimension(dimension)
                   .buildingId(UUID.randomUUID())
                   .settlementId(settlementId)
                   .buildingType(buildingType)
                   .placerId(placerId)
                   .bounds(bounds)
-                  .registryAccess(getLevel().registryAccess())
                   .build();
 
       buildings.add(building);
@@ -60,22 +69,66 @@ public abstract class BuildingStore extends SavedData {
       return find(buildingId).orElseThrow();
    }
 
-   public Optional<Building> findEnclosingBuilding(BlockPos blockPos) {
-      // BAD IMPLEMENTATION: if the blockpos is on the edge of a blockpos index "quadrant", it may not be found
-      return buildings.getProximityIndex()
-            .getValues(blockPos)
+   public Set<Building> findInChunk(ChunkPos chunkPos, Level level) {
+      return buildings.getChunkIndex()
+            .getValues(chunkPos)
             .stream()
-            .filter(b -> b.getBounds().contains(blockPos))
-            .findFirst();
+            .filter(b -> b.getDimension().equals(level.dimension()))
+            .collect(Collectors.toSet());
    }
 
-   public Optional<Building> findOverlappingBuilding(BuildingBounds bounds) {
-      // BAD IMPLEMENTATION: if the blockpos is on the edge of a blockpos index "quadrant", it may not be found
-      return buildings.getProximityIndex()
-            .getValues(bounds.getCenter())
-            .stream()
-            .filter(b -> b.getBounds().isOverlapping(bounds))
-            .findFirst();
+   public Optional<Building> findEnclosingBuilding(BlockPos blockPos, Level level) {
+
+      // Instead of querying the position of every building in the BuildingStore, we only look buildings in nearby
+      // chunks to the specified point.
+      // This is done using the building-chunk DB store index, and should be much faster on average (max 9 chunk index
+      // lookups)
+
+      ChunkPos centerChunk = new ChunkPos(blockPos);
+      Set<ChunkPos> neighborChunks = ChunkPos.rangeClosed(centerChunk, 2).collect(Collectors.toSet());
+
+      for (ChunkPos chunk : neighborChunks) {
+         // find the first building in this chunk that contains our point
+         Optional<Building> enclosing =
+               buildings.getChunkIndex()
+                     .getValues(chunk)
+                     .stream()
+                     .filter(b -> b.getDimension().equals(level.dimension()) && b.getBounds().contains(blockPos))
+                     .findFirst();
+
+         // if it exists, return it
+         if (enclosing.isPresent())
+            return enclosing;
+      }
+
+      return Optional.empty();
+   }
+
+   public Optional<Building> findOverlappingBuilding(BuildingBounds bounds, Level level) {
+
+      // Instead of querying the position of every building in the BuildingStore, we only look buildings in nearby
+      // chunks to the specified point.
+      // This is done using the building-chunk DB store index, and should be much faster on average (max 9 chunk index
+      // lookups)
+
+      ChunkPos centerChunk = new ChunkPos(bounds.getCenter());
+      Set<ChunkPos> neighborChunks = ChunkPos.rangeClosed(centerChunk, 2).collect(Collectors.toSet());
+
+      for (ChunkPos chunk : neighborChunks) {
+         // find the first building in this chunk that overlaps our bounds
+         Optional<Building> overlapping =
+               buildings.getChunkIndex()
+                     .getValues(chunk)
+                     .stream()
+                     .filter(b -> b.getDimension().equals(level.dimension()) && b.getBounds().isOverlapping(bounds))
+                     .findFirst();
+
+         // if it exists, return it
+         if (overlapping.isPresent())
+            return overlapping;
+      }
+
+      return Optional.empty();
    }
 
    public Optional<Building> findStorehouse(UUID settlementId) {
