@@ -9,12 +9,13 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.behaviour.AnimalFarmBehaviour;
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportUpTo;
 import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import com.uncreated.civilized.core.building.state.AnimalFarmState;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
@@ -47,7 +48,7 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
                   MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get(),
+                  AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get(),
                   MemoryStatus.VALUE_PRESENT));
       this.animalMobType = animalMobType;
    }
@@ -63,31 +64,38 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
       }
 
       Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
-      LogisticsManager logisticsManager =
-            ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
-      AnimalFarmBehaviour behaviour = (AnimalFarmBehaviour) workSite.getBehaviour();
+
+      Optional<LoadedSettlement> loadedSettlement = LoadedSettlements.checkLoaded(home.getSettlementId());
+      if (loadedSettlement.isEmpty())
+         return false;
+
+      LogisticsManager logisticsManager = loadedSettlement.get().getBehaviour().getLogisticsManager();
+
+      AnimalFarmState behaviour = (AnimalFarmState) workSite.getState();
       TaskConsumableItemRequirement taskItemRequirement =
             new TaskConsumableItemRequirement(
+                  level,
                   "breed_animals",
                   behaviour::isCorrectFood,
                   StorehouseOrder.Origin.AUTOMATIC,
                   2,
                   16);
-      taskItemRequirement.setExpiryTime(10);
+      taskItemRequirement.setExpiry(12000);
       logisticsManager.registerOrder(home, taskItemRequirement);
-      ImportWhenStockpilesLow importOrder =
-            new ImportWhenStockpilesLow(
+      ImportUpTo importOrder =
+            new ImportUpTo(
+                  level,
                   "animal_food",
                   taskItemRequirement.getItemSearch(),
                   StorehouseOrder.Origin.AUTOMATIC,
                   16,
                   2);
-      importOrder.setExpiryTime(10);
+      importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home, importOrder);
 
       List<ItemStack> animalFoodItemsInventory = getAnimalFoodItemsInventory(villager, breedableAnimals.getFirst());
       if (animalFoodItemsInventory.stream().mapToInt(ItemStack::getCount).sum() < 2) {
-         villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
+         villager.getBrain().eraseMemory(AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get());
          return false;
       }
       this.handHeld = animalFoodItemsInventory.getFirst();

@@ -2,17 +2,14 @@ package com.uncreated.civilized.entity.behaviour.worker.common.logistics;
 
 import java.util.Optional;
 
-import com.uncreated.civilized.core.building.logistics.PendingShipment;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrders;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportOrder;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
-import com.uncreated.civilized.core.settlement.Settlement;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
@@ -20,25 +17,22 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class ExchangeResourcesAtStorehouse extends ExchangeResourcesAtBuilding {
+public class OffloadExportsAtStorehouse extends ExchangeResourcesAtBuilding {
 
    private static final Logger LOGGER = LogUtils.getLogger();
 
    private Building home;
-   private Settlement settlement;
+   private LoadedSettlement settlement;
 
-   public ExchangeResourcesAtStorehouse() {
+   public OffloadExportsAtStorehouse() {
       super(
             ImmutableMap.of(
                   MemoryModuleType.LOOK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.WALK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
-                  AIRegistry.MM_HOLDING_EXPORT_RESOURCES.get(),
-                  MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HOLDING_IMPORT_RESOURCES.get(),
-                  MemoryStatus.VALUE_ABSENT
-                    ));
+                  AIRegistry.MM_BUSY_OFFLOADING_EXPORTS.get(),
+                  MemoryStatus.VALUE_PRESENT));
    }
 
    @Override
@@ -56,7 +50,11 @@ public class ExchangeResourcesAtStorehouse extends ExchangeResourcesAtBuilding {
       if (home == null)
          return false;
 
-      settlement = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId());
+      Optional<LoadedSettlement> loadedSettlement = LoadedSettlements.checkLoaded(villager.getInfo().getSettlementId());
+      if (loadedSettlement.isEmpty())
+         return false;
+
+      settlement = loadedSettlement.get();
       return true;
    }
 
@@ -64,21 +62,9 @@ public class ExchangeResourcesAtStorehouse extends ExchangeResourcesAtBuilding {
    protected void exchangeResources(ServerLevel level, CivilizedVillager villager, long tickTime) {
 
       dumpInventoryToChests(villager.getLogisticsInventory());
-      villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_EXPORT_RESOURCES.get());
+      villager.getBrain().eraseMemory(AIRegistry.MM_BUSY_OFFLOADING_EXPORTS.get());
 
-      LogisticsOrders<ImportOrder> importOrders = settlement.getLogisticsManager().getImportOrders(home);
-      boolean holdingImportResources = false;
-      for (ImportOrder order : importOrders.orders()) {
-
-         PendingShipment shipment = order.getNextShipment(targetBuilding, home, level);
-         if (!shipment.shouldShip())
-            continue;
-
-         if (order.takeShipment(villager, shipment))
-            holdingImportResources = true;
-      }
-
-      if (holdingImportResources)
-         villager.getBrain().setMemory(AIRegistry.MM_HOLDING_IMPORT_RESOURCES.get(), true);
+      // since villager is already at the storehouse, might as well import stuff
+      villager.getBrain().setMemory(AIRegistry.MM_IMPORT_DESIRED.get(), true);
    }
 }

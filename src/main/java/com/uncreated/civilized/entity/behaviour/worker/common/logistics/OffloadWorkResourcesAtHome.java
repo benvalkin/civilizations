@@ -8,8 +8,9 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.exports.ExportAll;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import com.uncreated.civilized.core.building.logistics.orders.exports.ExportAlways;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
@@ -27,7 +28,7 @@ public class OffloadWorkResourcesAtHome extends ExchangeResourcesAtBuilding {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.WALK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
-                  AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(),
+                  AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(),
                   MemoryStatus.VALUE_PRESENT));
    }
 
@@ -42,13 +43,22 @@ public class OffloadWorkResourcesAtHome extends ExchangeResourcesAtBuilding {
       dumpInventoryToChests(villager.getWorkInputInventory());
 
       Set<Item> toExport = dumpInventoryToChests(villager.getWorkOutputInventory());
-      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
+      Optional<LoadedSettlement> loadedSettlement = LoadedSettlements.checkLoaded(villager.getInfo().getSettlementId());
+      if (loadedSettlement.isEmpty()) {
+         doStop(level, villager, tickTime);
+         return;
+      }
+
+      LogisticsManager logisticsManager = loadedSettlement.get().getBehaviour().getLogisticsManager();
+
       toExport.forEach(item -> {
-         ExportAll exportOrder = new ExportAll(item.toString(), i -> i.is(item), StorehouseOrder.Origin.AUTOMATIC);
-         exportOrder.setExpiryTime(10);
-         logisticsManager.registerOrder(targetBuilding, exportOrder);
+         ExportAlways exportOrder =
+               new ExportAlways(level, item.toString(), i -> i.is(item), StorehouseOrder.Origin.AUTOMATIC);
+         exportOrder.setExpiry(12000);
+         logisticsManager.registerOrder(targetbuilding, exportOrder);
       });
 
-      villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get());
+      villager.getBrain().eraseMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get());
+      villager.getBrain().setMemory(AIRegistry.MM_EXPORT_DESIRED.get(), true);
    }
 }

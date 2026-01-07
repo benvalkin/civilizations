@@ -121,7 +121,7 @@ public class HarvestCrops extends WorkTaskBehaviour {
                villager.playSound(SoundEvents.CROP_BREAK, 1.0f, 1.0f);
                toolHits = 0;
 
-               villager.getBrain().setMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), true);
+               villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
             }
          }
       }
@@ -149,14 +149,18 @@ public class HarvestCrops extends WorkTaskBehaviour {
       farmland.clear();
       maturesCrops.clear();
 
-      workSite.getBounds().traverseBlocksWithinTerminateYChecksIfCanSeeSky(b -> {
+      workSite.getBounds().traverseBlocksWithin(traversal -> {
+         BlockPos b = traversal.getCurrentBlockPos();
+
          if (isMatureCrop(b, serverLevel)) {
             maturesCrops.add(b);
          }
          if (isFarmland(b.below(), serverLevel)) {
             farmland.add(b);
          }
-      }, serverLevel);
+         if (serverLevel.canSeeSky(b))
+            traversal.skipToNextXZ();
+      });
    }
 
    private boolean isFarmland(BlockPos blockPos, ServerLevel serverLevel) {

@@ -22,7 +22,7 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
 
    private static final Logger LOGGER = LogUtils.getLogger();
 
-   protected Building targetBuilding;
+   protected Building targetbuilding;
    private List<ChestBlockEntity> chestsAtTarget;
    private MediumDistanceTravelTask travelHelper;
 
@@ -39,10 +39,10 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
       if (targetBuilding.isEmpty())
          return false;
 
-      this.targetBuilding = targetBuilding.get();
+      this.targetbuilding = targetBuilding.get();
 
       chestsAtTarget =
-              this.targetBuilding
+              this.targetbuilding
                   .getBounds()
                   .getBlockEntitiesInsideBuilding(level)
                   .stream()
@@ -59,18 +59,18 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
-      LOGGER.info("Villager going to exchange resources at {}.", targetBuilding.toStringLite());
+      LOGGER.info("Villager going to exchange resources at {}.", targetbuilding.toStringLite());
 
       travelHelper =
             new MediumDistanceTravelTask(
                   villager,
-                  targetBuilding.getBlockPos(), 3);
+                  targetbuilding.getBlockPos(), 3);
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
-      LOGGER.info("Villager finished exchange resources at {}.", targetBuilding.toStringLite());
+      LOGGER.info("Villager finished exchange resources at {}.", targetbuilding.toStringLite());
    }
 
    @Override

@@ -5,31 +5,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.uncreated.civilized.core.building.logistics.LogisticsManager;
-import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
-import com.uncreated.civilized.core.building.logistics.orders.task.ToolRequirement;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
-import com.uncreated.civilized.util.ContainerHelper;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.PickaxeItem;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportUpTo;
+import com.uncreated.civilized.core.building.logistics.orders.task.ToolRequirement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
+import com.uncreated.civilized.util.ContainerHelper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -57,7 +58,7 @@ public class MineOres extends WorkTaskBehaviour {
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
                   MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(),
+                  AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(),
                   MemoryStatus.VALUE_ABSENT),
             20 * 60 * 4,
             20 * 60 * 4);
@@ -70,18 +71,26 @@ public class MineOres extends WorkTaskBehaviour {
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
 
       Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
-      LogisticsManager logisticsManager = ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
-      ToolRequirement toolRequirement = new ToolRequirement("mine_ores", PickaxeItem.class, StorehouseOrder.Origin.AUTOMATIC);
-      toolRequirement.setExpiryTime(10);
+      Optional<LoadedSettlement> loadedSettlement = LoadedSettlements.checkLoaded(home.getSettlementId());
+      if (loadedSettlement.isEmpty())
+         return false;
+
+      LogisticsManager logisticsManager = loadedSettlement.get().getBehaviour().getLogisticsManager();
+
+      ToolRequirement toolRequirement =
+            new ToolRequirement(level, "mine_ores", PickaxeItem.class, StorehouseOrder.Origin.AUTOMATIC);
+      toolRequirement.setExpiry(12000);
       logisticsManager.registerOrder(home, toolRequirement);
-      ImportWhenStockpilesLow importOrder = new ImportWhenStockpilesLow("pickaxe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1);
-      importOrder.setExpiryTime(10);
+      ImportUpTo importOrder =
+            new ImportUpTo(level, "pickaxe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1);
+      importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home, importOrder);
 
-      Optional<ContainerHelper.ItemSearchResult> tool = ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
+      Optional<ContainerHelper.ItemSearchResult> tool =
+            ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
       if (tool.isEmpty()) {
          // todo: send notification that the villager is missing tool
-         villager.getBrain().eraseMemory(AIRegistry.MM_HOLDING_WORK_INPUT_RESOURCES.get());
+         villager.getBrain().eraseMemory(AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get());
          return false;
       }
       this.handHeld = tool.get().itemStack();
@@ -102,7 +111,7 @@ public class MineOres extends WorkTaskBehaviour {
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
       if (foundOres)
-         villager.getBrain().setMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), true);
+         villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
 
       villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
    }
@@ -110,7 +119,8 @@ public class MineOres extends WorkTaskBehaviour {
    @Override
    protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
       return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT)
-            && villager.getBrain().checkMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), MemoryStatus.VALUE_ABSENT);
+            && villager.getBrain()
+                  .checkMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), MemoryStatus.VALUE_ABSENT);
    }
 
    private int applyWorkSpeedMultiplier(int requiredToolHits) {

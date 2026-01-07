@@ -10,13 +10,14 @@ import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.behaviour.CropFarmBehaviour;
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportWhenStockpilesLow;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportUpTo;
 import com.uncreated.civilized.core.building.logistics.orders.task.TaskConsumableItemRequirement;
 import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
-import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import com.uncreated.civilized.core.building.state.CropFarmState;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
@@ -66,25 +67,31 @@ public class PlantCrops extends WorkTaskBehaviour {
 
       // import new seeds only if there is empty farmland
       Building home = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getHomeBuildingId());
-      LogisticsManager logisticsManager =
-            ServerSettlementsStore.INSTANCE.get(villager.getInfo().getSettlementId()).getLogisticsManager();
-      CropFarmBehaviour behaviour = (CropFarmBehaviour) workSite.getBehaviour();
+
+      Optional<LoadedSettlement> loadedSettlement = LoadedSettlements.checkLoaded(home.getSettlementId());
+      if (loadedSettlement.isEmpty())
+         return false;
+
+      LogisticsManager logisticsManager = loadedSettlement.get().getBehaviour().getLogisticsManager();
+      CropFarmState behaviour = (CropFarmState) workSite.getState();
       TaskItemRequirement taskItemRequirement =
             new TaskConsumableItemRequirement(
+                  level,
                   "plant_crops",
                   behaviour::isCorrectCrop,
                   StorehouseOrder.Origin.AUTOMATIC,
                   16);
-      taskItemRequirement.setExpiryTime(10);
+      taskItemRequirement.setExpiry(12000);
       logisticsManager.registerOrder(home, taskItemRequirement);
-      ImportWhenStockpilesLow importOrder =
-            new ImportWhenStockpilesLow(
+      ImportUpTo importOrder =
+            new ImportUpTo(
+                  level,
                   "seeds",
                   taskItemRequirement.getItemSearch(),
                   StorehouseOrder.Origin.AUTOMATIC,
                   32,
                   8);
-      importOrder.setExpiryTime(10);
+      importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home, importOrder);
 
       if (!(hasSeedsInInventory(villager.getWorkInputInventory())
@@ -193,11 +200,14 @@ public class PlantCrops extends WorkTaskBehaviour {
    private void findFarmland(ServerLevel serverLevel) {
       emptyFarmland.clear();
 
-      workSite.getBounds().traverseBlocksWithinTerminateYChecksIfCanSeeSky(b -> {
+      workSite.getBounds().traverseBlocksWithin(traversal -> {
+         BlockPos b = traversal.getCurrentBlockPos();
          if (isEmptyFarmland(b.below(), serverLevel)) {
             emptyFarmland.add(b);
          }
-      }, serverLevel);
+         if (serverLevel.canSeeSky(b))
+            traversal.skipToNextXZ();
+      });
    }
 
    private boolean isEmptyFarmland(BlockPos blockPos, ServerLevel serverLevel) {

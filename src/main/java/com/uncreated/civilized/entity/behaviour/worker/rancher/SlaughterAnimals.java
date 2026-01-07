@@ -109,7 +109,7 @@ public class SlaughterAnimals<T extends Animal> extends WorkTaskBehaviour {
             i.remove(Entity.RemovalReason.KILLED);
          });
 
-         villager.getBrain().setMemory(AIRegistry.MM_HOLDING_WORK_OUTPUT_RESOURCES.get(), true);
+         villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
       }
    }
 

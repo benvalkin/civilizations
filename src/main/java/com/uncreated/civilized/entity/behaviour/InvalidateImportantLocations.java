@@ -141,6 +141,9 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
          filter =
                b -> b == BuildingType.CATTLE_FARM || b == BuildingType.CHICKEN_FARM || b == BuildingType.SHEEP_FARM
                      || b == BuildingType.HOG_FARM;
+
+      } else if (villagerInfo.getOccupation() == VillagerOccupation.BAKER) {
+         return ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
       } else
          return Optional.empty();
 
