@@ -16,6 +16,7 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.crafting.CraftingMachine;
 import com.uncreated.civilized.core.building.crafting.PendingProductionOutput;
+import com.uncreated.civilized.core.building.crafting.bills.ProductionType;
 import com.uncreated.civilized.core.building.crafting.orders.ProductionOrder;
 import com.uncreated.civilized.core.building.entity.LoadedBuilding;
 import com.uncreated.civilized.core.building.entity.LoadedBuildings;
@@ -166,7 +167,7 @@ public class CraftItems extends WorkTaskBehaviour {
          }
 
          PendingProductionOutput pendingOutput = nextOrder.get().getSecond();
-         ItemStack resultItem = pendingOutput.resultItem();
+         ItemStack resultItem = pendingOutput.assembledRecipe().resultItem();
          if (!villager.getWorkOutputInventory().canAddItem(resultItem)) {
             // nothing more to craft
             doStop(level, villager, gameTime);
@@ -174,7 +175,7 @@ public class CraftItems extends WorkTaskBehaviour {
          }
 
          villager.getWorkOutputInventory().addItem(resultItem);
-         pendingOutput.consumeIngredients(level);
+         pendingOutput.consumeIngredients();
 
          villager.swing(InteractionHand.MAIN_HAND, true);
          villager.setItemSlot(EquipmentSlot.MAINHAND, resultItem.copyWithCount(1));
@@ -188,6 +189,10 @@ public class CraftItems extends WorkTaskBehaviour {
 
       for (int i = 0; i < craftingMachine.getOrders().size(); i++) {
          ProductionOrder order = craftingMachine.getOrders().get(i);
+
+         if (order.getBill().getProductionType() != ProductionType.CRAFTING)
+            continue;
+
          PendingProductionOutput pendingOutput = order.getNextOutput(ingredientsChests, stockChests);
 
          if (!pendingOutput.canProduce())

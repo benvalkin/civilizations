@@ -1,13 +1,11 @@
 package com.uncreated.civilized.core.building.state;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.uncreated.civilized.core.building.Building;
-
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeManager;
+import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
+import com.uncreated.civilized.core.building.crafting.bills.ProductionType;
+import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
 
 public class BakerHouseState extends ArtisanHouseState {
    protected BakerHouseState(Building building) {
@@ -15,9 +13,13 @@ public class BakerHouseState extends ArtisanHouseState {
    }
 
    @Override
-   public List<Optional<RecipeHolder<CraftingRecipe>>> getDefaultCraftingRecipes(RecipeManager recipeManager) {
+   public List<ProductionBill> getDefaultProductionBills() {
       return List.of(
-            getCraftingRecipeFor(recipeManager, "minecraft:bread"),
-            getCraftingRecipeFor(recipeManager, "minecraft:iron_pickaxe"));
+            new ProductionBill(
+                  "minecraft:bread",
+                  ProductionType.CRAFTING,
+                  ProductionStrategyType.PRODUCE_UP_TO,
+                  32,
+                  true));
    }
 }

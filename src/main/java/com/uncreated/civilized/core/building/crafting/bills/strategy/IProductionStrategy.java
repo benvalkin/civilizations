@@ -1,0 +1,9 @@
+package com.uncreated.civilized.core.building.crafting.bills.strategy;
+
+import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
+
+public interface IProductionStrategy {
+    int calculateStockDeficit(AggregateItemStack stockChestsStock);
+    ProductionStrategyType getType();
+
+}

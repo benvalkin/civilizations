@@ -1,19 +1,22 @@
 package com.uncreated.civilized.core.building.crafting;
 
 import java.util.Collection;
+import java.util.List;
 
-import net.minecraft.server.level.ServerLevel;
+import com.uncreated.civilized.core.building.crafting.orders.recipe.AssembledRecipe;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 
-public record PendingProductionOutput(CraftingRecipe recipe, CraftingInput craftingInput, ItemStack resultItem, boolean canProduce, int stockDeficit,
-      Collection<Container> sourceContainers) {
+public record PendingProductionOutput(Recipe<?> recipe, AssembledRecipe<?> assembledRecipe,
+      boolean canProduce, int stockDeficit, Collection<Container> sourceContainers) {
 
-   public void consumeIngredients(ServerLevel level) {
+   public void consumeIngredients() {
 
-      for (ItemStack ingredient : craftingInput.items()) {
+      for (ItemStack ingredient : assembledRecipe.availableIngredients()) {
 
          final int quota = ingredient.getCount();
          int successfullyRemoved = 0;
