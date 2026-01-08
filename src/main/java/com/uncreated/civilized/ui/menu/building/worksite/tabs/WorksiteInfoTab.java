@@ -7,6 +7,7 @@ import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.style.Colors;
 
@@ -26,8 +27,7 @@ public class WorksiteInfoTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
-         Building building,
-         Settlement settlement) {
+         BuildingScreenContext context) {
       super(
             index,
             x,
@@ -36,8 +36,7 @@ public class WorksiteInfoTab extends ABuildingScreenTab {
             height,
             font,
             Component.translatable("menu.building.residence.info.tab.heading"),
-            building,
-            settlement);
+            context);
       this.workers = createOccupantsList();
    }
 
@@ -75,7 +74,7 @@ public class WorksiteInfoTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createOccupantsList() {
-      return BuildingUtil.getAssignedWorkers(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getAssignedWorkers(context.building(), ClientVillagerStore.INSTANCE);
    }
 
    @Override

@@ -3,9 +3,8 @@ package com.uncreated.civilized.ui.menu.building;
 import java.util.List;
 
 import com.uncreated.civilized.core.StoreOperation;
-import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
-import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.Minecraft;
@@ -33,18 +32,8 @@ public class BuildingSettingsTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
-         Building building,
-         Settlement settlement) {
-      super(
-            index,
-            x,
-            y,
-            width,
-            height,
-            font,
-            Component.translatable("menu.building.settings.tab.heading"),
-            building,
-            settlement);
+         BuildingScreenContext context) {
+      super(index, x, y, width, height, font, Component.translatable("menu.building.settings.tab.heading"), context);
       decommissionRequested = false;
 
       autoAssignOccupants =
@@ -77,7 +66,7 @@ public class BuildingSettingsTab extends ABuildingScreenTab {
    }
 
    private void onPressDecommissionConfirm(Button button) {
-      ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.DELETE);
+      ClientBuildingStore.INSTANCE.replicateChange(context.building(), StoreOperation.DELETE);
       Minecraft.getInstance().setScreen(null);
       decommissionRequested = false;
    }

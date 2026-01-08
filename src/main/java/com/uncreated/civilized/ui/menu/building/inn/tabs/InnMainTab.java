@@ -2,11 +2,10 @@ package com.uncreated.civilized.ui.menu.building.inn.tabs;
 
 import java.util.List;
 
-import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.style.Colors;
 
@@ -20,15 +19,7 @@ public class InnMainTab extends ABuildingScreenTab {
 
    private List<VillagerInfo> visitors;
 
-   public InnMainTab(
-         int index,
-         int x,
-         int y,
-         int width,
-         int height,
-         Font font,
-         Building building,
-         Settlement settlement) {
+   public InnMainTab(int index, int x, int y, int width, int height, Font font, BuildingScreenContext context) {
       super(
             index,
             x,
@@ -36,11 +27,11 @@ public class InnMainTab extends ABuildingScreenTab {
             width,
             height,
             font,
-            settlement.displayNameTranslationExtended()
+            context.settlement()
+                  .displayNameTranslationExtended()
                   .withColor(Colors.SETTLEMENT_NAME)
                   .withStyle(ChatFormatting.ITALIC),
-            building,
-            settlement);
+            context);
 
       visitors = createVisitorsList();
    }
@@ -48,7 +39,13 @@ public class InnMainTab extends ABuildingScreenTab {
    @Override
    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
       super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-      graphics.drawString(font, Component.translatable("menu.building.inn.visitors.count", visitors.size()), getX(), getY() + 20, Colors.MENU_TEXT_DARK, false);
+      graphics.drawString(
+            font,
+            Component.translatable("menu.building.inn.visitors.count", visitors.size()),
+            getX(),
+            getY() + 20,
+            Colors.MENU_TEXT_DARK,
+            false);
 
       for (int i = 0; i < visitors.size(); i++) {
 
@@ -69,7 +66,7 @@ public class InnMainTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createVisitorsList() {
-      return BuildingUtil.getResidents(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getResidents(context.building(), ClientVillagerStore.INSTANCE);
    }
 
    @Override

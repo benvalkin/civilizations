@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.uncreated.civilized.core.building.Building;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -22,13 +23,13 @@ public class CropFarmState extends BuildingState {
       cropSlots[2] = ItemStack.EMPTY;
    }
 
-   public void applyNbt(CompoundTag compoundTag) {
+   public void applyNbt(CompoundTag compoundTag, HolderLookup.Provider registryAccess) {
       readItemSlot(0, compoundTag);
       readItemSlot(1, compoundTag);
       readItemSlot(2, compoundTag);
    }
 
-   public CompoundTag toNbt() {
+   public CompoundTag toNbt(HolderLookup.Provider registryAccess) {
       CompoundTag tag = new CompoundTag();
       writeItemSlot(0, tag);
       writeItemSlot(1, tag);

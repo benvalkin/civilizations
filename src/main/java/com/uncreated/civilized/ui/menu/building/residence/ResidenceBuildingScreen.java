@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingSettingsTab;
 import com.uncreated.civilized.ui.menu.building.residence.tabs.ManageResidentsTab;
@@ -20,8 +21,8 @@ public class ResidenceBuildingScreen extends ABuildingScreen {
    private Button tab2;
    private Button tab3;
 
-   public ResidenceBuildingScreen(Building building, Settlement settlement, Component title) {
-      super(building, settlement, title);
+   public ResidenceBuildingScreen(BuildingScreenContext context, Component title) {
+      super(context, title);
    }
 
    @Override
@@ -35,8 +36,7 @@ public class ResidenceBuildingScreen extends ABuildingScreen {
                   tabWidth,
                   tabHeight,
                   this.font,
-                  building,
-                  settlement),
+                    context),
             new ManageResidentsTab(
                   1,
                   contentLeftPos,
@@ -44,8 +44,7 @@ public class ResidenceBuildingScreen extends ABuildingScreen {
                   tabWidth,
                   tabHeight,
                   this.font,
-                  building,
-                  settlement),
+                    context),
             new BuildingSettingsTab(
                   2,
                   contentLeftPos,
@@ -53,8 +52,7 @@ public class ResidenceBuildingScreen extends ABuildingScreen {
                   tabWidth,
                   tabHeight,
                   this.font,
-                  building,
-                  settlement));
+                    context));
    }
 
    @Override

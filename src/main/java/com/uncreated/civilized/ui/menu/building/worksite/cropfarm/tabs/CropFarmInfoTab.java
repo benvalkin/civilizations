@@ -12,6 +12,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
 import com.uncreated.civilized.ui.style.Colors;
@@ -38,8 +39,7 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
-         Building building,
-         Settlement settlement) {
+         BuildingScreenContext context) {
       super(
             index,
             x,
@@ -48,8 +48,7 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
             height,
             font,
             Component.translatable("menu.building.residence.info.tab.heading"),
-            building,
-            settlement);
+            context);
       this.workers = createOccupantsList();
 
       chooseCrops =
@@ -62,7 +61,7 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
    }
 
    private void onPressModifyItems(Button button) {
-      PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(building.getBuildingId(), 3));
+      PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(context.building().getBuildingId(), 3));
    }
 
    protected Container createContainer() {
@@ -72,7 +71,7 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
    @Override
    protected List<Slot> createAndArrangeItemSlots(Container container) {
 
-      CropFarmState cropFarmBehaviour = (CropFarmState) building.getState();
+      CropFarmState cropFarmBehaviour = (CropFarmState) context.building().getState();
       cropFarmBehaviour.tryApplyDefaults();
       container.setItem(0, cropFarmBehaviour.getCropSlot(0));
       container.setItem(1, cropFarmBehaviour.getCropSlot(1));
@@ -131,7 +130,7 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createOccupantsList() {
-      return BuildingUtil.getAssignedWorkers(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getAssignedWorkers(context.building(), ClientVillagerStore.INSTANCE);
    }
 
    @Override

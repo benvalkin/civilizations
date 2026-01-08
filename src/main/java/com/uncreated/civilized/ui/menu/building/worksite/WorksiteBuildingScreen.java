@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingSettingsTab;
 import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
@@ -20,15 +21,24 @@ public class WorksiteBuildingScreen extends ABuildingScreen {
    private Button tab2;
    private Button tab3;
 
-   public WorksiteBuildingScreen(Building building, Settlement settlement, Component title) {
-      super(building, settlement, title);
+   public WorksiteBuildingScreen(
+         BuildingScreenContext context,
+         Component title) {
+      super(context, title);
    }
 
    @Override
    protected List<ATab> createTabs(int contentLeftPos, int contentTopPos, int tabWidth, int tabHeight) {
 
       return List.of(
-            new WorksiteInfoTab(0, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, building, settlement),
+            new WorksiteInfoTab(
+                  0,
+                  contentLeftPos,
+                  contentTopPos,
+                  tabWidth,
+                  tabHeight,
+                  this.font,
+                  context),
             new ManageWorkersTab(
                   1,
                   contentLeftPos,
@@ -36,8 +46,7 @@ public class WorksiteBuildingScreen extends ABuildingScreen {
                   tabWidth,
                   tabHeight,
                   this.font,
-                  building,
-                  settlement),
+                  context),
             new BuildingSettingsTab(
                   2,
                   contentLeftPos,
@@ -45,8 +54,7 @@ public class WorksiteBuildingScreen extends ABuildingScreen {
                   tabWidth,
                   tabHeight,
                   this.font,
-                  building,
-                  settlement));
+                  context));
    }
 
    @Override

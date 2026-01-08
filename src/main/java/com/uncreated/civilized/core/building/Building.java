@@ -9,8 +9,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
@@ -23,9 +21,11 @@ import lombok.Setter;
 import lombok.ToString;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -51,7 +51,7 @@ public class Building {
                   .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
                   .build();
 
-      result.state.applyNbt(buffer.readNbt());
+      result.state.applyNbt(buffer.readNbt(), buffer.registryAccess());
       return result;
    }
 
@@ -64,7 +64,7 @@ public class Building {
       buffer.writeEnum(buildingType);
       bounds.encode(buffer);
       buffer.writeCollection(occupantIds, (buf, o) -> buf.writeUUID(o));
-      buffer.writeNbt(state.toNbt());
+      buffer.writeNbt(state.toNbt(buffer.registryAccess()));
    }
 
    public static final String FIELD_DIMENSION = "dimension";
@@ -108,7 +108,7 @@ public class Building {
       buildingType = other.buildingType;
       bounds = other.bounds;
       occupantIds = other.occupantIds; // BAD IMPLEMENTATION: this is sus if we are saving the list reference anywhere
-      state.applyNbt(other.state.toNbt());
+      state.applyNbt(other.state.toNbt(registryAccess), registryAccess);
    }
 
    public BlockPos getBlockPos() {
@@ -128,7 +128,7 @@ public class Building {
    public String toStringLite() {
       return String.format(
             "{dimension: %s buildingType: %s buildingId: %s blockPos: %s occupants: %s}",
-              dimension,
+            dimension,
             buildingType,
             buildingId.toString().substring(0, 6),
             getBlockPos(),

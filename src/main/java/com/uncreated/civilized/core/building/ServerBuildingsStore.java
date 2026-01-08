@@ -80,7 +80,7 @@ public class ServerBuildingsStore extends BuildingStore {
             occupantIds.add(occupantTag);
          }
          item.put(Building.FIELD_LIST_OCCUPANTS, occupantIds);
-         item.put(Building.FIELD_BEHAVIOUR_DATA, building.getState().toNbt());
+         item.put(Building.FIELD_BEHAVIOUR_DATA, building.getState().toNbt(registries));
          tags.add(item);
       }
 
@@ -125,7 +125,7 @@ public class ServerBuildingsStore extends BuildingStore {
 
          builder.occupantIds(occupantIds);
          Building building = builder.build();
-         building.getState().applyNbt(itemTag.getCompound(Building.FIELD_BEHAVIOUR_DATA));
+         building.getState().applyNbt(itemTag.getCompound(Building.FIELD_BEHAVIOUR_DATA), lookupProvider);
          store.buildings.add(building);
       }
 

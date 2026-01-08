@@ -14,6 +14,7 @@ import com.uncreated.civilized.neoforge.registration.attachments.DataAttachments
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -124,7 +125,9 @@ public abstract class SignBlockMixin extends BaseEntityBlock implements SimpleWa
       // menu.setSynchronizer(containerSynchronizer);
       // serverPlayer.containerMenu = menu;
 
-      PacketDistributor.sendToPlayer(serverPlayer, new ShowBuildingScreen(buildingId));
+      CompoundTag additionalData = new CompoundTag();
+      building.get().getState().serverAddToBuildingScreenContext(additionalData, serverPlayer.serverLevel());
+      PacketDistributor.sendToPlayer(serverPlayer, new ShowBuildingScreen(buildingId, additionalData));
       // building.get());
 
       // player.openMenu(new MenuProvider() {

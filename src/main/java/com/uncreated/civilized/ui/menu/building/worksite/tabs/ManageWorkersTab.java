@@ -7,6 +7,7 @@ import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.residence.tabs.ManageResidentsTab;
 import com.uncreated.civilized.ui.menu.building.widgets.ManageOccupantWidget;
 import com.uncreated.civilized.ui.menu.building.widgets.ManageWorkerWidget;
@@ -18,16 +19,8 @@ public class ManageWorkersTab extends ManageResidentsTab {
 
    public static final int MAX_ASSIGNED_WORKERS = 1;
 
-   public ManageWorkersTab(
-         int index,
-         int x,
-         int y,
-         int width,
-         int height,
-         Font font,
-         Building building,
-         Settlement settlement) {
-      super(index, x, y, width, height, font, building, settlement);
+   public ManageWorkersTab(int index, int x, int y, int width, int height, Font font, BuildingScreenContext context) {
+      super(index, x, y, width, height, font, context);
    }
 
    @Override
@@ -60,7 +53,7 @@ public class ManageWorkersTab extends ManageResidentsTab {
 
    @Override
    protected ManageOccupantWidget.ManagementOption getAssignButtonAction(VillagerInfo villager) {
-      if (villager.isAssignedWorkerOf(building))
+      if (villager.isAssignedWorkerOf(context.building()))
          return ManageOccupantWidget.ManagementOption.UNASSIGN;
       else
          return ManageOccupantWidget.ManagementOption.ASSIGN;
@@ -80,7 +73,7 @@ public class ManageWorkersTab extends ManageResidentsTab {
             width,
             height,
             font,
-            building,
+            context.building(),
             villagerInfo,
             managementOption,
             isBuildingFull);

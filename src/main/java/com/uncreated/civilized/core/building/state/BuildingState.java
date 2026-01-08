@@ -1,5 +1,7 @@
 package com.uncreated.civilized.core.building.state;
 
+import net.minecraft.core.HolderLookup;
+import net.minecraft.server.level.ServerLevel;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -27,11 +29,15 @@ public class BuildingState {
       };
    }
 
-   public void applyNbt(CompoundTag compoundTag) {
+   public void applyNbt(CompoundTag compoundTag, HolderLookup.Provider registryAccess) {
 
    }
 
-   public CompoundTag toNbt() {
+   public CompoundTag toNbt(HolderLookup.Provider registryAccess) {
       return new CompoundTag();
+   }
+
+   public void serverAddToBuildingScreenContext(CompoundTag compoundTag, ServerLevel serverLevel) {
+
    }
 }

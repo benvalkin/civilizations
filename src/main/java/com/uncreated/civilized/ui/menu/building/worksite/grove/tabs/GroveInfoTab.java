@@ -12,6 +12,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
 import com.uncreated.civilized.ui.style.Colors;
@@ -38,8 +39,7 @@ public class GroveInfoTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
-         Building building,
-         Settlement settlement) {
+         BuildingScreenContext context) {
       super(
             index,
             x,
@@ -48,8 +48,7 @@ public class GroveInfoTab extends ABuildingScreenTab {
             height,
             font,
             Component.translatable("menu.building.residence.info.tab.heading"),
-            building,
-            settlement);
+            context);
       this.workers = createOccupantsList();
 
       chooseSaplings =
@@ -62,7 +61,7 @@ public class GroveInfoTab extends ABuildingScreenTab {
    }
 
    private void onPressModifyItems(Button button) {
-      PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(building.getBuildingId(), 1));
+      PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(context.building().getBuildingId(), 1));
    }
 
    protected Container createContainer() {
@@ -72,7 +71,7 @@ public class GroveInfoTab extends ABuildingScreenTab {
    @Override
    protected List<Slot> createAndArrangeItemSlots(Container container) {
 
-      GroveState groveBehaviour = (GroveState) building.getState();
+      GroveState groveBehaviour = (GroveState) context.building().getState();
       container.setItem(0, groveBehaviour.getSapling());
 
       ArrayList<Slot> slots = Lists.newArrayList();
@@ -126,7 +125,7 @@ public class GroveInfoTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createOccupantsList() {
-      return BuildingUtil.getAssignedWorkers(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getAssignedWorkers(context.building(), ClientVillagerStore.INSTANCE);
    }
 
    @Override

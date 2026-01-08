@@ -2,17 +2,16 @@ package com.uncreated.civilized.ui.menu.building.residence.artisan;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.compress.utils.Lists;
 
-import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
-import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
+import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.ui.components.ScrollListView;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
-import com.uncreated.civilized.ui.menu.building.widgets.ManageOccupantWidget;
+import com.uncreated.civilized.ui.menu.building.widgets.RecipeListViewWidget;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;
@@ -20,13 +19,17 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public class ManageProductionBillsTab extends ABuildingScreenTab {
 
    public static final int MAX_ASSIGNED_RESIDENTS = 2;
+
+   @Nullable
    private ScrollListView scrollView;
-   private List<VillagerInfo> currentOccupants;
-   private List<VillagerInfo> candidateOccupants;
+
+   @Nullable
+   private ArtisanHouseState buildingState;
 
    public ManageProductionBillsTab(
          int index,
@@ -35,8 +38,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
-         Building building,
-         Settlement settlement) {
+         BuildingScreenContext context) {
       super(
             index,
             x,
@@ -44,9 +46,8 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
             width,
             height,
             font,
-            Component.translatable("menu.building.residence.residents.tab.heading"),
-            building,
-            settlement);
+            Component.translatable("menu.building.residence.production_bills.tab.heading"),
+            context);
       refresh();
    }
 
@@ -54,24 +55,17 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
       super.renderWidget(graphics, mouseX, mouseY, partialTicks);
 
-      Component heading;
-      if (candidateOccupants.isEmpty())
-         heading = getSubHeadingNoCandidates();
-      else
-         heading = getSubHeading(currentOccupants);
-
-      graphics.drawWordWrap(font, heading, getX(), getY() + 15, width, Colors.MENU_TEXT_DARK, false);
-
-      if (!candidateOccupants.isEmpty())
+      if (scrollView != null)
          scrollView.render(graphics, mouseX, mouseY, partialTicks);
-   }
-
-   protected Component getSubHeading(List<VillagerInfo> currentOccupants) {
-      return Component.translatable("menu.building.residence.residents.heading", currentOccupants.size());
-   }
-
-   protected Component getSubHeadingNoCandidates() {
-      return Component.translatable("menu.building.residence.residents.heading.empty");
+      else
+         graphics.drawWordWrap(
+               font,
+               Component.translatable("menu.building.residence.production_bills.heading.empty"),
+               getX(),
+               getY() + 15,
+               width,
+               Colors.MENU_TEXT_DARK,
+               false);
    }
 
    @Override
@@ -82,31 +76,25 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
       return children;
    }
 
-   private ScrollListView createScrollView(List<VillagerInfo> currentOccupants, List<VillagerInfo> candidateOccupants) {
+   private ScrollListView createScrollView(List<ProductionBill> productionBills) {
       return new ScrollListView(getX(), getY() + 30, width, height, (x_, y_, w, h) -> {
          List<AbstractWidget> elements = Lists.newArrayList();
-
-         boolean isBuildingFull = currentOccupants.size() >= getMaxNumberOfOccupants();
 
          final int elementHeight = 25;
 
          int elementIndex = 0;
-         for (VillagerInfo villager : candidateOccupants) {
-
-            ManageOccupantWidget.ManagementOption mode = getAssignButtonAction(villager);
-
-            if (mode == ManageOccupantWidget.ManagementOption.NOT_APPLICABLE)
-               continue;
+         for (ProductionBill bill : productionBills) {
 
             elements.add(
-                  createManagementWidget(
+                  new RecipeListViewWidget(
                         x_,
                         y_ + elementIndex * elementHeight,
                         w - 10,
                         elementHeight,
-                        villager,
-                        mode,
-                        isBuildingFull));
+                        font,
+                        bill,
+                        context.building()));
+
             elementIndex++;
          }
 
@@ -114,60 +102,15 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
       });
    }
 
-   protected List<VillagerInfo> getCurrentOccupants(Building building, Settlement settlement) {
-      return BuildingUtil.getResidents(building, ClientVillagerStore.INSTANCE);
-   }
-
-   protected List<VillagerInfo> getCandidateOccupants(Building building, Settlement settlement) {
-      return ClientVillagerStore.INSTANCE.getCitizens(settlement.getSettlementId()).stream().sorted((v1, v2) -> {
-         boolean v1IsOccupant = building.getBuildingId().equals(v1.getHomeBuildingId());
-         boolean v2IsOccupant = building.getBuildingId().equals(v2.getHomeBuildingId());
-         if (v1IsOccupant && v2IsOccupant)
-            return 0;
-         else if (v1IsOccupant)
-            return -1;
-         else
-            return 1;
-      }).toList();
-   }
-
-   protected int getMaxNumberOfOccupants() {
-      return MAX_ASSIGNED_RESIDENTS;
-   }
-
-   protected ManageOccupantWidget.ManagementOption getAssignButtonAction(VillagerInfo villager) {
-      if (villager.isOccupantOf(building))
-         return ManageOccupantWidget.ManagementOption.UNASSIGN;
-      else if (villager.getOccupation() == VillagerOccupation.UNEMPLOYED)
-         return ManageOccupantWidget.ManagementOption.ASSIGN;
-
-      return ManageOccupantWidget.ManagementOption.NOT_APPLICABLE;
-   }
-
-   protected ManageOccupantWidget createManagementWidget(
-         int x,
-         int y,
-         int width,
-         int height,
-         VillagerInfo villagerInfo,
-         ManageOccupantWidget.ManagementOption managementOption,
-         boolean isBuildingFull) {
-      return new ManageOccupantWidget(
-            x,
-            y,
-            width,
-            height,
-            font,
-            building,
-            villagerInfo,
-            managementOption,
-            isBuildingFull);
-   }
-
    @Override
    public void refresh() {
-      currentOccupants = getCurrentOccupants(building, settlement);
-      candidateOccupants = getCandidateOccupants(building, settlement);
-      scrollView = createScrollView(currentOccupants, candidateOccupants);
+
+      if (context.building().getState() instanceof ArtisanHouseState state) {
+         this.buildingState = state;
+
+         state.tryLoadDefaultProductionBills();
+
+         scrollView = createScrollView(List.of());
+      }
    }
 }

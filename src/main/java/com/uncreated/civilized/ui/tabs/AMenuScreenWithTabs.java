@@ -27,8 +27,8 @@ public abstract class AMenuScreenWithTabs extends Screen implements IRefreshable
 
    public AMenuScreenWithTabs(Component title, int imageWidth, int imageHeight) {
       super(title);
-       this.imageWidth = imageWidth;
-       this.imageHeight = imageHeight;
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
    }
 
    protected abstract List<ATab> createTabs();

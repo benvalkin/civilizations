@@ -2,11 +2,10 @@ package com.uncreated.civilized.ui.menu.building.residence.tabs;
 
 import java.util.List;
 
-import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.style.Colors;
 
@@ -19,15 +18,7 @@ public class ResidenceInfoTab extends ABuildingScreenTab {
 
    private List<VillagerInfo> occupants;
 
-   public ResidenceInfoTab(
-         int index,
-         int x,
-         int y,
-         int width,
-         int height,
-         Font font,
-         Building building,
-         Settlement settlement) {
+   public ResidenceInfoTab(int index, int x, int y, int width, int height, Font font, BuildingScreenContext context) {
       super(
             index,
             x,
@@ -36,8 +27,7 @@ public class ResidenceInfoTab extends ABuildingScreenTab {
             height,
             font,
             Component.translatable("menu.building.residence.info.tab.heading"),
-            building,
-            settlement);
+            context);
       this.occupants = createOccupantsList();
    }
 
@@ -72,7 +62,7 @@ public class ResidenceInfoTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createOccupantsList() {
-      return BuildingUtil.getResidents(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getResidents(context.building(), ClientVillagerStore.INSTANCE);
    }
 
    @Override

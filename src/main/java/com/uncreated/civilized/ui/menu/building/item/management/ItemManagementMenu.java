@@ -8,6 +8,8 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 
 import lombok.Getter;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -78,6 +80,9 @@ public abstract class ItemManagementMenu extends AbstractContainerMenu {
 
       // BAD IMPLEMENTATION: this method is called when the player's menu closes (e.g. when escape is pressed), so this
       // currently re-opens the UI when it shouldn't.
-      PacketDistributor.sendToPlayer(serverPlayer, new ShowBuildingScreen(building.getBuildingId()));
+
+      CompoundTag additionalData = new CompoundTag();
+      building.getState().serverAddToBuildingScreenContext(additionalData, serverPlayer.serverLevel());
+      PacketDistributor.sendToPlayer(serverPlayer, new ShowBuildingScreen(building.getBuildingId(), additionalData));
    }
 }

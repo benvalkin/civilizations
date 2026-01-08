@@ -7,11 +7,11 @@ import org.apache.commons.compress.utils.Lists;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.core.settlement.util.SettlementUtil;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.ui.components.ScrollListView;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.widgets.ManageOccupantWidget;
 import com.uncreated.civilized.ui.style.Colors;
@@ -36,8 +36,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
-         Building building,
-         Settlement settlement) {
+         BuildingScreenContext context) {
       super(
             index,
             x,
@@ -46,8 +45,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
             height,
             font,
             Component.translatable("menu.building.residence.residents.tab.heading"),
-            building,
-            settlement);
+            context);
       refresh();
    }
 
@@ -137,7 +135,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
    }
 
    protected ManageOccupantWidget.ManagementOption getAssignButtonAction(VillagerInfo villager) {
-      if (villager.isOccupantOf(building))
+      if (villager.isOccupantOf(context.building()))
          return ManageOccupantWidget.ManagementOption.UNASSIGN;
       else if (villager.getOccupation() == VillagerOccupation.UNEMPLOYED)
          return ManageOccupantWidget.ManagementOption.ASSIGN;
@@ -159,7 +157,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
             width,
             height,
             font,
-            building,
+            context.building(),
             villagerInfo,
             managementOption,
             isBuildingFull);
@@ -167,8 +165,8 @@ public class ManageResidentsTab extends ABuildingScreenTab {
 
    @Override
    public void refresh() {
-      currentOccupants = getCurrentOccupants(building, settlement);
-      candidateOccupants = getCandidateOccupants(building, settlement);
+      currentOccupants = getCurrentOccupants(context.building(), context.settlement());
+      candidateOccupants = getCandidateOccupants(context.building(), context.settlement());
       scrollView = createScrollView(currentOccupants, candidateOccupants);
    }
 }

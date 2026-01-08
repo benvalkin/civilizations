@@ -11,6 +11,7 @@ import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -77,6 +78,8 @@ public class ChooseAnimalFoodMenu extends ItemManagementMenu {
 
       // BAD IMPLEMENTATION: this method is called when the player's menu closes (e.g. when escape is pressed), so this
       // currently re-opens the UI when it shouldn't.
-      PacketDistributor.sendToPlayer(serverPlayer, new ShowBuildingScreen(building.getBuildingId()));
+      CompoundTag additionalData = new CompoundTag();
+      building.getState().serverAddToBuildingScreenContext(additionalData, serverPlayer.serverLevel());
+      PacketDistributor.sendToPlayer(serverPlayer, new ShowBuildingScreen(building.getBuildingId(), additionalData));
    }
 }

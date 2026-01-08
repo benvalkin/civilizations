@@ -39,6 +39,8 @@
   "building.mine": "Mine",
   "building.barracks": "Barracks",
   "building.guard_post": "Guard Post",
+  "building.production_strategy.produce_infinite": "produce infinite",
+  "building.production_strategy.produce_up_to": "produce up to",
   "menu.title.civilized.mymenu": "Settlement Menu",
   "message.building.placement.validation.building_overlapping": "%s placement obstructed.\nThis building is too close to another building: %s.",
   "message.building.placement.validation.center_obstructed": "%s placement obstructed.\nhe center of this building at %s seems to be covered by a block.",
@@ -196,5 +198,8 @@
   "villager.dialogue.quest.migrant_worker.woodcutter_1.accepted.page_1": "Appreciate the kind offer.",
   "villager.dialogue.quest.migrant_worker.woodcutter_1.accepted.page_1.response": "You're more than welcome.",
   "villager.dialogue.quest.migrant_worker.woodcutter_1.accepted.page_2": "Well, I'm off to settle in.\n\nTomorrow I'll be right at work first thing.",
-  "end": ""
+  "end": "",
+  "menu.building.residence.production_bills.tab.heading": "Production Bills",
+  "gui.misc.button.edit": "Edit",
+  "menu.building.residence.production_bills.heading.empty": "No production orders found. Add recipes to automatically produce items."
 }

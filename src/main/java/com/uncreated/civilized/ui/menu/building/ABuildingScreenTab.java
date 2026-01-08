@@ -2,6 +2,7 @@ package com.uncreated.civilized.ui.menu.building;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.style.Colors;
 import com.uncreated.civilized.ui.tabs.ATabWithViewableItemSlots;
 
@@ -12,8 +13,7 @@ import net.minecraft.network.chat.Component;
 public abstract class ABuildingScreenTab extends ATabWithViewableItemSlots {
 
    private final Component tabTitle;
-   protected final Building building;
-   protected final Settlement settlement;
+   protected final BuildingScreenContext context;
 
    public ABuildingScreenTab(
          int index,
@@ -23,12 +23,10 @@ public abstract class ABuildingScreenTab extends ATabWithViewableItemSlots {
          int height,
          Font font,
          Component tabTitle,
-         Building building,
-         Settlement settlement) {
+         BuildingScreenContext context) {
       super(index, x, y, width, height, font);
       this.tabTitle = tabTitle;
-      this.building = building;
-      this.settlement = settlement;
+      this.context = context;
    }
 
    @Override

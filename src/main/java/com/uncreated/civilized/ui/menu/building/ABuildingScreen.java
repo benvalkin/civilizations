@@ -7,6 +7,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.WorksiteBuildingScreen;
@@ -27,17 +28,15 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs {
    private static final ResourceLocation MENU_TEXTURE =
          ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_menu.png");
 
-   protected final Building building;
-   protected final Settlement settlement;
+   protected final BuildingScreenContext context;
    protected int contentLeftPos;
    protected int contentTopPos;
    protected int contentWidth;
    protected int contentHeight;
 
-   public ABuildingScreen(Building building, Settlement settlement, Component title) {
+   public ABuildingScreen(BuildingScreenContext context, Component title) {
       super(title, 340, 200);
-      this.building = building;
-      this.settlement = settlement;
+      this.context = context;
    }
 
    @Override
@@ -74,27 +73,27 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs {
             .blit(RenderType::guiTextured, MENU_TEXTURE, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 384, 384);
    }
 
-   public static ABuildingScreen factory(Building building, Settlement settlement) {
+   public static ABuildingScreen factory(Building building, Settlement settlement, BuildingScreenContext context) {
 
       BuildingType buildingType = building.getBuildingType();
       Component component = buildingType.translationDark().withStyle(ChatFormatting.UNDERLINE);
 
       if (buildingType == BuildingType.INN)
-         return new InnBuildingScreen(building, settlement, component);
+         return new InnBuildingScreen(context, component);
       if (buildingType.isPermanentResidence())
-         return new ResidenceBuildingScreen(building, settlement, component);
+         return new ResidenceBuildingScreen(context, component);
       if (buildingType.isWorksite()) {
 
          if (buildingType == BuildingType.CROP_FARM)
-            return new CropFarmBuildingScreen(building, settlement, component);
+            return new CropFarmBuildingScreen(context, component);
          if (buildingType == BuildingType.GROVE)
-            return new GroveBuildingScreen(building, settlement, component);
+            return new GroveBuildingScreen(context, component);
          if (buildingType.isAnimalFarm())
-            return new AnimalFarmBuildingScreen(building, settlement, component);
+            return new AnimalFarmBuildingScreen(context, component);
 
-         return new WorksiteBuildingScreen(building, settlement, component);
+         return new WorksiteBuildingScreen(context, component);
       }
 
-      return new ResidenceBuildingScreen(building, settlement, component);
+      return new ResidenceBuildingScreen(context, component);
    }
 }

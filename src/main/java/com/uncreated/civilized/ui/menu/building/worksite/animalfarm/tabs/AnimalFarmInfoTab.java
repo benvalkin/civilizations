@@ -5,13 +5,12 @@ import java.util.List;
 
 import org.apache.commons.compress.utils.Lists;
 
-import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.state.AnimalFarmState;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
 import com.uncreated.civilized.ui.style.Colors;
@@ -31,15 +30,7 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
    private List<VillagerInfo> workers;
    private final Button chooseFood;
 
-   public AnimalFarmInfoTab(
-         int index,
-         int x,
-         int y,
-         int width,
-         int height,
-         Font font,
-         Building building,
-         Settlement settlement) {
+   public AnimalFarmInfoTab(int index, int x, int y, int width, int height, Font font, BuildingScreenContext context) {
       super(
             index,
             x,
@@ -48,8 +39,7 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
             height,
             font,
             Component.translatable("menu.building.residence.info.tab.heading"),
-            building,
-            settlement);
+            context);
       this.workers = createOccupantsList();
 
       chooseFood =
@@ -59,7 +49,7 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
    }
 
    private void onPressModifyItems(Button button) {
-      PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(building.getBuildingId(), 3));
+      PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(context.building().getBuildingId(), 3));
    }
 
    protected Container createContainer() {
@@ -69,7 +59,7 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
    @Override
    protected List<Slot> createAndArrangeItemSlots(Container container) {
 
-      AnimalFarmState animalFarmBehaviour = (AnimalFarmState) building.getState();
+      AnimalFarmState animalFarmBehaviour = (AnimalFarmState) context.building().getState();
       animalFarmBehaviour.tryApplyDefaults();
       container.setItem(0, animalFarmBehaviour.getFoodSlot(0));
       container.setItem(1, animalFarmBehaviour.getFoodSlot(1));
@@ -128,7 +118,7 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
    }
 
    private List<VillagerInfo> createOccupantsList() {
-      return BuildingUtil.getAssignedWorkers(building, ClientVillagerStore.INSTANCE);
+      return BuildingUtil.getAssignedWorkers(context.building(), ClientVillagerStore.INSTANCE);
    }
 
    @Override

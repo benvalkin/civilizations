@@ -2,8 +2,7 @@ package com.uncreated.civilized.ui.menu.building.inn;
 
 import java.util.List;
 
-import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingSettingsTab;
 import com.uncreated.civilized.ui.menu.building.inn.tabs.InnMainTab;
@@ -20,25 +19,17 @@ public class InnBuildingScreen extends ABuildingScreen {
    private Button tab2;
    private Button tab3;
 
-   public InnBuildingScreen(Building building, Settlement settlement, Component title) {
-      super(building, settlement, title);
+   public InnBuildingScreen(BuildingScreenContext context, Component title) {
+      super(context, title);
    }
 
    @Override
    protected List<ATab> createTabs(int contentLeftPos, int contentTopPos, int tabWidth, int tabHeight) {
 
       return List.of(
-            new InnMainTab(0, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, building, settlement),
-            new InnVisitorsTab(1, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, building, settlement),
-            new BuildingSettingsTab(
-                  2,
-                  contentLeftPos,
-                  contentTopPos,
-                  tabWidth,
-                  tabHeight,
-                  this.font,
-                  building,
-                  settlement));
+            new InnMainTab(0, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
+            new InnVisitorsTab(1, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
+            new BuildingSettingsTab(2, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context));
    }
 
    @Override

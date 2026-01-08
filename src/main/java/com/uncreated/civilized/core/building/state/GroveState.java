@@ -4,6 +4,7 @@ import com.uncreated.civilized.core.building.Building;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -23,11 +24,11 @@ public class GroveState extends BuildingState {
       sapling = DEFAULT_SAPLING;
    }
 
-   public void applyNbt(CompoundTag compoundTag) {
+   public void applyNbt(CompoundTag compoundTag, HolderLookup.Provider registryAccess) {
       read(compoundTag);
    }
 
-   public CompoundTag toNbt() {
+   public CompoundTag toNbt(HolderLookup.Provider registryAccess) {
       CompoundTag tag = new CompoundTag();
       write(tag);
       return tag;

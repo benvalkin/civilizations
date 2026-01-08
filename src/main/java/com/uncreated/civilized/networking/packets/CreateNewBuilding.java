@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -52,6 +53,8 @@ public record CreateNewBuilding(BuildingType buildingType,
    public static void serverReceiveCreateNewBuilding(CreateNewBuilding createNewBuilding, IPayloadContext context) {
 
       ServerPlayer placer = (ServerPlayer) context.player();
+      ServerLevel serverLevel = placer.serverLevel();
+
       Optional<Settlement> settlement = ServerSettlementsStore.INSTANCE.findFromOwner(placer.getUUID());
       if (settlement.isEmpty()) {
          settlement = Optional.of(ServerSettlementsStore.INSTANCE.createNew(placer.getUUID()));
@@ -62,15 +65,15 @@ public record CreateNewBuilding(BuildingType buildingType,
       Building building =
             ServerBuildingsStore.INSTANCE.createNew(
                   context.player().registryAccess(),
-                  context.player().level().dimension(),
+                  serverLevel.dimension(),
                   settlement.get().getSettlementId(),
                   placer.getUUID(),
                   createNewBuilding.buildingType(),
                   createNewBuilding.buildingBounds());
 
-      if (placer.level().isLoaded(building.getBlockPos())) {
-         LoadedBuildings.load(building, placer.level());
-         LoadedSettlements.onBuildingLoaded(settlement.get(), placer.level());
+      if (serverLevel.isLoaded(building.getBlockPos())) {
+         LoadedBuildings.load(building, serverLevel);
+         LoadedSettlements.onBuildingLoaded(settlement.get(), serverLevel);
       }
 
       ServerBuildingsStore.INSTANCE.setDirty();
