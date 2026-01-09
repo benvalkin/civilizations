@@ -11,7 +11,7 @@ import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.ui.components.ScrollListView;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
-import com.uncreated.civilized.ui.menu.building.widgets.RecipeListViewWidget;
+import com.uncreated.civilized.ui.menu.building.widgets.ProductionBillListViewWidget;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;
@@ -19,7 +19,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 public class ManageProductionBillsTab extends ABuildingScreenTab {
 
@@ -27,9 +26,6 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
 
    @Nullable
    private ScrollListView scrollView;
-
-   @Nullable
-   private ArtisanHouseState buildingState;
 
    public ManageProductionBillsTab(
          int index,
@@ -86,7 +82,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
          for (ProductionBill bill : productionBills) {
 
             elements.add(
-                  new RecipeListViewWidget(
+                  new ProductionBillListViewWidget(
                         x_,
                         y_ + elementIndex * elementHeight,
                         w - 10,
@@ -106,11 +102,10 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
    public void refresh() {
 
       if (context.building().getState() instanceof ArtisanHouseState state) {
-         this.buildingState = state;
 
          state.tryLoadDefaultProductionBills();
 
-         scrollView = createScrollView(List.of());
+         scrollView = createScrollView(state.getProductionBills());
       }
    }
 }

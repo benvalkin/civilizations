@@ -10,6 +10,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.ArtisanBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.WorksiteBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.AnimalFarmBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.CropFarmBuildingScreen;
@@ -80,6 +81,8 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs {
 
       if (buildingType == BuildingType.INN)
          return new InnBuildingScreen(context, component);
+      if (buildingType.isArtisanBuilding())
+         return new ArtisanBuildingScreen(context, component);
       if (buildingType.isPermanentResidence())
          return new ResidenceBuildingScreen(context, component);
       if (buildingType.isWorksite()) {

@@ -29,7 +29,7 @@ public class ItemDisplayWidget extends AbstractWidget {
 
    public ItemDisplayWidget(int x, int y, ItemStack itemStack) {
       super(x, y, 16, 16, Component.empty());
-      this.slot = new Slot(new SimpleContainer(), 0, x, y);
+      this.slot = new Slot(new SimpleContainer(1), 0, x, y);
       this.slot.set(itemStack);
       this.isHovering = false;
       this.font = Minecraft.getInstance().font;

@@ -8,6 +8,7 @@ import com.uncreated.civilized.core.building.crafting.bills.strategy.ProduceUpTo
 import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +24,7 @@ public class ProductionBill {
    private final ProductionType productionType;
    private final IProductionStrategy productionStrategy;
    private final int billAmount;
+   @Setter
    private boolean enabled;
    private final ItemStack getDisplayItem;
 

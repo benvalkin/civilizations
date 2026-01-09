@@ -3,13 +3,12 @@ package com.uncreated.civilized.ui.menu.building.worksite.animalfarm.tabs;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.compress.utils.Lists;
-
 import com.uncreated.civilized.core.building.state.AnimalFarmState;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
+import com.uncreated.civilized.ui.components.widget.ItemDisplayWidget;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
@@ -20,13 +19,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class AnimalFarmInfoTab extends ABuildingScreenTab {
 
+   private final ArrayList<ItemDisplayWidget> itemDisplayWidgets;
    private List<VillagerInfo> workers;
    private final Button chooseFood;
 
@@ -42,6 +40,8 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
             context);
       this.workers = createOccupantsList();
 
+      itemDisplayWidgets = new ArrayList<>();
+
       chooseFood =
             Button.builder(
                   Component.translatable("menu.building.worksite.animal_farm.edit_allowed_animal_food"),
@@ -50,26 +50,6 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
 
    private void onPressModifyItems(Button button) {
       PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(context.building().getBuildingId(), 3));
-   }
-
-   protected Container createContainer() {
-      return new SimpleContainer(3);
-   }
-
-   @Override
-   protected List<Slot> createAndArrangeItemSlots(Container container) {
-
-      AnimalFarmState animalFarmBehaviour = (AnimalFarmState) context.building().getState();
-      animalFarmBehaviour.tryApplyDefaults();
-      container.setItem(0, animalFarmBehaviour.getFoodSlot(0));
-      container.setItem(1, animalFarmBehaviour.getFoodSlot(1));
-      container.setItem(2, animalFarmBehaviour.getFoodSlot(2));
-
-      ArrayList<Slot> slots = Lists.newArrayList();
-      for (int i = 0; i < container.getContainerSize(); i++) {
-         slots.add(new Slot(container, i, getX() + 18 * i, getHeight() - 60));
-      }
-      return slots;
    }
 
    @Override
@@ -109,7 +89,8 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
             Colors.MENU_TEXT_DARK,
             false);
 
-      renderItems(graphics, mouseX, mouseY, partialTicks);
+      itemDisplayWidgets.forEach(i -> i.render(graphics, mouseX, mouseY, partialTicks));
+
    }
 
    @Override
@@ -124,5 +105,13 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
    @Override
    public void refresh() {
       this.workers = createOccupantsList();
+
+      AnimalFarmState cropFarmState = (AnimalFarmState) context.building().getState();
+
+      itemDisplayWidgets.clear();
+      for (int i = 0; i < container.getContainerSize(); i++) {
+         ItemStack foodSlot = cropFarmState.getFoodSlot(i);
+         itemDisplayWidgets.add(new ItemDisplayWidget(getX() + 18, getHeight() - 60, foodSlot));
+      }
    }
 }

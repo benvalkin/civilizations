@@ -3,15 +3,12 @@ package com.uncreated.civilized.ui.menu.building.worksite.cropfarm.tabs;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.compress.utils.Lists;
-
-import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.state.CropFarmState;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
-import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
+import com.uncreated.civilized.ui.components.widget.ItemDisplayWidget;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
 import com.uncreated.civilized.ui.menu.building.worksite.tabs.ManageWorkersTab;
@@ -22,24 +19,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class CropFarmInfoTab extends ABuildingScreenTab {
 
+   private final ArrayList<ItemDisplayWidget> itemDisplayWidgets;
    private List<VillagerInfo> workers;
    private final Button chooseCrops;
 
-   public CropFarmInfoTab(
-         int index,
-         int x,
-         int y,
-         int width,
-         int height,
-         Font font,
-         BuildingScreenContext context) {
+   public CropFarmInfoTab(int index, int x, int y, int width, int height, Font font, BuildingScreenContext context) {
       super(
             index,
             x,
@@ -50,6 +39,8 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
             Component.translatable("menu.building.residence.info.tab.heading"),
             context);
       this.workers = createOccupantsList();
+
+      itemDisplayWidgets = new ArrayList<>();
 
       chooseCrops =
             Button.builder(
@@ -62,26 +53,6 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
 
    private void onPressModifyItems(Button button) {
       PacketDistributor.sendToServer(new RequestBuildingItemManagementScreen(context.building().getBuildingId(), 3));
-   }
-
-   protected Container createContainer() {
-      return new SimpleContainer(3);
-   }
-
-   @Override
-   protected List<Slot> createAndArrangeItemSlots(Container container) {
-
-      CropFarmState cropFarmBehaviour = (CropFarmState) context.building().getState();
-      cropFarmBehaviour.tryApplyDefaults();
-      container.setItem(0, cropFarmBehaviour.getCropSlot(0));
-      container.setItem(1, cropFarmBehaviour.getCropSlot(1));
-      container.setItem(2, cropFarmBehaviour.getCropSlot(2));
-
-      ArrayList<Slot> slots = Lists.newArrayList();
-      for (int i = 0; i < container.getContainerSize(); i++) {
-         slots.add(new Slot(container, i, getX() + 18 * i, getHeight() - 60));
-      }
-      return slots;
    }
 
    @Override
@@ -121,7 +92,7 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
             Colors.MENU_TEXT_DARK,
             false);
 
-      renderItems(graphics, mouseX, mouseY, partialTicks);
+      itemDisplayWidgets.forEach(i -> i.render(graphics, mouseX, mouseY, partialTicks));
    }
 
    @Override
@@ -136,5 +107,13 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
    @Override
    public void refresh() {
       this.workers = createOccupantsList();
+
+      CropFarmState cropFarmState = (CropFarmState) context.building().getState();
+
+      itemDisplayWidgets.clear();
+      for (int i = 0; i < container.getContainerSize(); i++) {
+         ItemStack cropSlot = cropFarmState.getCropSlot(i);
+         itemDisplayWidgets.add(new ItemDisplayWidget(getX() + 18, getHeight() - 60, cropSlot));
+      }
    }
 }

@@ -26,6 +26,8 @@ public enum BuildingType {
    BAKER_HOUSE,
    BUTCHER_HOUSE,
    TANNER_HOUSE,
+   BLACKSMITH_HOUSE,
+   CARPENTER_HOUSE,
    GROVE,
    CROP_FARM,
    CATTLE_FARM,
@@ -58,6 +60,10 @@ public enum BuildingType {
       case MINER_HOUSE, MINE -> VillagerOccupation.MINER;
       case RANCHER_HOUSE, CATTLE_FARM, CHICKEN_FARM, SHEEP_FARM, HOG_FARM -> VillagerOccupation.RANCHER;
       case BAKER_HOUSE -> VillagerOccupation.BAKER;
+      case BUTCHER_HOUSE -> VillagerOccupation.BUTCHER;
+      case TANNER_HOUSE -> VillagerOccupation.TANNER;
+      case BLACKSMITH_HOUSE -> VillagerOccupation.BLACKSMITH;
+      case CARPENTER_HOUSE -> VillagerOccupation.CARPENTER;
       default -> VillagerOccupation.UNEMPLOYED;
       };
    }
@@ -65,8 +71,15 @@ public enum BuildingType {
    public boolean isPermanentResidence() {
       return switch (this) {
       case FARMER_HOUSE, RANCHER_HOUSE, WOODCUTTER_HOUSE, MINER_HOUSE, BEEKEEPER_HOUSE, BAKER_HOUSE, BUTCHER_HOUSE,
-            TANNER_HOUSE, BARRACKS, GUARD_POST ->
+            TANNER_HOUSE, BLACKSMITH_HOUSE, CARPENTER_HOUSE, BARRACKS, GUARD_POST ->
          true;
+      default -> false;
+      };
+   }
+
+   public boolean isArtisanBuilding() {
+      return switch (this) {
+      case BAKER_HOUSE, BUTCHER_HOUSE, TANNER_HOUSE, BLACKSMITH_HOUSE, CARPENTER_HOUSE -> true;
       default -> false;
       };
    }
