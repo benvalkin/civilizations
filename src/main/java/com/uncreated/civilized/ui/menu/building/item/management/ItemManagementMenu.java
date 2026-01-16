@@ -1,23 +1,15 @@
 package com.uncreated.civilized.ui.menu.building.item.management;
 
-import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.state.CropFarmState;
 import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 
 import lombok.Getter;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public abstract class ItemManagementMenu extends AbstractContainerMenu {
    @Getter
@@ -36,6 +28,7 @@ public abstract class ItemManagementMenu extends AbstractContainerMenu {
       return this.container.stillValid(player);
    }
 
+   @Override
    public ItemStack quickMoveStack(Player player, int index) {
       ItemStack itemstack = ItemStack.EMPTY;
       Slot slot = this.slots.get(index);
@@ -58,31 +51,5 @@ public abstract class ItemManagementMenu extends AbstractContainerMenu {
       }
 
       return itemstack;
-   }
-
-   @Override
-   public void removed(Player player) {
-      super.removed(player);
-      this.container.stopOpen(player);
-
-      if (!(player instanceof ServerPlayer serverPlayer))
-         return;
-
-      if (!(building.getState() instanceof CropFarmState cropFarmBehaviour))
-         return;
-
-      cropFarmBehaviour.setCropSlot(0, container.getItem(0));
-      cropFarmBehaviour.setCropSlot(1, container.getItem(1));
-      cropFarmBehaviour.setCropSlot(2, container.getItem(2));
-
-      ServerBuildingsStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
-      ServerBuildingsStore.INSTANCE.setDirty();
-
-      // BAD IMPLEMENTATION: this method is called when the player's menu closes (e.g. when escape is pressed), so this
-      // currently re-opens the UI when it shouldn't.
-
-      CompoundTag additionalData = new CompoundTag();
-      building.getState().serverAddToBuildingScreenContext(additionalData, serverPlayer.serverLevel());
-      PacketDistributor.sendToPlayer(serverPlayer, new ShowBuildingScreen(building.getBuildingId(), additionalData));
    }
 }

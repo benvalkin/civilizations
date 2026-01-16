@@ -17,6 +17,8 @@ public abstract class ItemManagementScreen<T extends ItemManagementMenu> extends
    private final ResourceLocation menuTexture;
    protected final Building building;
    protected final Settlement settlement;
+   protected final int contentXMargin;
+   private final int contentYMargin;
 
    protected int imageHeight; // it seems like shadowing the base AbstractContainerScreen's imageHeight (but not
                               // imageWidth) makes the scaling work nicelly...
@@ -30,25 +32,29 @@ public abstract class ItemManagementScreen<T extends ItemManagementMenu> extends
       this.settlement = menu.getSettlement();
       this.imageWidth = 340;
       this.imageHeight = 200;
+      this.contentXMargin = 25;
+      this.contentYMargin = 25;
       this.inventoryLabelX = 90;
       this.inventoryLabelY = this.imageHeight - 125;
-      this.titleLabelY = 10;
+      this.titleLabelY = 2;
       this.titleLabelX = 30;
-
-      int contentWidth = width - (width - imageWidth) / 2;
-      int contentHeight = height - (height - imageHeight) / 2;
-      done =
-            Button.builder(Component.translatable("gui.misc.button.done"), this::onPressDone)
-                  .pos(contentWidth - 85, contentHeight - 40)
-                  .size(60, 18)
-                  .build();
-
-      addRenderableWidget(done);
    }
 
    @Override
    protected void init() {
       super.init();
+
+      int contentXStart = (width - imageWidth) / 2 + contentXMargin;
+      int contentYStart = (height - imageHeight) / 2 + contentYMargin;
+      int contentXEnd = width - (width - imageWidth) / 2 - contentXMargin;
+      int contentYEnd = height - (height - imageHeight) / 2 - contentYMargin;
+      done =
+            Button.builder(Component.translatable("gui.misc.button.done"), this::onPressDone)
+                  .pos(contentXEnd - 60, contentYStart + 60)
+                  .size(60, 18)
+                  .build();
+
+      addRenderableWidget(done);
    }
 
    protected void onPressDone(Button button) {

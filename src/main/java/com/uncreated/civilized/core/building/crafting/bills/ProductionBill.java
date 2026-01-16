@@ -1,5 +1,6 @@
 package com.uncreated.civilized.core.building.crafting.bills;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.uncreated.civilized.core.building.crafting.bills.strategy.IProductionStrategy;
@@ -26,7 +27,9 @@ public class ProductionBill {
    private final int billAmount;
    @Setter
    private boolean enabled;
-   private final ItemStack getDisplayItem;
+
+   private final List<ItemStack> inputItems;
+   private final ItemStack displayItem;
 
    public ProductionBill(
          String minecraftRecipeName,
@@ -34,12 +37,14 @@ public class ProductionBill {
          ProductionStrategyType productionStrategyType,
          int billAmount,
          boolean enabled,
-         ItemStack getDisplayItem) {
+         List<ItemStack> inputItems,
+         ItemStack displayItem) {
       this.minecraftRecipeName = minecraftRecipeName;
       this.productionType = productionType;
       this.billAmount = billAmount;
       this.enabled = enabled;
-      this.getDisplayItem = getDisplayItem;
+      this.inputItems = inputItems;
+      this.displayItem = displayItem;
       this.productionStrategy = switch (productionStrategyType) {
       case ProductionStrategyType.PRODUCE_INFINITE -> new ProduceInfinite(billAmount);
       case ProductionStrategyType.PRODUCE_UP_TO -> new ProduceUpTo(billAmount);

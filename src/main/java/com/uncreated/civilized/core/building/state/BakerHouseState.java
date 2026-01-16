@@ -24,6 +24,7 @@ public class BakerHouseState extends ArtisanHouseState {
                   ProductionStrategyType.PRODUCE_UP_TO,
                   64,
                   true,
+                  List.of(new ItemStack(Items.WHEAT), new ItemStack(Items.WHEAT), new ItemStack(Items.WHEAT)),
                   new ItemStack(Items.BREAD)));
    }
 }

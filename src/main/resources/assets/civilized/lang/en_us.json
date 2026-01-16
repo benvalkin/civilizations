@@ -214,5 +214,6 @@
   "villager.occupation.tanner": "Tanner",
   "villager.occupation.traveller": "Traveller",
   "villager.occupation.unemployed": "Unemployed",
-  "villager.occupation.woodcutter": "Woodcutter"
+  "villager.occupation.woodcutter": "Woodcutter",
+  "menu.building.residence.production_bills.edit_crafting_recipe.description": "Crafting Recipe Production"
 }

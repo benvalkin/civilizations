@@ -6,6 +6,8 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.compress.utils.Lists;
 
+import com.uncreated.civilized.core.StoreOperation;
+import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.ui.components.ScrollListView;
@@ -89,6 +91,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
                         elementHeight,
                         font,
                         bill,
+                        elementIndex,
                         context.building()));
 
             elementIndex++;
@@ -104,6 +107,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
       if (context.building().getState() instanceof ArtisanHouseState state) {
 
          state.tryLoadDefaultProductionBills();
+         ClientBuildingStore.INSTANCE.replicateChange(context.building(), StoreOperation.UPDATE);
 
          scrollView = createScrollView(state.getProductionBills());
       }

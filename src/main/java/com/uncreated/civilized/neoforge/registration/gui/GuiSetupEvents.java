@@ -1,5 +1,7 @@
 package com.uncreated.civilized.neoforge.registration.gui;
 
+import com.uncreated.civilized.ui.menu.building.residence.artisan.EditCraftingRecipeMenu;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.EditCraftingRecipeScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodMenu;
 import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.items.ChooseCropsMenu;
@@ -48,5 +50,17 @@ public class GuiSetupEvents {
                         buildingMenu,
                         inventory,
                         Component.translatable("menu.building.worksite.animal_farm.allowed_animal_food.description")));
+
+      event.register(
+            GuiRegistry.CHOOSE_CRAFTING_RECIPE_MENU.get(), // do not remove cast - it seems to cause compile errors even
+            // though
+            // intellij thinks its redundant
+            (MenuScreens.ScreenConstructor<EditCraftingRecipeMenu, EditCraftingRecipeScreen>) (
+                  buildingMenu,
+                  inventory,
+                  component) -> new EditCraftingRecipeScreen(
+                        buildingMenu,
+                        inventory,
+                        Component.translatable("menu.building.residence.production_bills.edit_crafting_recipe.description")));
    }
 }

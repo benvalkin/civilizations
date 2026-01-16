@@ -72,6 +72,7 @@ public class ArtisanHouseState extends BuildingState {
                      ProductionStrategyType.valueOf(ct.getString("production_strategy_type")),
                      ct.getInt("bill_amount"),
                      ct.getBoolean("enabled"),
+                     readItemList(ct.getList("input_items", Tag.TAG_COMPOUND), registryAccess),
                      ItemStack.parse(registryAccess, ct.getCompound("display_item")).orElse(ItemStack.EMPTY));
          productionBills.add(bill);
       }
@@ -91,7 +92,8 @@ public class ArtisanHouseState extends BuildingState {
          billTag.putString("production_strategy_type", bill.getProductionStrategy().getType().name());
          billTag.putInt("bill_amount", bill.getBillAmount());
          billTag.putBoolean("enabled", bill.isEnabled());
-         billTag.put("display_item", bill.getGetDisplayItem().save(registryAccess, new CompoundTag()));
+         billTag.put("input_items", writeItemList(bill.getInputItems(), registryAccess));
+         billTag.put("display_item", bill.getDisplayItem().save(registryAccess, new CompoundTag()));
          list.add(billTag);
       }
 
@@ -101,12 +103,37 @@ public class ArtisanHouseState extends BuildingState {
       return tag;
    }
 
+   private List<ItemStack> readItemList(ListTag listTag, HolderLookup.Provider registryAccess) {
+      List<ItemStack> result = new ArrayList<>();
+      for (Tag tag : listTag) {
+         if (!(tag instanceof CompoundTag itemTag))
+            continue;
+
+         ItemStack itemStack = ItemStack.parseOptional(registryAccess, itemTag);
+         result.add(itemStack);
+      }
+      return result;
+   }
+
+   private ListTag writeItemList(List<ItemStack> items, HolderLookup.Provider registryAccess) {
+      ListTag list = new ListTag();
+      for (ItemStack item : items) {
+         list.add(item.saveOptional(registryAccess));
+      }
+
+      return list;
+   }
+
    public void addBill(ProductionBill productionBill) {
       productionBills.add(productionBill);
    }
 
    public void removeBill(int index) {
       productionBills.remove(index);
+   }
+
+   public void replaceBill(int index, ProductionBill productionBill) {
+      productionBills.set(index, productionBill);
    }
 
    protected List<ProductionBill> getDefaultProductionBills() {

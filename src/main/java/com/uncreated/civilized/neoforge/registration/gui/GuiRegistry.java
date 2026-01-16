@@ -4,6 +4,7 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.function.Supplier;
 
+import com.uncreated.civilized.ui.menu.building.residence.artisan.EditCraftingRecipeMenu;
 import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodMenu;
 import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.items.ChooseCropsMenu;
 import com.uncreated.civilized.ui.menu.building.worksite.grove.items.ChooseSaplingsMenu;
@@ -25,4 +26,7 @@ public class GuiRegistry {
 
    public static final Supplier<MenuType<ChooseAnimalFoodMenu>> CHOOSE_ANIMAL_FOOD_MENU =
          MENUS.register("choose_animal_food_menu", () -> IMenuTypeExtension.create(ChooseAnimalFoodMenu::new));
+
+   public static final Supplier<MenuType<EditCraftingRecipeMenu>> CHOOSE_CRAFTING_RECIPE_MENU =
+         MENUS.register("choose_crafting_recipe_menu", () -> IMenuTypeExtension.create(EditCraftingRecipeMenu::new));
 }

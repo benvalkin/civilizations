@@ -14,8 +14,9 @@ import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.CreateNewBuilding;
-import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
+import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
+import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
 import net.neoforged.bus.api.SubscribeEvent;
@@ -70,9 +71,14 @@ public class PacketRegistry {
             ShowBuildingScreen::clientReceiveShowBuildingScreen);
 
       registrar.playToServer(
-              RequestBuildingItemManagementScreen.TYPE,
-              RequestBuildingItemManagementScreen.STREAM_CODEC,
-              RequestBuildingItemManagementScreen::serverReceiveRequestModifyItemsScreen);
+            RequestBuildingItemManagementScreen.TYPE,
+            RequestBuildingItemManagementScreen.STREAM_CODEC,
+            RequestBuildingItemManagementScreen::serverReceiveRequestScreen);
+
+      registrar.playToServer(
+            RequestEditRecipeScreenScreen.TYPE,
+            RequestEditRecipeScreenScreen.STREAM_CODEC,
+            RequestEditRecipeScreenScreen::serverReceiveRequestScreen);
 
       registrar.playToServer(
             GiveItemsToPlayer.TYPE,

@@ -11,12 +11,11 @@ import org.apache.commons.lang3.function.TriFunction;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
+import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
-import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodMenu;
-import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.items.ChooseCropsMenu;
-import com.uncreated.civilized.ui.menu.building.worksite.grove.items.ChooseSaplingsMenu;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.EditCraftingRecipeMenu;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
@@ -32,20 +31,28 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record RequestBuildingItemManagementScreen(UUID buildingId, int containerSize) implements CustomPacketPayload {
-   public static final Type<RequestBuildingItemManagementScreen> TYPE =
-         new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "show_modify_items_screen"));
+public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, int productionBillIndex,
+      boolean isNewBill) implements CustomPacketPayload {
 
-   public static StreamCodec<FriendlyByteBuf, RequestBuildingItemManagementScreen> STREAM_CODEC =
-         StreamCodec.ofMember(RequestBuildingItemManagementScreen::encode, RequestBuildingItemManagementScreen::decode);
+   public static final Type<RequestEditRecipeScreenScreen> TYPE =
+         new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "request_edit_recipe_screen"));
 
-   public static RequestBuildingItemManagementScreen decode(FriendlyByteBuf buffer) {
-      return new RequestBuildingItemManagementScreen(buffer.readUUID(), buffer.readInt());
+   public static StreamCodec<FriendlyByteBuf, RequestEditRecipeScreenScreen> STREAM_CODEC =
+         StreamCodec.ofMember(RequestEditRecipeScreenScreen::encode, RequestEditRecipeScreenScreen::decode);
+
+   public static RequestEditRecipeScreenScreen decode(FriendlyByteBuf buffer) {
+      return new RequestEditRecipeScreenScreen(
+            buffer.readUUID(),
+            buffer.readInt(),
+            buffer.readInt(),
+            buffer.readBoolean());
    }
 
    public void encode(FriendlyByteBuf buffer) {
       buffer.writeUUID(buildingId);
       buffer.writeInt(containerSize);
+      buffer.writeInt(productionBillIndex);
+      buffer.writeBoolean(isNewBill);
    }
 
    @Override
@@ -53,32 +60,33 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
       return TYPE;
    }
 
-   public static void serverReceiveRequestScreen(
-         RequestBuildingItemManagementScreen packet,
-         IPayloadContext context) {
+   public static void serverReceiveRequestScreen(RequestEditRecipeScreenScreen packet, IPayloadContext context) {
 
       Optional<Building> building = ServerBuildingsStore.INSTANCE.find(packet.buildingId);
       if (building.isEmpty())
          return;
 
+      if (!(building.get().getState() instanceof ArtisanHouseState artisanHouseState))
+         return;
+
+      if (packet.productionBillIndex() >= artisanHouseState.getProductionBills().size())
+         return;
+
+      ProductionBill bill = artisanHouseState.getProductionBills().get(packet.productionBillIndex());
+
       Settlement settlement = ClientSettlementsStore.INSTANCE.get(building.get().getSettlementId());
 
-      TriFunction<Integer, Inventory, Player, ItemManagementMenu> menuSupplier =
-            switch (building.get().getBuildingType()) {
-            case CROP_FARM -> (
-                  i,
-                  inventory,
-                  player) -> new ChooseCropsMenu(i, inventory, new SimpleContainer(3), settlement, building.get());
-            case GROVE -> (
-                  i,
-                  inventory,
-                  player) -> new ChooseSaplingsMenu(i, inventory, new SimpleContainer(1), settlement, building.get());
-            case CATTLE_FARM, SHEEP_FARM, HOG_FARM, CHICKEN_FARM -> (
-                  i,
-                  inventory,
-                  player) -> new ChooseAnimalFoodMenu(i, inventory, new SimpleContainer(3), settlement, building.get());
-            default -> throw new IllegalArgumentException();
-            };
+      TriFunction<Integer, Inventory, Player, EditCraftingRecipeMenu> menuSupplier = switch (bill.getProductionType()) {
+      case CRAFTING -> (i, inventory, player) -> new EditCraftingRecipeMenu(
+            i,
+            inventory,
+            new SimpleContainer(9),
+            settlement,
+            building.get(),
+            packet.productionBillIndex(),
+            packet.isNewBill());
+      default -> throw new IllegalArgumentException();
+      };
 
       context.player().openMenu(new MenuProvider() {
          @Override
@@ -93,9 +101,11 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
 
          @Override
          public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
-            buffer.writeInt(packet.containerSize);
+            buffer.writeInt(packet.containerSize());
             buffer.writeUUID(settlement.getSettlementId());
             buffer.writeUUID(building.get().getBuildingId());
+            buffer.writeInt(packet.productionBillIndex());
+            buffer.writeBoolean(packet.isNewBill());
          }
       });
 

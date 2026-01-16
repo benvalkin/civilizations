@@ -7,6 +7,7 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
 import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
+import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
 import com.uncreated.civilized.ui.components.widget.ItemDisplayWidget;
 import com.uncreated.civilized.ui.style.Colors;
 
@@ -19,10 +20,12 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ProductionBillListViewWidget extends AbstractContainerWidget {
 
    protected final Font font;
+   private final int productionBillIndex;
    protected final Building building;
    protected final ProductionBill productionBill;
    private final Button editButton;
@@ -36,13 +39,15 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
          int height,
          Font font,
          ProductionBill productionBill,
+         int productionBillIndex,
          Building building) {
       super(x, y, width, height, Component.literal("ManageOccupantWidget"));
       this.font = font;
-      this.building = building;
+      this.productionBillIndex = productionBillIndex;
       this.productionBill = productionBill;
+      this.building = building;
 
-      itemDisplay = new ItemDisplayWidget(x + 4, y, productionBill.getGetDisplayItem());
+      itemDisplay = new ItemDisplayWidget(x + 4, y, productionBill.getDisplayItem());
       enabledButton =
             Checkbox.builder(Component.empty(), font)
                   .onValueChange(this::onProductionBillToggled)
@@ -80,7 +85,7 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
             font,
             ProductionStrategyType.getBillStrategyDescription(productionBill),
             getX() + 28,
-            getY() + 5,
+            getY() + 6,
             Colors.MENU_TEXT_DARK,
             false);
 
@@ -100,9 +105,7 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
    }
 
    private void onPress(Button b) {
-
-      // show edit recipe screen
-
-      // ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
+      PacketDistributor
+            .sendToServer(new RequestEditRecipeScreenScreen(building.getBuildingId(), 9, productionBillIndex, false));
    }
 }
