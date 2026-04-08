@@ -4,11 +4,14 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.List;
 
-import com.uncreated.civilized.core.building.requirement.IBuildingRequirementResult;
+import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
+import com.uncreated.civilized.core.building.requirement.IBuildingRequirementResult;
 import com.uncreated.civilized.item.BuildingDeedItem;
 import com.uncreated.civilized.networking.packets.CreateNewBuilding;
+import com.uncreated.civilized.ui.components.IListViewBuilder;
+import com.uncreated.civilized.ui.components.ScrollListView;
 import com.uncreated.civilized.ui.components.multiline.ImprovedMultiLineTextWidget;
 import com.uncreated.civilized.ui.menu.building.widgets.BuildingRequirementWidget;
 import com.uncreated.civilized.ui.style.Colors;
@@ -41,8 +44,8 @@ public class EstablishBuildingScreen extends Screen {
    private int topPos;
    private int contentWidth;
    private int contentHeight;
-   private int contentMarginX = 65;
-   private int contentMarginY = 30;
+   private int contentMarginX = 60;
+   private int contentMarginY = 15;
    private int titleX;
    private int titleY;
 
@@ -53,6 +56,7 @@ public class EstablishBuildingScreen extends Screen {
    private final BuildingType buildingType;
    private final BuildingBounds bounds;
    private final List<IBuildingRequirementResult> requirements;
+   private ScrollListView<IBuildingRequirementResult, BuildingRequirementWidget> scrollView;
 
    public EstablishBuildingScreen(
          BuildingType buildingType,
@@ -76,7 +80,7 @@ public class EstablishBuildingScreen extends Screen {
       this.leftPos = (width - this.imageWidth) / 2 + contentMarginX;
       this.topPos = (height - this.imageHeight) / 2 + contentMarginY;
       this.contentWidth = imageWidth - contentMarginX * 2;
-      this.contentHeight = imageHeight - 125;
+      this.contentHeight = imageHeight - 85;
       this.titleX = leftPos;
       this.titleY = topPos;
 
@@ -110,30 +114,45 @@ public class EstablishBuildingScreen extends Screen {
                            .withColor(Colors.VALIDATION_ERROR)));
       }
 
+      int elementSpacing = 14;
+
+      scrollView =
+            new ScrollListView<>(
+                  leftPos,
+                  topPos + 50,
+                  contentWidth,
+                  contentHeight - buttonMargin - 20,
+                  elementSpacing,
+                  new IListViewBuilder<>() {
+                     @Override
+                     public List<IBuildingRequirementResult> provideModelData() {
+                        return requirements.stream().filter(r -> !(r.hideIfSatisfied() && r.isSatisfied())).toList();
+                     }
+
+                     @Override
+                     public BuildingRequirementWidget buildElementWidgetFromModel(
+                           int elementIndex,
+                           IBuildingRequirementResult buildingRequirement,
+                           int elementX,
+                           int elementY,
+                           int elementWidth,
+                           int elementHeight,
+                           int elementSpacing) {
+                        return new BuildingRequirementWidget(
+                              elementX,
+                              elementY,
+                              elementWidth,
+                              elementHeight,
+                              9,
+                              font,
+                              buildingRequirement);
+                     }
+                  });
+
       addRenderableOnly(titleText);
       addRenderableWidget(cancel);
       addRenderableWidget(confirm);
-
-      int index = 0;
-      int elementSpacing = 14;
-      for (IBuildingRequirementResult requirement : requirements) {
-
-         if (requirement.hideIfSatisfied() && requirement.isSatisfied())
-            continue;
-
-         BuildingRequirementWidget roofBlocksRequirementWidget =
-               new BuildingRequirementWidget(
-                     leftPos,
-                     topPos + 50 + index * elementSpacing,
-                     contentWidth,
-                     elementSpacing,
-                     9,
-                     font,
-                     requirement);
-
-         addRenderableWidget(roofBlocksRequirementWidget);
-         index++;
-      }
+      addRenderableWidget(scrollView);
    }
 
    private void onPressCancel(Button button) {
@@ -154,6 +173,8 @@ public class EstablishBuildingScreen extends Screen {
          PacketDistributor.sendToServer(new CreateNewBuilding(buildingType, bounds));
          itemInHand.consume(1, player);
       }
+
+      BuildingBoundsDragTool.resetDragging();
    }
 
    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {

@@ -10,6 +10,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.ui.components.IListViewBuilder;
 import com.uncreated.civilized.ui.components.ScrollListView;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
@@ -18,14 +19,13 @@ import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
 public class ManageResidentsTab extends ABuildingScreenTab {
 
    public static final int MAX_ASSIGNED_RESIDENTS = 2;
-   private ScrollListView scrollView;
+   private ScrollListView<VillagerInfo, ManageOccupantWidget> scrollView;
    private List<VillagerInfo> currentOccupants;
    private List<VillagerInfo> candidateOccupants;
 
@@ -36,8 +36,14 @@ public class ManageResidentsTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
+         Component component,
          BuildingScreenContext context) {
-      super(
+      super(index, x, y, width, height, font, component, context);
+      refresh();
+   }
+
+   public ManageResidentsTab(int index, int x, int y, int width, int height, Font font, BuildingScreenContext context) {
+      this(
             index,
             x,
             y,
@@ -46,7 +52,6 @@ public class ManageResidentsTab extends ABuildingScreenTab {
             font,
             Component.translatable("menu.building.residence.residents.tab.heading"),
             context);
-      refresh();
    }
 
    @Override
@@ -81,35 +86,39 @@ public class ManageResidentsTab extends ABuildingScreenTab {
       return children;
    }
 
-   private ScrollListView createScrollView(List<VillagerInfo> currentOccupants, List<VillagerInfo> candidateOccupants) {
-      return new ScrollListView(getX(), getY() + 30, width, height, (x_, y_, w, h) -> {
-         List<AbstractWidget> elements = Lists.newArrayList();
+   private ScrollListView<VillagerInfo, ManageOccupantWidget> createScrollView(
+         List<VillagerInfo> currentOccupants,
+         List<VillagerInfo> candidateOccupants) {
+      int elementHeight = 25;
 
-         boolean isBuildingFull = currentOccupants.size() >= getMaxNumberOfOccupants();
+      boolean isBuildingFull = currentOccupants.size() >= getMaxNumberOfOccupants();
 
-         final int elementHeight = 25;
-
-         int elementIndex = 0;
-         for (VillagerInfo villager : candidateOccupants) {
-
-            ManageOccupantWidget.ManagementOption mode = getAssignButtonAction(villager);
-
-            if (mode == ManageOccupantWidget.ManagementOption.NOT_APPLICABLE)
-               continue;
-
-            elements.add(
-                  createManagementWidget(
-                        x_,
-                        y_ + elementIndex * elementHeight,
-                        w - 10,
-                        elementHeight,
-                        villager,
-                        mode,
-                        isBuildingFull));
-            elementIndex++;
+      return new ScrollListView<>(getX(), getY() + 30, width, height, elementHeight, new IListViewBuilder<>() {
+         @Override
+         public List<VillagerInfo> provideModelData() {
+            return candidateOccupants.stream()
+                  .filter(v -> getAssignButtonAction(v) != ManageOccupantWidget.ManagementOption.NOT_APPLICABLE)
+                  .toList();
          }
 
-         return elements;
+         @Override
+         public ManageOccupantWidget buildElementWidgetFromModel(
+               int elementIndex,
+               VillagerInfo villagerInfo,
+               int elementX,
+               int elementY,
+               int elementWidth,
+               int elementHeight,
+               int elementSpacing) {
+            return createManagementWidget(
+                  elementX,
+                  elementY,
+                  elementWidth,
+                  elementHeight,
+                  villagerInfo,
+                  getAssignButtonAction(villagerInfo),
+                  isBuildingFull);
+         }
       });
    }
 

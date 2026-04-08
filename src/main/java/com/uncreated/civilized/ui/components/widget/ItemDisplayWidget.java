@@ -23,16 +23,20 @@ import net.minecraft.world.item.ItemStack;
 public class ItemDisplayWidget extends AbstractWidget {
 
    @Getter
-   private final Slot slot;
+   protected final Slot slot;
    private boolean isHovering;
    private final Font font;
 
-   public ItemDisplayWidget(int x, int y, ItemStack itemStack) {
+   public ItemDisplayWidget(int x, int y, ItemStack initialItem) {
       super(x, y, 16, 16, Component.empty());
       this.slot = new Slot(new SimpleContainer(1), 0, x, y);
-      this.slot.set(itemStack);
+      this.slot.set(initialItem.copy());
       this.isHovering = false;
       this.font = Minecraft.getInstance().font;
+   }
+
+   public ItemStack getDisplayItem() {
+      return slot.getItem();
    }
 
    @Override

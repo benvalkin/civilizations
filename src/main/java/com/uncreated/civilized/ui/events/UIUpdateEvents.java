@@ -1,6 +1,9 @@
 package com.uncreated.civilized.ui.events;
 
+import java.util.UUID;
+
 import com.uncreated.civilized.CivilizedMod;
+import com.uncreated.civilized.core.building.events.model.BuildingUpdatedEvent;
 import com.uncreated.civilized.core.villagerinfo.events.model.VillagerInfoUpdatedEvent;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 
@@ -16,12 +19,31 @@ public class UIUpdateEvents {
       if (!event.isClientside())
          return;
 
-      updateScreen();
+      if (!(Minecraft.getInstance().screen instanceof ABuildingScreen buildingScreen))
+         return;
+
+      UUID viewedBuildingId = buildingScreen.getContext().building().getBuildingId();
+
+      if (!(viewedBuildingId.equals(event.getVillagerInfo().getHomeBuildingId())
+            || viewedBuildingId.equals(event.getVillagerInfo().getPrimaryWorksiteId())))
+         return;
+
+      buildingScreen.refresh();
    }
 
-   private static void updateScreen() {
-      if (Minecraft.getInstance().screen instanceof ABuildingScreen buildingScreen) {
-         buildingScreen.refresh();
-      }
+   @SubscribeEvent
+   public static void onBuildingChanged(BuildingUpdatedEvent event) {
+      if (!event.isClientside())
+         return;
+
+      if (!(Minecraft.getInstance().screen instanceof ABuildingScreen buildingScreen))
+         return;
+
+      UUID viewedBuildingId = buildingScreen.getContext().building().getBuildingId();
+
+      if (!viewedBuildingId.equals(event.getBuilding().getBuildingId()))
+         return;
+
+      buildingScreen.refresh();
    }
 }

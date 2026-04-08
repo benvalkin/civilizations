@@ -106,12 +106,13 @@ public class AnimalFarmInfoTab extends ABuildingScreenTab {
    public void refresh() {
       this.workers = createOccupantsList();
 
-      AnimalFarmState cropFarmState = (AnimalFarmState) context.building().getState();
+      AnimalFarmState animalFarmState = (AnimalFarmState) context.building().getState();
+      animalFarmState.tryApplyDefaults();
 
       itemDisplayWidgets.clear();
-      for (int i = 0; i < container.getContainerSize(); i++) {
-         ItemStack foodSlot = cropFarmState.getFoodSlot(i);
-         itemDisplayWidgets.add(new ItemDisplayWidget(getX() + 18, getHeight() - 60, foodSlot));
+      for (int i = 0; i < AnimalFarmState.NUMBER_OF_FOOD_SLOTS; i++) {
+         ItemStack foodSlot = animalFarmState.getFoodSlot(i);
+         itemDisplayWidgets.add(new ItemDisplayWidget(getX() + i * 18, getHeight() - 60, foodSlot));
       }
    }
 }

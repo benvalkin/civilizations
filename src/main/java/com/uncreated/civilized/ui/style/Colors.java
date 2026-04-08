@@ -10,6 +10,7 @@ public class Colors {
 
    public final static int VALIDATION_ERROR = 0xebb2b2;
    public final static int VALIDATION_SUCCESS = 0xc5edcc;
+   public final static int VALIDATION_PARTIAL_SUCCESS = 0xa5d4e8;
 
    public final static int WARNING = 0xff8269;
 

@@ -10,6 +10,8 @@ import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
+import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
+import com.uncreated.civilized.ui.components.IListViewBuilder;
 import com.uncreated.civilized.ui.components.ScrollListView;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreenTab;
@@ -18,16 +20,17 @@ import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ManageProductionBillsTab extends ABuildingScreenTab {
 
-   public static final int MAX_ASSIGNED_RESIDENTS = 2;
-
+   private final Button addProductionBill;
    @Nullable
-   private ScrollListView scrollView;
+   private ScrollListView<ProductionBill, ProductionBillListViewWidget> scrollView;
 
    public ManageProductionBillsTab(
          int index,
@@ -46,7 +49,27 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
             font,
             Component.translatable("menu.building.residence.production_bills.tab.heading"),
             context);
+
+      addProductionBill =
+            Button.builder(
+                  Component.translatable("menu.building.residence.production_bills.add_bill.description"),
+                  this::onAddBill)
+                  .pos(x + width - 80, height - 20)
+                  .size(80, 20)
+                  .tooltip(
+                        Tooltip.create(
+                              Component.translatable("menu.building.residence.production_bills.add_bill.tooltip")))
+                  .build();
+
       refresh();
+   }
+
+   private void onAddBill(Button button) {
+      ArtisanHouseState state = (ArtisanHouseState) context.building().getState();
+      int newIndex = state.getProductionBills().size();
+
+      PacketDistributor
+            .sendToServer(new RequestEditRecipeScreenScreen(context.building().getBuildingId(), 9, newIndex, true));
    }
 
    @Override
@@ -64,52 +87,60 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
                width,
                Colors.MENU_TEXT_DARK,
                false);
+
+      addProductionBill.render(graphics, mouseX, mouseY, partialTicks);
    }
 
    @Override
    public List<? extends GuiEventListener> children() {
       List<GuiEventListener> children = Lists.newArrayList();
+      children.add(addProductionBill);
       children.add(scrollView);
       children.addAll(scrollView.children());
       return children;
    }
 
-   private ScrollListView createScrollView(List<ProductionBill> productionBills) {
-      return new ScrollListView(getX(), getY() + 30, width, height, (x_, y_, w, h) -> {
-         List<AbstractWidget> elements = Lists.newArrayList();
+   private ScrollListView<ProductionBill, ProductionBillListViewWidget> createScrollView(
+         List<ProductionBill> productionBills) {
+      final int elementHeight = 22;
 
-         final int elementHeight = 25;
+      return new ScrollListView<>(getX(), getY() + 20, width, height - 90, elementHeight, new IListViewBuilder<>() {
 
-         int elementIndex = 0;
-         for (ProductionBill bill : productionBills) {
-
-            elements.add(
-                  new ProductionBillListViewWidget(
-                        x_,
-                        y_ + elementIndex * elementHeight,
-                        w - 10,
-                        elementHeight,
-                        font,
-                        bill,
-                        elementIndex,
-                        context.building()));
-
-            elementIndex++;
+         @Override
+         public List<ProductionBill> provideModelData() {
+            return productionBills;
          }
 
-         return elements;
+         @Override
+         public ProductionBillListViewWidget buildElementWidgetFromModel(
+               int elementIndex,
+               ProductionBill productionBill,
+               int elementX,
+               int elementY,
+               int elementWidth,
+               int elementHeight,
+               int elementSpacing) {
+            return new ProductionBillListViewWidget(
+                  elementX,
+                  elementY,
+                  elementWidth,
+                  elementHeight,
+                  font,
+                  productionBill,
+                  elementIndex,
+                  context.building());
+         }
       });
    }
 
    @Override
    public void refresh() {
 
-      if (context.building().getState() instanceof ArtisanHouseState state) {
-
-         state.tryLoadDefaultProductionBills();
+      ArtisanHouseState state = (ArtisanHouseState) context.building().getState();
+      if (state.tryLoadDefaultProductionBills())
          ClientBuildingStore.INSTANCE.replicateChange(context.building(), StoreOperation.UPDATE);
 
-         scrollView = createScrollView(state.getProductionBills());
-      }
+      scrollView = createScrollView(state.getProductionBills());
+
    }
 }

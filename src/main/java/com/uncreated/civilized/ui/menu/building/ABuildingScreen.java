@@ -18,6 +18,7 @@ import com.uncreated.civilized.ui.menu.building.worksite.grove.GroveBuildingScre
 import com.uncreated.civilized.ui.tabs.AMenuScreenWithTabs;
 import com.uncreated.civilized.ui.tabs.ATab;
 
+import lombok.Getter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -29,6 +30,7 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs {
    private static final ResourceLocation MENU_TEXTURE =
          ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_menu.png");
 
+   @Getter
    protected final BuildingScreenContext context;
    protected int contentLeftPos;
    protected int contentTopPos;

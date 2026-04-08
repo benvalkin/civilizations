@@ -52,6 +52,10 @@ public class HarvestCrops extends WorkTaskBehaviour {
 
    @Override
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
+      if (!super.checkExtraStartConditions(level, villager))
+         return false;
+
+      workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
       findFarmland(level);
       return !maturesCrops.isEmpty();
    }

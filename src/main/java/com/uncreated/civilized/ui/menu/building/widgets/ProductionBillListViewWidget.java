@@ -7,7 +7,9 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
 import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
+import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
+import com.uncreated.civilized.ui.components.buttons.TrashcanButton;
 import com.uncreated.civilized.ui.components.widget.ItemDisplayWidget;
 import com.uncreated.civilized.ui.style.Colors;
 
@@ -27,10 +29,11 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
    protected final Font font;
    private final int productionBillIndex;
    protected final Building building;
-   protected final ProductionBill productionBill;
+   protected ProductionBill productionBill;
    private final Button editButton;
    private final ItemDisplayWidget itemDisplay;
    private final Checkbox enabledButton;
+   private final TrashcanButton deleteButton;
 
    public ProductionBillListViewWidget(
          int x,
@@ -48,6 +51,10 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
       this.building = building;
 
       itemDisplay = new ItemDisplayWidget(x + 4, y, productionBill.getDisplayItem());
+
+      deleteButton = new TrashcanButton(x + width - 90, y, b -> {
+      }, this::onDeleteConfirmed);
+
       enabledButton =
             Checkbox.builder(Component.empty(), font)
                   .onValueChange(this::onProductionBillToggled)
@@ -56,15 +63,30 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
                   .selected(productionBill.isEnabled())
                   .build();
       editButton =
-            Button.builder(Component.translatable("gui.misc.button.edit"), this::onPress)
+            Button.builder(Component.translatable("gui.misc.button.edit"), this::onPressEdit)
                   .pos(x + width - 50, y)
                   .size(50, 17)
                   .build();
 
    }
 
+   private void onDeleteConfirmed(TrashcanButton button) {
+      ArtisanHouseState state = (ArtisanHouseState) building.getState();
+      if (productionBillIndex >= state.getProductionBills().size())
+         return;
+
+      state.removeBill(productionBillIndex);
+      ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
+   }
+
    private void onProductionBillToggled(Checkbox checkbox, boolean enabled) {
+      // we have to set the state on the actual building instance because the building's state field may no longer be
+      // the same
+      // instance as the stored instance
+      ProductionBill productionBill =
+            ((ArtisanHouseState) building.getState()).getProductionBills().get(productionBillIndex);
       productionBill.setEnabled(enabled);
+      this.productionBill = productionBill;
       ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
    }
 
@@ -83,12 +105,13 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
 
       guiGraphics.drawString(
             font,
-            ProductionStrategyType.getBillStrategyDescription(productionBill),
+            ProductionStrategyType.getComplexDescription(productionBill),
             getX() + 28,
             getY() + 6,
             Colors.MENU_TEXT_DARK,
             false);
 
+      deleteButton.render(guiGraphics, mouseX, mouseY, partialTick);
       editButton.render(guiGraphics, mouseX, mouseY, partialTick);
       enabledButton.render(guiGraphics, mouseX, mouseY, partialTick);
       itemDisplay.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -101,10 +124,10 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
 
    @Override
    public List<? extends GuiEventListener> children() {
-      return List.of(editButton, enabledButton, itemDisplay);
+      return List.of(deleteButton, editButton, enabledButton, itemDisplay);
    }
 
-   private void onPress(Button b) {
+   private void onPressEdit(Button b) {
       PacketDistributor
             .sendToServer(new RequestEditRecipeScreenScreen(building.getBuildingId(), 9, productionBillIndex, false));
    }

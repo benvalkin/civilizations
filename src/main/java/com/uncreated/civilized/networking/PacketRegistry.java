@@ -14,9 +14,11 @@ import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.CreateNewBuilding;
+import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
 import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.EditCraftingRecipeMenu;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
 import net.neoforged.bus.api.SubscribeEvent;
@@ -89,5 +91,10 @@ public class PacketRegistry {
             VillagerDialogueScreen.ScreenToggledPacket.TYPE,
             VillagerDialogueScreen.ScreenToggledPacket.STREAM_CODEC,
             VillagerDialogueScreen::serverReceiveShowScreen);
+
+      registrar.playToServer(
+            EditProductionBillUpdateState.TYPE,
+            EditProductionBillUpdateState.CODEC,
+            EditCraftingRecipeMenu::serverReceiveDesiredProductionBillAmount);
    }
 }

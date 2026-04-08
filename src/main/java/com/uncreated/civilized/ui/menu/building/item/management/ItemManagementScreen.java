@@ -18,10 +18,14 @@ public abstract class ItemManagementScreen<T extends ItemManagementMenu> extends
    protected final Building building;
    protected final Settlement settlement;
    protected final int contentXMargin;
-   private final int contentYMargin;
+   protected final int contentYMargin;
+   protected int contentXStart;
+   protected int contentYStart;
+   protected int contentXEnd;
+   protected int contentYEnd;
 
    protected int imageHeight; // it seems like shadowing the base AbstractContainerScreen's imageHeight (but not
-                              // imageWidth) makes the scaling work nicelly...
+                              // imageWidth) makes the scaling work nicely...
 
    private Button done;
 
@@ -33,7 +37,7 @@ public abstract class ItemManagementScreen<T extends ItemManagementMenu> extends
       this.imageWidth = 340;
       this.imageHeight = 200;
       this.contentXMargin = 25;
-      this.contentYMargin = 25;
+      this.contentYMargin = 20;
       this.inventoryLabelX = 90;
       this.inventoryLabelY = this.imageHeight - 125;
       this.titleLabelY = 2;
@@ -44,13 +48,13 @@ public abstract class ItemManagementScreen<T extends ItemManagementMenu> extends
    protected void init() {
       super.init();
 
-      int contentXStart = (width - imageWidth) / 2 + contentXMargin;
-      int contentYStart = (height - imageHeight) / 2 + contentYMargin;
-      int contentXEnd = width - (width - imageWidth) / 2 - contentXMargin;
-      int contentYEnd = height - (height - imageHeight) / 2 - contentYMargin;
+      contentXStart = (width - imageWidth) / 2 + contentXMargin;
+      contentYStart = (height - imageHeight) / 2 + contentYMargin;
+      contentXEnd = width - (width - imageWidth) / 2 - contentXMargin;
+      contentYEnd = height - (height - imageHeight) / 2 - contentYMargin;
       done =
             Button.builder(Component.translatable("gui.misc.button.done"), this::onPressDone)
-                  .pos(contentXEnd - 60, contentYStart + 60)
+                  .pos(contentXEnd - 60, contentYEnd - 18)
                   .size(60, 18)
                   .build();
 

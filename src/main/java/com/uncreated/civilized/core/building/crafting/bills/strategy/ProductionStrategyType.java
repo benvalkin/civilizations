@@ -7,16 +7,24 @@ import net.minecraft.network.chat.Component;
 public enum ProductionStrategyType {
    PRODUCE_INFINITE, PRODUCE_UP_TO;
 
-   public String translationKey() {
-      return "production_bill.production_strategy." + this.name().toLowerCase();
+   public boolean requiresAmount() {
+      return switch (this) {
+         case PRODUCE_INFINITE -> false;
+         case PRODUCE_UP_TO -> true;
+      };
    }
 
-   public static Component getBillStrategyDescription(ProductionBill bill) {
+   public Component getSimpleDescription() {
+      return Component.translatable("production_bill.production_strategy.description.simple." + this.name().toLowerCase());
+   }
+
+   public static Component getComplexDescription(ProductionBill bill) {
       return switch (bill.getProductionStrategy().getType()) {
       case PRODUCE_INFINITE ->
-         Component.translatable("production_bill.description.production_strategy.produce_infinite");
-      case PRODUCE_UP_TO ->
-         Component.translatable("production_bill.description.production_strategy.produce_up_to", bill.getBillAmount());
+         Component.translatable("production_bill.production_strategy.description.complex.produce_infinite");
+      case PRODUCE_UP_TO -> Component.translatable(
+            "production_bill.production_strategy.description.complex.produce_up_to",
+            bill.getBillAmount());
       };
    }
 }

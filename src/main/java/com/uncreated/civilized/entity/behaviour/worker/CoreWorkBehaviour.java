@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class CoreWorkBehaviour extends GateBehavior<CivilizedVillager> {
+public class CoreWorkBehaviour extends MGateBehavior<CivilizedVillager> {
    public CoreWorkBehaviour(
          List<Pair<? extends BehaviorControl<? super CivilizedVillager>, Integer>> behavioursWithDurations) {
       super(
@@ -23,8 +23,9 @@ public class CoreWorkBehaviour extends GateBehavior<CivilizedVillager> {
                   AIRegistry.MM_DIALOGUE_TARGET.get(),
                   MemoryStatus.VALUE_ABSENT),
             Set.of(MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET),
-            OrderPolicy.ORDERED,
-            RunningPolicy.TRY_ALL,
+            GateBehavior.OrderPolicy.ORDERED,
+            GateBehavior.RunningPolicy.TRY_ALL,
             behavioursWithDurations);
    }
+
 }

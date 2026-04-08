@@ -20,7 +20,15 @@ public class ManageWorkersTab extends ManageResidentsTab {
    public static final int MAX_ASSIGNED_WORKERS = 1;
 
    public ManageWorkersTab(int index, int x, int y, int width, int height, Font font, BuildingScreenContext context) {
-      super(index, x, y, width, height, font, context);
+      super(
+            index,
+            x,
+            y,
+            width,
+            height,
+            font,
+            Component.translatable("menu.building.worksite.workers.tab.heading"),
+            context);
    }
 
    @Override

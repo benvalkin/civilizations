@@ -60,6 +60,8 @@ public class PlantCrops extends WorkTaskBehaviour {
       if (!super.checkExtraStartConditions(level, villager))
          return false;
 
+      workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
+
       findFarmland(level);
 
       if (emptyFarmland.isEmpty())
@@ -104,7 +106,6 @@ public class PlantCrops extends WorkTaskBehaviour {
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
-      workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
       travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 5);
    }
 

@@ -16,11 +16,14 @@ import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
+import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
 import com.uncreated.civilized.ui.menu.item.management.EyedropperSlot;
 import com.uncreated.civilized.ui.menu.item.management.ReadonlySlot;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -37,11 +40,17 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class EditCraftingRecipeMenu extends ItemManagementMenu implements ContainerListener {
 
    private final int productionBillIndex;
+   @Getter
+   @Nullable
+   private final ProductionBill existingBill;
+   @Getter
    private final SimpleContainer resultContainer;
+   @Getter
    private final ReadonlySlot outputSlot;
 
    @Nullable
@@ -49,6 +58,18 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
    @Nullable
    private RecipeHolder<CraftingRecipe> recipe;
    private final boolean isNewBill;
+
+   @Getter
+   @Setter
+   private int desiredProductionBillAmount;
+
+   @Getter
+   @Setter
+   private ProductionStrategyType desiredProductionStrategyType;
+
+   @Getter
+   @Setter
+   private boolean desiredProductionEnabled;
 
    // client constructor
    public EditCraftingRecipeMenu(int containerId, Inventory playerInventory, FriendlyByteBuf extraDataFromServer) {
@@ -95,14 +116,23 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
       ArtisanHouseState artisanHouseState = (ArtisanHouseState) building.getState();
 
       if (isNewBill) {
+         existingBill = null;
          outputSlot.set(ItemStack.EMPTY);
+
+         desiredProductionBillAmount = -1;
+         desiredProductionStrategyType = ProductionStrategyType.PRODUCE_INFINITE;
+         desiredProductionEnabled = true;
       } else {
-         ProductionBill existingBill = artisanHouseState.getProductionBills().get(productionBillIndex);
+         existingBill = artisanHouseState.getProductionBills().get(productionBillIndex);
 
          List<ItemStack> inputItems = existingBill.getInputItems();
          for (int i = 0; i < inputItems.size(); i++) {
             slots.get(i).set(inputItems.get(i));
          }
+
+         desiredProductionBillAmount = existingBill.getBillAmount();
+         desiredProductionStrategyType = existingBill.getProductionStrategy().getType();
+         desiredProductionEnabled = existingBill.isEnabled();
 
          outputSlot.set(existingBill.getDisplayItem());
       }
@@ -137,16 +167,17 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
                new ProductionBill(
                      recipe.id().location().getPath(),
                      ProductionType.CRAFTING,
-                     ProductionStrategyType.PRODUCE_UP_TO,
-                     64,
-                     true,
+                     desiredProductionStrategyType,
+                     desiredProductionBillAmount,
+                     desiredProductionEnabled, // note: currently no support for enabling production from this menu yet
                      this.getItems().subList(0, 9),
                      outputSlot.getItem());
 
          if (isNewBill)
             artisanHouseState.addBill(newBill);
-         else
+         else {
             artisanHouseState.replaceBill(productionBillIndex, newBill);
+         }
 
          ServerBuildingsStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
          ServerBuildingsStore.INSTANCE.setDirty();
@@ -193,5 +224,20 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
       ItemStack resultItem = recipe.get().value().assemble(craftingInput, serverLevel.registryAccess());
 
       outputSlot.set(resultItem);
+   }
+
+   public static void serverReceiveDesiredProductionBillAmount(
+         EditProductionBillUpdateState packet,
+         IPayloadContext context) {
+
+      if (!(context.player().containerMenu instanceof EditCraftingRecipeMenu editCraftingRecipeMenu))
+         return;
+
+      editCraftingRecipeMenu.setDesiredProductionStrategyType(packet.desiredProductionStrategyType());
+      editCraftingRecipeMenu.setDesiredProductionBillAmount(packet.desiredProductionAmount());
+   }
+
+   public int getDefaultProductionAmount() {
+      return 16;
    }
 }

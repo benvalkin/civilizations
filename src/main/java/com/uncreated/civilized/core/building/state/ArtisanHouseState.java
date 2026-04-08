@@ -140,11 +140,12 @@ public class ArtisanHouseState extends BuildingState {
       return List.of();
    }
 
-   public void tryLoadDefaultProductionBills() {
+   public boolean tryLoadDefaultProductionBills() {
       if (!shouldLoadDefaults)
-         return;
+         return false;
 
       productionBills = getDefaultProductionBills();
       shouldLoadDefaults = false;
+      return true;
    }
 }

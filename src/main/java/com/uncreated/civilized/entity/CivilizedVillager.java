@@ -4,6 +4,7 @@ import static com.uncreated.civilized.entity.behaviour.CivilizedVillagerActiviti
 import static com.uncreated.civilized.entity.behaviour.worker.WorkActivities.getWorkPackage;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,7 +26,9 @@ import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.entity.behaviour.worker.CoreWorkBehaviour;
 import com.uncreated.civilized.entity.pathfinding.VillagerGroundPathNavigation;
+import com.uncreated.civilized.entity.renderer.CivilizedVillagerRenderer;
 import com.uncreated.civilized.entity.stats.ClothingTextureRegistry;
 import com.uncreated.civilized.entity.stats.HairTextureRegistry;
 import com.uncreated.civilized.entity.stats.SkinTextureRegistry;
@@ -37,6 +40,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -49,6 +55,7 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -362,6 +369,21 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       this.getBrain().tick(serverLevel, this);
       profilerFiller.pop();
 
+      if (CivilizedVillagerRenderer.DEBUG) {
+         var runningBehaviours = this.getBrain().getRunningBehaviors();
+         // var behavioursList = String.join(" | ",
+         // runningBehaviours.stream().map(BehaviorControl::debugString).toList());
+
+         Optional<BehaviorControl<? super CivilizedVillager>> workBehaviour =
+               runningBehaviours.stream().filter(b -> b instanceof CoreWorkBehaviour).findFirst();
+         if (workBehaviour.isPresent()) {
+            this.getEntityData().set(CURRENT_WORK_BEHAVIOUR, workBehaviour.get().debugString());
+         } else {
+            this.getEntityData().set(CURRENT_WORK_BEHAVIOUR, "not working");
+         }
+
+      }
+
       super.customServerAiStep(serverLevel);
    }
 
@@ -373,5 +395,20 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
    public void stopSpeakingToPlayer() {
       getBrain().eraseMemory(AIRegistry.MM_DIALOGUE_TARGET.get());
       brain.setActiveActivityIfPossible(Activity.IDLE);
+   }
+
+   // The generic type must match the one of the second parameter below.
+   public static final EntityDataAccessor<String> CURRENT_WORK_BEHAVIOUR =
+         SynchedEntityData.defineId(
+               // The class of the entity.
+               CivilizedVillager.class,
+               // The entity data accessor type.
+               EntityDataSerializers.STRING);
+
+   @Override
+   protected void defineSynchedData(SynchedEntityData.Builder builder) {
+      super.defineSynchedData(builder);
+      // Our default value is zero.
+      builder.define(CURRENT_WORK_BEHAVIOUR, "");
    }
 }

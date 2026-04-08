@@ -1,7 +1,5 @@
 package com.uncreated.civilized.ui.menu.building;
 
-import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.style.Colors;
 import com.uncreated.civilized.ui.tabs.ATabWithViewableItemSlots;

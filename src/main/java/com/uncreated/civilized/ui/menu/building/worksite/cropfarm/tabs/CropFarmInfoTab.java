@@ -109,11 +109,12 @@ public class CropFarmInfoTab extends ABuildingScreenTab {
       this.workers = createOccupantsList();
 
       CropFarmState cropFarmState = (CropFarmState) context.building().getState();
+      cropFarmState.tryApplyDefaults();
 
       itemDisplayWidgets.clear();
-      for (int i = 0; i < container.getContainerSize(); i++) {
+      for (int i = 0; i < CropFarmState.NUMBER_OF_CROP_SLOTS; i++) {
          ItemStack cropSlot = cropFarmState.getCropSlot(i);
-         itemDisplayWidgets.add(new ItemDisplayWidget(getX() + 18, getHeight() - 60, cropSlot));
+         itemDisplayWidgets.add(new ItemDisplayWidget(getX() + i * 18, getHeight() - 60, cropSlot));
       }
    }
 }

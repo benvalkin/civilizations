@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import com.uncreated.civilized.CivilizedMod;
 import com.uncreated.civilized.core.building.BuildingType;
-import com.uncreated.civilized.core.building.requirement.EnclosedWallsRequirement;
+import com.uncreated.civilized.core.building.requirement.EnclosedRoomRequirement;
 import com.uncreated.civilized.core.building.requirement.SpaceRequirement;
 import com.uncreated.civilized.core.building.requirement.SurfaceAreaRequirement;
 import com.uncreated.civilized.core.building.requirement.blockcount.BlockTypeRequirement;
@@ -61,7 +61,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.INN, 1)
                      .add(new SpaceRequirement(50))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 200))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new BedsPresentRequirement(4, false))
@@ -72,7 +72,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.FARMER_HOUSE, 1)
                      .add(new SpaceRequirement(15))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -82,7 +82,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.FARMER_HOUSE, 2)
                      .add(new SpaceRequirement(30))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -92,7 +92,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.WOODCUTTER_HOUSE, 1)
                      .add(new SpaceRequirement(15))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -102,7 +102,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.WOODCUTTER_HOUSE, 2)
                      .add(new SpaceRequirement(30))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -112,7 +112,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.RANCHER_HOUSE, 1)
                      .add(new SpaceRequirement(15))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -122,7 +122,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.RANCHER_HOUSE, 2)
                      .add(new SpaceRequirement(30))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -132,7 +132,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.MINER_HOUSE, 1)
                      .add(new SpaceRequirement(15))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -142,7 +142,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.MINER_HOUSE, 2)
                      .add(new SpaceRequirement(30))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
                      .add(new ChestsPresentRequirement(1, false))
                      .add(new SignsPresentRequirement(1, false))
@@ -152,7 +152,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.BAKER_HOUSE, 1)
                      .add(new SpaceRequirement(15))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 100))
                      .add(new CraftingTablesPresentRequirement(1, false))
                      .add(new FurnacesPresentRequirement(1, false))
@@ -164,7 +164,7 @@ public class BuildingRequirementRegistry {
                registry,
                BuildingRequirementList.forBuilding(BuildingType.BAKER_HOUSE, 2)
                      .add(new SpaceRequirement(30))
-                     .add(new EnclosedWallsRequirement())
+                     .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 160))
                      .add(new CraftingTablesPresentRequirement(1, false))
                      .add(new FurnacesPresentRequirement(2, false))

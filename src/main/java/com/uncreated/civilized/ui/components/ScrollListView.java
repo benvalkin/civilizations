@@ -3,6 +3,8 @@ package com.uncreated.civilized.ui.components;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -15,54 +17,81 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class ScrollListView extends AbstractContainerWidget {
+public class ScrollListView<Model, ElementWidget extends AbstractWidget> extends AbstractContainerWidget {
    private static final Logger LOGGER = LogUtils.getLogger();
-   private static final ResourceLocation SCROLLER_SPRITE =
-         ResourceLocation.withDefaultNamespace("container/villager/scroller");
+   private static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller");
+   private static final ResourceLocation SCROLLER_BACKDROP_SPRITE =
+         ResourceLocation.withDefaultNamespace("widget/scroller_background");
    private final ImageButton scrollBar;
+   @org.jetbrains.annotations.NotNull
+   private final IListViewBuilder<Model, ElementWidget> listViewBuilder;
    private boolean isDragging = false;
-   int scrollOff;
 
-   private List<AbstractWidget> children;
-   private final List<AbstractWidget> elements;
+   private final List<Model> modelData;
 
    private int contentLeftPos;
    private int contentTopPos;
+   private final int elementSpacing;
 
-   int scrollIndex = 0;
-   private final int maxElementsInView = 5;
+   private int scrollIndex = 0;
+   private int maxElementsInView;
 
-   int previousMouseY = 0;
+   private int minScrollbarY;
+   private int maxScrollbarY;
+   private int scrollbarScrollableHeight;
 
-   private int numberOfElementsInView;
+   private static final int SCROLLBAR_WIDTH = 6;
 
-   private final int minScrollbarY;
-   private final int maxScrollbarY;
-   private final int scrollbarScrollableHeight;
-
-   public ScrollListView(int x, int y, int width, int height, IViewBuilder<List<AbstractWidget>> createElements) {
+   public ScrollListView(
+         int x,
+         int y,
+         int width,
+         int height,
+         int elementSpacing,
+         IListViewBuilder<Model, ElementWidget> listViewBuilder) {
       super(x, y, width, height, Component.literal("Scroll View"));
       contentLeftPos = x;
       contentTopPos = y;
-      elements = createElements.buildView(x, y, width, height);
+      this.elementSpacing = elementSpacing;
+      modelData = listViewBuilder.provideModelData();
 
       scrollBar =
             new ImageButton(
-                  contentLeftPos + width - 8,
+                  contentLeftPos + width - SCROLLBAR_WIDTH,
                   contentTopPos,
-                  8,
+                  SCROLLBAR_WIDTH,
                   20,
                   new WidgetSprites(SCROLLER_SPRITE, SCROLLER_SPRITE, SCROLLER_SPRITE, SCROLLER_SPRITE),
                   this::onPress);
+      this.listViewBuilder = listViewBuilder;
+
+      computeScrollbarSizeAndMaxElements(height, elementSpacing);
+
+      visibleElementWidgets = new ArrayList<>();
+
+      rebuildVisibleElementWidgets();
+   }
+
+   private void computeScrollbarSizeAndMaxElements(int height, int elementSpacing) {
+      for (int i = 0; i < modelData.size(); i++) {
+         int currentAggregateElementHeight = (i + 1) * elementSpacing;
+         if (currentAggregateElementHeight <= height)
+            maxElementsInView += 1;
+         else
+            break;
+      }
 
       minScrollbarY = contentTopPos;
+      float scrollBarSizeFactor =
+            1f / (modelData.size() - maxElementsInView/* + 1 // add 1 for complete even scroll bar size */);
+      int newScrollBarHeight = Math.clamp(Math.round(scrollBarSizeFactor * height), 8, height / 2);
+      scrollBar.setHeight(newScrollBarHeight);
       maxScrollbarY = contentTopPos + contentHeight() - scrollBar.getHeight();
       scrollbarScrollableHeight = maxScrollbarY - minScrollbarY;
-
-      numberOfElementsInView = Math.min(maxElementsInView, elements.size());
    }
 
    @Override
@@ -78,40 +107,84 @@ public class ScrollListView extends AbstractContainerWidget {
    @Override
    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
 
-      for (int i = 0; i < numberOfElementsInView; i++) {
-         int displayIndex = i + scrollIndex;
-         if (displayIndex >= elements.size())
-            continue;
-
-         AbstractWidget child = elements.get(displayIndex);
-         // child.setY(contentTopPos + i * elementSpacing);
-
-         // guiGraphics.pose().pushPose();
-         // guiGraphics.pose().translate(getX(), getY(), 0);
-         child.render(guiGraphics, mouseX, mouseY, partialTick);
-         // guiGraphics.pose().popPose();
+      for (ElementWidget elementWidget : visibleElementWidgets) {
+         elementWidget.render(guiGraphics, mouseX, mouseY, partialTick);
       }
 
       renderScrollbar(guiGraphics, mouseX, mouseY, partialTick);
    }
 
-   private void renderScrollbar(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-      // guiGraphics.pose().pushPose();
-      // guiGraphics.pose().translate(getX(), getY(), 0);
-      if (isDragging() && elements.size() > maxElementsInView) {
-         int mouseYDiff = mouseY - previousMouseY;
-         int newScrollbarY = scrollBar.getY() + mouseYDiff;
+   private List<ElementWidget> visibleElementWidgets;
 
-         if (mouseYDiff != 0 && newScrollbarY >= minScrollbarY && newScrollbarY <= maxScrollbarY) {
-            scrollBar.setY(newScrollbarY);
+   private void rebuildVisibleElementWidgets() {
+
+      visibleElementWidgets.clear();
+
+      int i = 0;
+      while (i < maxElementsInView) {
+         int displayIndex = i + scrollIndex;
+         if (displayIndex >= modelData.size())
+            break;
+
+         Model currentModel = modelData.get(displayIndex);
+         int elementY = getY() + i * elementSpacing;
+         int elemntWidth = width - 10;
+         ElementWidget elementWidget =
+               listViewBuilder.buildElementWidgetFromModel(
+                     displayIndex,
+                     currentModel,
+                     getX(),
+                     elementY,
+                     elemntWidth,
+                     elementSpacing,
+                     elementSpacing);
+
+         visibleElementWidgets.add(elementWidget);
+
+         i++;
+      }
+   }
+
+   @Nullable
+   private Integer mouseYStartDragging;
+
+   private void renderScrollbar(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+
+      if (modelData.size() <= maxElementsInView)
+         return;
+
+      if (isDragging) {
+
+         if (mouseYStartDragging == null) {
+            mouseYStartDragging = scrollBar.getY();
          }
 
-         float scrolledPercent = (scrollBar.getY() - minScrollbarY) / (float) scrollbarScrollableHeight;
-         scrollIndex = Math.round((elements.size() - maxElementsInView) * scrolledPercent);
+         // int mouseYDiff = mouseY - previousMouseY;
+         int mouseYDiffSinceStartDragging = mouseY - mouseYStartDragging;
+
+         int pendingNewScrollbarY = scrollBar.getY() + mouseYDiffSinceStartDragging;
+         float pendingNewScrollPercent = (pendingNewScrollbarY - minScrollbarY) / (float) scrollbarScrollableHeight;
+         int pendingNewScrollIndex = Math.round((modelData.size() - maxElementsInView) * pendingNewScrollPercent);
+         pendingNewScrollIndex = Math.clamp(pendingNewScrollIndex, 0, modelData.size() - maxElementsInView);
+
+         if (pendingNewScrollIndex != scrollIndex) {
+            mouseYStartDragging = null;
+            scrollIndex = pendingNewScrollIndex;
+            float realizedScrollBarPercentage = scrollIndex / (float) (modelData.size() - maxElementsInView);
+            int realizedScrollBarHeight = Math.round(scrollbarScrollableHeight * realizedScrollBarPercentage);
+            int newScrollbarY = getY() + realizedScrollBarHeight;
+            scrollBar.setY(newScrollbarY);
+            rebuildVisibleElementWidgets();
+         }
       }
+      guiGraphics.blitSprite(
+            RenderType::guiTextured,
+            SCROLLER_BACKDROP_SPRITE,
+            this.getX() + this.width - SCROLLBAR_WIDTH,
+            this.getY(),
+            SCROLLBAR_WIDTH,
+            this.height);
       scrollBar.render(guiGraphics, mouseX, mouseY, partialTick);
-      previousMouseY = mouseY;
-      // guiGraphics.pose().popPose();
    }
 
    private void onPress(Button b) {
@@ -131,8 +204,7 @@ public class ScrollListView extends AbstractContainerWidget {
 
    @Override
    public List<? extends GuiEventListener> children() {
-      children = new ArrayList<>();
-      children.addAll(elements);
+      List<GuiEventListener> children = new ArrayList<>(visibleElementWidgets);
       children.add(scrollBar);
       return children;
    }

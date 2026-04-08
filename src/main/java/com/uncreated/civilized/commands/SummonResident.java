@@ -63,6 +63,8 @@ public class SummonResident {
       villager.getInfo().setHomeBuildingId(building.get().getBuildingId());
       ServerVillagerStore.INSTANCE.setDirty();
       ServerVillagerStore.INSTANCE.replicateChange(villager.getInfo(), StoreOperation.UPDATE);
+      ServerBuildingsStore.INSTANCE.setDirty();
+      ServerBuildingsStore.INSTANCE.replicateChange(building.get(), StoreOperation.UPDATE);
       return 1;
    }
 }

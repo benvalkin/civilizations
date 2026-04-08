@@ -2,6 +2,7 @@ package com.uncreated.civilized.networking.packets;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,6 +13,8 @@ import org.apache.commons.lang3.function.TriFunction;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
+import com.uncreated.civilized.core.building.crafting.bills.ProductionType;
+import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
@@ -29,6 +32,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, int productionBillIndex,
@@ -69,10 +73,21 @@ public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, 
       if (!(building.get().getState() instanceof ArtisanHouseState artisanHouseState))
          return;
 
-      if (packet.productionBillIndex() >= artisanHouseState.getProductionBills().size())
+      ProductionBill bill;
+      if (packet.isNewBill)
+         bill =
+               new ProductionBill(
+                     "pending_recipe_name",
+                     ProductionType.CRAFTING,
+                     ProductionStrategyType.PRODUCE_INFINITE,
+                     -1,
+                     true,
+                     List.of(),
+                     ItemStack.EMPTY);
+      else if (packet.productionBillIndex() < artisanHouseState.getProductionBills().size())
+         bill = artisanHouseState.getProductionBills().get(packet.productionBillIndex());
+      else
          return;
-
-      ProductionBill bill = artisanHouseState.getProductionBills().get(packet.productionBillIndex());
 
       Settlement settlement = ClientSettlementsStore.INSTANCE.get(building.get().getSettlementId());
 

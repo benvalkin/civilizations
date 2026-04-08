@@ -2,18 +2,27 @@ package com.uncreated.civilized.client.renderer;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
+import com.uncreated.civilized.item.BuildingDeedItem;
+import com.uncreated.civilized.item.events.EquipmentChange;
+import com.uncreated.civilized.item.events.PlayerChangedEquipment;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -31,28 +40,59 @@ public final class BuildingBoundsDragTool {
 
    public static final int DRAG_LOWER_BOUND = 4;
    public static final int DRAG_HEIGHT_BOUND = 14;
+   private static @Nullable ItemStack currentItem;
    private static @Nullable BlockPos origin;
    private static @Nullable BlockPos candidateDestination;
    private static @Nullable BlockPos finalDestination;
    private static @Nullable Player player;
 
+   private static boolean showDraggedBounds;
+
+   private static final Map<ItemStack, SavedDraggedBounds> savedDraggedBounds = new HashMap<>();
+
    private BuildingBoundsDragTool() {
    }
 
-   public static void startDraggingBounds(Player player, BlockPos origin) {
-      BuildingBoundsDragTool.player = player;
+   public static void startDraggingBounds(BlockPos origin) {
       BuildingBoundsDragTool.origin = adjustOrigin(origin);
       BuildingBoundsDragTool.candidateDestination = null;
       BuildingBoundsDragTool.finalDestination = null;
    }
 
-   public static void completeDragging(Player player, BlockPos destination) {
-      if (player != BuildingBoundsDragTool.player || origin == null)
+   public static void completeDragging(BlockPos destination) {
+      if (origin == null)
          return;
 
       BuildingBoundsDragTool.candidateDestination = null;
       BuildingBoundsDragTool.finalDestination = adjustDestination(destination);
+   }
 
+   public static void saveAndHideDraggedBounds(ItemStack buildingDeed) {
+      player = Minecraft.getInstance().player;
+      showDraggedBounds = false;
+      currentItem = null;
+
+      if (origin == null || finalDestination == null)
+         return;
+
+      savedDraggedBounds.put(buildingDeed, new SavedDraggedBounds(origin, finalDestination));
+      origin = null;
+      candidateDestination = null;
+      finalDestination = null;
+   }
+
+   public static void loadAndShowDraggedBounds(ItemStack buildingDeed) {
+      player = Minecraft.getInstance().player;
+      showDraggedBounds = true;
+      currentItem = buildingDeed;
+
+      @Nullable
+      SavedDraggedBounds saved = savedDraggedBounds.remove(buildingDeed);
+      if (saved == null)
+         return;
+
+      origin = saved.origin();
+      finalDestination = saved.finalDestination();
    }
 
    /**
@@ -72,12 +112,12 @@ public final class BuildingBoundsDragTool {
       return new BlockPos(destination.getX(), origin.getY() + DRAG_LOWER_BOUND + DRAG_HEIGHT_BOUND, destination.getZ());
    }
 
-   public static boolean isBusyDragging(Player player) {
-      return BuildingBoundsDragTool.player == player && origin != null && candidateDestination != null;
+   public static boolean isBusyDragging() {
+      return origin != null && candidateDestination != null;
    }
 
-   public static boolean isDraggingComplete(Player player) {
-      return BuildingBoundsDragTool.player == player && origin != null && finalDestination != null;
+   public static boolean isDraggingComplete() {
+      return origin != null && finalDestination != null;
    }
 
    public static BuildingBoundsDragResult getBuildingBoundsDragResult(Level level) {
@@ -134,8 +174,7 @@ public final class BuildingBoundsDragTool {
    public record BuildingBoundsDragResult(BuildingBounds bounds, boolean centerIsAir, boolean centerIsInside) {
    }
 
-   public static void stopDragging() {
-      BuildingBoundsDragTool.player = null;
+   public static void resetDragging() {
       BuildingBoundsDragTool.origin = null;
       BuildingBoundsDragTool.candidateDestination = null;
       BuildingBoundsDragTool.finalDestination = null;
@@ -143,7 +182,14 @@ public final class BuildingBoundsDragTool {
 
    @SubscribeEvent
    public static void onClientTick(ClientTickEvent.Post event) {
+
+      if (!showDraggedBounds)
+         return;
+
       if (player == null)
+         return;
+
+      if (origin == null)
          return;
 
       if (finalDestination != null) // do not update candidate if final position has been chosen
@@ -161,13 +207,34 @@ public final class BuildingBoundsDragTool {
 
    @SubscribeEvent
    public static void onRenderLevelStage(RenderLevelStageEvent event) {
+
+      if (!showDraggedBounds)
+         return;
+
       BlockPos destination = finalDestination != null ? finalDestination : candidateDestination;
       if (origin != null && destination != null && event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
          PoseStack poseStack = event.getPoseStack();
          Vec3 camera = event.getCamera().getPosition();
          VertexConsumer consumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.lines());
+
          drawRenderBoundingBox(poseStack, consumer, camera, origin, destination);
       }
+   }
+
+   @SubscribeEvent
+   public static void onPlayerChangeEquipment(PlayerChangedEquipment event) {
+
+      Optional<EquipmentChange> equipmentChange = event.getEquipmentChange(EquipmentSlot.MAINHAND);
+      if (equipmentChange.isEmpty())
+         equipmentChange = event.getEquipmentChange(EquipmentSlot.OFFHAND);
+      if (equipmentChange.isEmpty())
+         return;
+
+      if (equipmentChange.get().from().getItem() instanceof BuildingDeedItem)
+         BuildingBoundsDragTool.saveAndHideDraggedBounds(equipmentChange.get().from());
+
+      if (equipmentChange.get().to().getItem() instanceof BuildingDeedItem)
+         BuildingBoundsDragTool.loadAndShowDraggedBounds(equipmentChange.get().to());
    }
 
    private static void drawRenderBoundingBox(

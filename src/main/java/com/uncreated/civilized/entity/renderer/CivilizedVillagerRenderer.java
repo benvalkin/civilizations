@@ -23,6 +23,8 @@ import net.minecraft.world.phys.Vec3;
 public class CivilizedVillagerRenderer extends
       HumanoidMobRenderer<CivilizedVillager, CivilizedVillagerRenderState, HumanoidModel<CivilizedVillagerRenderState>> {
 
+   public static final boolean DEBUG = true;
+
    public CivilizedVillagerRenderer(EntityRendererProvider.Context context) {
       super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER)), 1);
 
@@ -48,6 +50,10 @@ public class CivilizedVillagerRenderer extends
          state.occupationName = villager.getInfo().getOccupation().translation();
       else
          state.occupationName = null;
+
+      if (DEBUG) {
+         state.debugBehavioursList = villager.getEntityData().get(CivilizedVillager.CURRENT_WORK_BEHAVIOUR);
+      }
    }
 
    @Override
@@ -72,6 +78,9 @@ public class CivilizedVillagerRenderer extends
          renderNameTag(renderState, renderState.villagerName, pose, bufferSource, packedLight);
       if (renderState.occupationName != null)
          renderJobTag(renderState, renderState.occupationName, pose, bufferSource, packedLight);
+
+      if (DEBUG)
+         renderDebugInfo(renderState, pose, bufferSource, packedLight);
    }
 
    protected void renderNameTag(
@@ -138,6 +147,37 @@ public class CivilizedVillagerRenderer extends
       int backgroundColor = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25F) * 255.0F) << 24;
       font.drawInBatch(
             displayName,
+            width,
+            0,
+            0xcccccc,
+            false,
+            matrix4f,
+            bufferSource,
+            flag ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL,
+            backgroundColor,
+            packedLight);
+
+      poseStack.popPose();
+   }
+
+   protected void renderDebugInfo(
+         CivilizedVillagerRenderState renderState,
+         PoseStack poseStack,
+         MultiBufferSource bufferSource,
+         int packedLight) {
+
+      Vec3 vec3 = new Vec3(0, 2.4, 0);
+      boolean flag = !renderState.isDiscrete;
+      poseStack.pushPose();
+      poseStack.translate(vec3.x, vec3.y + (double) 0.5F, vec3.z);
+      poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+      poseStack.scale(0.018F, -0.018F, 0.018F);
+      Matrix4f matrix4f = poseStack.last().pose();
+      Font font = this.getFont();
+      float width = (float) (-font.width(renderState.debugBehavioursList)) / 2.0F;
+      int backgroundColor = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25F) * 255.0F) << 24;
+      font.drawInBatch(
+            renderState.debugBehavioursList,
             width,
             0,
             0xcccccc,
