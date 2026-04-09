@@ -183,19 +183,4 @@ public class BuildingDeedItem extends Item {
 
       return true;
    }
-
-   // @Override
-   // public boolean onEntitySwing(ItemStack stack, LivingEntity player, InteractionHand hand) {
-   //
-   // if (!player.level().isClientSide || player != Minecraft.getInstance().player)
-   // return false;
-   //
-   // if (!(BuildingBoundsDragTool.isBusyDragging() || BuildingBoundsDragTool.isDraggingComplete()))
-   // return false;
-   //
-   // BuildingBoundsDragTool.resetDragging();
-   // ((LocalPlayer) player)
-   // .displayClientMessage(Component.translatable("message.building.placement.help.placement_cancelled"), true);
-   // return false;
-   // }
 }

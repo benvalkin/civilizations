@@ -1,6 +1,6 @@
-package com.uncreated.civilized.core.building.crafting.bills.strategy;
+package com.uncreated.civilized.core.building.production.bills.strategy;
 
-import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
+import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 
 import net.minecraft.network.chat.Component;
 

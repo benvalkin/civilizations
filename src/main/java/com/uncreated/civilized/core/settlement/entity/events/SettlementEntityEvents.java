@@ -4,7 +4,6 @@ import java.util.Set;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.entity.LegacyBuildingEntity;
 import com.uncreated.civilized.core.building.entity.LoadedBuildings;
 import com.uncreated.civilized.core.building.events.model.BuildingDeletedEvent;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
@@ -13,7 +12,6 @@ import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -24,23 +22,6 @@ public class SettlementEntityEvents {
    public static void serverPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
       if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer serverPlayer)
          ServerBuildingsStore.INSTANCE.replicateFullToNewClient(serverPlayer);
-   }
-
-   // legacy, can remove later
-   @SubscribeEvent
-   public static void entitySpawnFinalized(EntityJoinLevelEvent event) {
-
-      // we aren't using legacy building entites right now
-      if (event.getEntity() instanceof LegacyBuildingEntity buildingEntity) {
-         if (!buildingEntity.level().isClientSide) {
-            if (!event.loadedFromDisk()) {
-               buildingEntity.initBrandNew();
-            } else {
-               buildingEntity.initFromSave();
-            }
-            buildingEntity.serverFinalizeSpawn();
-         }
-      }
    }
 
    @SubscribeEvent

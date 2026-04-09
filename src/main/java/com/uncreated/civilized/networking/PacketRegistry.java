@@ -16,7 +16,7 @@ import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.networking.packets.CreateNewBuilding;
 import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
-import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
+import com.uncreated.civilized.networking.packets.RequestEditRecipeProductionScreen;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.EditCraftingRecipeMenu;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
@@ -78,9 +78,9 @@ public class PacketRegistry {
             RequestBuildingItemManagementScreen::serverReceiveRequestScreen);
 
       registrar.playToServer(
-            RequestEditRecipeScreenScreen.TYPE,
-            RequestEditRecipeScreenScreen.STREAM_CODEC,
-            RequestEditRecipeScreenScreen::serverReceiveRequestScreen);
+            RequestEditRecipeProductionScreen.TYPE,
+            RequestEditRecipeProductionScreen.STREAM_CODEC,
+            RequestEditRecipeProductionScreen::serverReceiveRequestScreen);
 
       registrar.playToServer(
             GiveItemsToPlayer.TYPE,

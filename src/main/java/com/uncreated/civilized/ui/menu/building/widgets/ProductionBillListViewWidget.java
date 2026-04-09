@@ -5,10 +5,10 @@ import java.util.List;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
-import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
+import com.uncreated.civilized.core.building.production.bills.ProductionBill;
+import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
-import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
+import com.uncreated.civilized.networking.packets.RequestEditRecipeProductionScreen;
 import com.uncreated.civilized.ui.components.buttons.TrashcanButton;
 import com.uncreated.civilized.ui.components.widget.ItemDisplayWidget;
 import com.uncreated.civilized.ui.style.Colors;
@@ -72,10 +72,10 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
 
    private void onDeleteConfirmed(TrashcanButton button) {
       ArtisanHouseState state = (ArtisanHouseState) building.getState();
-      if (productionBillIndex >= state.getProductionBills().size())
+      if (productionBillIndex >= state.getProductionBills(productionBill.getProductionType()).size())
          return;
 
-      state.removeBill(productionBillIndex);
+      state.removeBill(productionBill.getProductionType(), productionBillIndex);
       ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
    }
 
@@ -83,10 +83,10 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
       // we have to set the state on the actual building instance because the building's state field may no longer be
       // the same
       // instance as the stored instance
-      ProductionBill productionBill =
-            ((ArtisanHouseState) building.getState()).getProductionBills().get(productionBillIndex);
+      this.productionBill =
+            ((ArtisanHouseState) building.getState()).getProductionBills(productionBill.getProductionType())
+                  .get(productionBillIndex);
       productionBill.setEnabled(enabled);
-      this.productionBill = productionBill;
       ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
    }
 
@@ -128,7 +128,12 @@ public class ProductionBillListViewWidget extends AbstractContainerWidget {
    }
 
    private void onPressEdit(Button b) {
-      PacketDistributor
-            .sendToServer(new RequestEditRecipeScreenScreen(building.getBuildingId(), 9, productionBillIndex, false));
+      PacketDistributor.sendToServer(
+            new RequestEditRecipeProductionScreen(
+                  building.getBuildingId(),
+                  9,
+                  productionBill.getProductionType(),
+                  productionBillIndex,
+                  false));
    }
 }

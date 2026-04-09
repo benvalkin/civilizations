@@ -1,15 +1,11 @@
-package com.uncreated.civilized.core.building.crafting;
+package com.uncreated.civilized.core.building.production;
 
 import java.util.Collection;
-import java.util.List;
 
-import com.uncreated.civilized.core.building.crafting.orders.recipe.AssembledRecipe;
+import com.uncreated.civilized.core.building.production.orders.recipe.AssembledRecipe;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.SingleRecipeInput;
 
 public record PendingProductionOutput(Recipe<?> recipe, AssembledRecipe<?> assembledRecipe,
       boolean canProduce, int stockDeficit, Collection<Container> sourceContainers) {

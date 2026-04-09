@@ -1,8 +1,10 @@
-package com.uncreated.civilized.core.building.crafting.orders.recipe;
+package com.uncreated.civilized.core.building.production.lines.crafting;
 
 import java.util.List;
 import java.util.Optional;
 
+import com.uncreated.civilized.core.building.production.orders.recipe.AssembledRecipe;
+import com.uncreated.civilized.core.building.production.orders.recipe.RecipeAssembler;
 import lombok.Getter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;

@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.building.crafting.bills.strategy;
+package com.uncreated.civilized.core.building.production.bills.strategy;
 
 import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
 

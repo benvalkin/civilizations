@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.building.crafting.orders.recipe;
+package com.uncreated.civilized.core.building.production.orders.recipe;
 
 import java.util.Arrays;
 import java.util.List;

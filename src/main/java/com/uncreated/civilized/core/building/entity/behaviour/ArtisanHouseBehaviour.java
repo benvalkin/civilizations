@@ -2,8 +2,9 @@ package com.uncreated.civilized.core.building.entity.behaviour;
 
 import java.util.List;
 
-import com.uncreated.civilized.core.building.crafting.orders.ProductionOrder;
 import com.uncreated.civilized.core.building.entity.LoadedBuilding;
+import com.uncreated.civilized.core.building.production.lines.crafting.CraftingMachine;
+import com.uncreated.civilized.core.building.production.lines.crafting.CraftingOrder;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 
 import net.minecraft.server.level.ServerLevel;
@@ -19,11 +20,18 @@ public class ArtisanHouseBehaviour extends BuildingBehaviour {
 
       ArtisanHouseState artisanHouseState = (ArtisanHouseState) getBuilding().getState();
 
-      List<ProductionOrder> productionOrders =
-            artisanHouseState.createProductionOrders((ServerLevel) getEntity().getLevel());
+      // CRAFTING
 
-      for (ProductionOrder productionOrder : productionOrders) {
-         getCraftingMachine().registerOrder(productionOrder);
+      CraftingMachine machine =
+            getEntity().getBehaviour().getRecipeProductionSystem().getMachine(CraftingMachine.class);
+
+      List<CraftingOrder> productionOrders =
+            artisanHouseState.createProductionOrders(
+                  getEntity().getBehaviour().getRecipeProductionSystem().getMachine(CraftingMachine.class),
+                  (ServerLevel) getEntity().getLevel());
+
+      for (CraftingOrder productionOrder : productionOrders) {
+         machine.registerOrder(productionOrder);
       }
    }
 }

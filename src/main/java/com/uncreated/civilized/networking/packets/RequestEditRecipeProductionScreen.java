@@ -12,9 +12,8 @@ import org.apache.commons.lang3.function.TriFunction;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
-import com.uncreated.civilized.core.building.crafting.bills.ProductionType;
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
+import com.uncreated.civilized.core.building.production.bills.ProductionBill;
+import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
@@ -32,22 +31,22 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, int productionBillIndex,
-      boolean isNewBill) implements CustomPacketPayload {
+public record RequestEditRecipeProductionScreen(UUID buildingId, int containerSize, ProductionType productionType,
+                                                int productionBillIndex, boolean isNewBill) implements CustomPacketPayload {
 
-   public static final Type<RequestEditRecipeScreenScreen> TYPE =
+   public static final Type<RequestEditRecipeProductionScreen> TYPE =
          new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "request_edit_recipe_screen"));
 
-   public static StreamCodec<FriendlyByteBuf, RequestEditRecipeScreenScreen> STREAM_CODEC =
-         StreamCodec.ofMember(RequestEditRecipeScreenScreen::encode, RequestEditRecipeScreenScreen::decode);
+   public static StreamCodec<FriendlyByteBuf, RequestEditRecipeProductionScreen> STREAM_CODEC =
+         StreamCodec.ofMember(RequestEditRecipeProductionScreen::encode, RequestEditRecipeProductionScreen::decode);
 
-   public static RequestEditRecipeScreenScreen decode(FriendlyByteBuf buffer) {
-      return new RequestEditRecipeScreenScreen(
+   public static RequestEditRecipeProductionScreen decode(FriendlyByteBuf buffer) {
+      return new RequestEditRecipeProductionScreen(
             buffer.readUUID(),
             buffer.readInt(),
+            buffer.readEnum(ProductionType.class),
             buffer.readInt(),
             buffer.readBoolean());
    }
@@ -55,6 +54,7 @@ public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, 
    public void encode(FriendlyByteBuf buffer) {
       buffer.writeUUID(buildingId);
       buffer.writeInt(containerSize);
+      buffer.writeEnum(productionType);
       buffer.writeInt(productionBillIndex);
       buffer.writeBoolean(isNewBill);
    }
@@ -64,7 +64,7 @@ public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, 
       return TYPE;
    }
 
-   public static void serverReceiveRequestScreen(RequestEditRecipeScreenScreen packet, IPayloadContext context) {
+   public static void serverReceiveRequestScreen(RequestEditRecipeProductionScreen packet, IPayloadContext context) {
 
       Optional<Building> building = ServerBuildingsStore.INSTANCE.find(packet.buildingId);
       if (building.isEmpty())
@@ -73,25 +73,16 @@ public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, 
       if (!(building.get().getState() instanceof ArtisanHouseState artisanHouseState))
          return;
 
-      ProductionBill bill;
-      if (packet.isNewBill)
-         bill =
-               new ProductionBill(
-                     "pending_recipe_name",
-                     ProductionType.CRAFTING,
-                     ProductionStrategyType.PRODUCE_INFINITE,
-                     -1,
-                     true,
-                     List.of(),
-                     ItemStack.EMPTY);
-      else if (packet.productionBillIndex() < artisanHouseState.getProductionBills().size())
-         bill = artisanHouseState.getProductionBills().get(packet.productionBillIndex());
-      else
+      Optional<List<ProductionBill>> existingBills = artisanHouseState.tryGetProductionBills(packet.productionType);
+      if (existingBills.isEmpty())
+         return;
+
+      if (packet.productionBillIndex() >= existingBills.get().size())
          return;
 
       Settlement settlement = ClientSettlementsStore.INSTANCE.get(building.get().getSettlementId());
 
-      TriFunction<Integer, Inventory, Player, EditCraftingRecipeMenu> menuSupplier = switch (bill.getProductionType()) {
+      TriFunction<Integer, Inventory, Player, EditCraftingRecipeMenu> menuSupplier = switch (packet.productionType) {
       case CRAFTING -> (i, inventory, player) -> new EditCraftingRecipeMenu(
             i,
             inventory,
@@ -119,10 +110,10 @@ public record RequestEditRecipeScreenScreen(UUID buildingId, int containerSize, 
             buffer.writeInt(packet.containerSize());
             buffer.writeUUID(settlement.getSettlementId());
             buffer.writeUUID(building.get().getBuildingId());
+            buffer.writeEnum(packet.productionType());
             buffer.writeInt(packet.productionBillIndex());
             buffer.writeBoolean(packet.isNewBill());
          }
       });
-
    }
 }

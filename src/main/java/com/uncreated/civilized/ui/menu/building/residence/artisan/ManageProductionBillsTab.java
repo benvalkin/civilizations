@@ -8,9 +8,10 @@ import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
-import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
+import com.uncreated.civilized.core.building.production.bills.ProductionBill;
+import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
-import com.uncreated.civilized.networking.packets.RequestEditRecipeScreenScreen;
+import com.uncreated.civilized.networking.packets.RequestEditRecipeProductionScreen;
 import com.uncreated.civilized.ui.components.IListViewBuilder;
 import com.uncreated.civilized.ui.components.ScrollListView;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
@@ -29,6 +30,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class ManageProductionBillsTab extends ABuildingScreenTab {
 
    private final Button addProductionBill;
+   private final ProductionType productionType;
    @Nullable
    private ScrollListView<ProductionBill, ProductionBillListViewWidget> scrollView;
 
@@ -39,7 +41,8 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
          int width,
          int height,
          Font font,
-         BuildingScreenContext context) {
+         BuildingScreenContext context,
+         ProductionType productionType) {
       super(
             index,
             x,
@@ -49,6 +52,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
             font,
             Component.translatable("menu.building.residence.production_bills.tab.heading"),
             context);
+      this.productionType = productionType;
 
       addProductionBill =
             Button.builder(
@@ -66,10 +70,15 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
 
    private void onAddBill(Button button) {
       ArtisanHouseState state = (ArtisanHouseState) context.building().getState();
-      int newIndex = state.getProductionBills().size();
+      int newIndex = state.getProductionBills(productionType).size();
 
-      PacketDistributor
-            .sendToServer(new RequestEditRecipeScreenScreen(context.building().getBuildingId(), 9, newIndex, true));
+      PacketDistributor.sendToServer(
+            new RequestEditRecipeProductionScreen(
+                  context.building().getBuildingId(),
+                  9,
+                  productionType,
+                  newIndex,
+                  true));
    }
 
    @Override
@@ -140,7 +149,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
       if (state.tryLoadDefaultProductionBills())
          ClientBuildingStore.INSTANCE.replicateChange(context.building(), StoreOperation.UPDATE);
 
-      scrollView = createScrollView(state.getProductionBills());
+      scrollView = createScrollView(state.getProductionBills(productionType));
 
    }
 }

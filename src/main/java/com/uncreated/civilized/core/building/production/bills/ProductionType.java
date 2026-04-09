@@ -1,4 +1,4 @@
-package com.uncreated.civilized.core.building.crafting.bills;
+package com.uncreated.civilized.core.building.production.bills;
 
 public enum ProductionType {
     CRAFTING,

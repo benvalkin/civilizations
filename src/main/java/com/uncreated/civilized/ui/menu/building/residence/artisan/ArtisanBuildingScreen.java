@@ -2,6 +2,7 @@ package com.uncreated.civilized.ui.menu.building.residence.artisan;
 
 import java.util.List;
 
+import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingSettingsTab;
@@ -29,7 +30,7 @@ public class ArtisanBuildingScreen extends ABuildingScreen {
 
       return List.of(
             new ResidenceInfoTab(0, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
-            new ManageProductionBillsTab(1, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
+            new ManageProductionBillsTab(1, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context, ProductionType.CRAFTING),
             new ManageResidentsTab(2, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
             new BuildingSettingsTab(3, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context));
    }

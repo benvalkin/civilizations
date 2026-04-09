@@ -2,15 +2,15 @@ package com.uncreated.civilized.networking.packets;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
-import java.util.UUID;
+import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record EditProductionBillUpdateState(ProductionStrategyType desiredProductionStrategyType, int desiredProductionAmount) implements CustomPacketPayload {
+public record EditProductionBillUpdateState(ProductionStrategyType desiredProductionStrategyType,
+      int desiredProductionAmount) implements CustomPacketPayload {
 
    public static final Type<EditProductionBillUpdateState> TYPE =
          new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "update_settlement_info"));

@@ -2,7 +2,7 @@ package com.uncreated.civilized.ui.menu.building.residence.artisan;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
+import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.ui.components.widget.ItemQuantitySelectorWidget;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementScreen;

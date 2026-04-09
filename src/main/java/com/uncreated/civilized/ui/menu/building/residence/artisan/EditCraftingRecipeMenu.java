@@ -9,9 +9,9 @@ import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.crafting.bills.ProductionBill;
-import com.uncreated.civilized.core.building.crafting.bills.ProductionType;
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
+import com.uncreated.civilized.core.building.production.bills.ProductionBill;
+import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
@@ -123,7 +123,7 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
          desiredProductionStrategyType = ProductionStrategyType.PRODUCE_INFINITE;
          desiredProductionEnabled = true;
       } else {
-         existingBill = artisanHouseState.getProductionBills().get(productionBillIndex);
+         existingBill = artisanHouseState.getProductionBills(ProductionType.CRAFTING).get(productionBillIndex);
 
          List<ItemStack> inputItems = existingBill.getInputItems();
          for (int i = 0; i < inputItems.size(); i++) {

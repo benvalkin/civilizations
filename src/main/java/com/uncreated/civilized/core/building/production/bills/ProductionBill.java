@@ -1,12 +1,12 @@
-package com.uncreated.civilized.core.building.crafting.bills;
+package com.uncreated.civilized.core.building.production.bills;
 
 import java.util.List;
 import java.util.Optional;
 
-import com.uncreated.civilized.core.building.crafting.bills.strategy.IProductionStrategy;
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProduceInfinite;
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProduceUpTo;
-import com.uncreated.civilized.core.building.crafting.bills.strategy.ProductionStrategyType;
+import com.uncreated.civilized.core.building.production.bills.strategy.IProductionStrategy;
+import com.uncreated.civilized.core.building.production.bills.strategy.ProduceInfinite;
+import com.uncreated.civilized.core.building.production.bills.strategy.ProduceUpTo;
+import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 
 import lombok.Getter;
 import lombok.Setter;
