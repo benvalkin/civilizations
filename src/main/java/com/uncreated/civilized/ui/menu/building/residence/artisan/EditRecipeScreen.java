@@ -1,7 +1,5 @@
 package com.uncreated.civilized.ui.menu.building.residence.artisan;
 
-import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
-
 import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.ui.components.widget.ItemQuantitySelectorWidget;
@@ -18,17 +16,15 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-public class EditCraftingRecipeScreen extends ItemManagementScreen<EditCraftingRecipeMenu>
+public abstract class EditRecipeScreen<TEditRecipeMenu extends EditRecipeMenu<?, ?>> extends ItemManagementScreen<TEditRecipeMenu>
       implements ContainerListener {
-   private static final ResourceLocation MENU_TEXTURE =
-         ResourceLocation
-               .fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/container/artisan_house_edit_crafting_recipe.png");
 
    private CycleButton<ProductionStrategyType> changeStrategyButton;
    private ItemQuantitySelectorWidget itemQuantitySelectorWidget;
 
-   public EditCraftingRecipeScreen(EditCraftingRecipeMenu menu, Inventory playerInventory, Component title) {
-      super(MENU_TEXTURE, menu, playerInventory, title);
+   public EditRecipeScreen(ResourceLocation backgroundTexture, TEditRecipeMenu menu, Inventory playerInventory, Component title) {
+      super(backgroundTexture, menu, playerInventory, title);
+
    }
 
    private Component apply(ProductionStrategyType productionStrategyType) {
@@ -40,7 +36,8 @@ public class EditCraftingRecipeScreen extends ItemManagementScreen<EditCraftingR
          ProductionStrategyType productionStrategyType) {
       itemQuantitySelectorWidget.visible = productionStrategyType.requiresAmount();
       if (itemQuantitySelectorWidget.visible)
-         itemQuantitySelectorWidget.setItemAndQuantity(menu.getOutputSlot().getItem(), getMenu().getDefaultProductionAmount());
+         itemQuantitySelectorWidget
+               .setItemAndQuantity(menu.getOutputSlot().getItem(), getMenu().getDefaultProductionAmount());
 
       menu.setDesiredProductionStrategyType(productionStrategyType);
       menu.setDesiredProductionBillAmount(

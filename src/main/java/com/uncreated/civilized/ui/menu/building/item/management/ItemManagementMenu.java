@@ -19,8 +19,8 @@ public abstract class ItemManagementMenu extends AbstractContainerMenu {
    @Getter
    protected Building building;
 
-   public ItemManagementMenu(MenuType<? extends ItemManagementMenu> chooseSaplingsMenuMenuType, int containerId) {
-      super(chooseSaplingsMenuMenuType, containerId);
+   public ItemManagementMenu(MenuType<? extends ItemManagementMenu> menuType, int containerId) {
+      super(menuType, containerId);
    }
 
    @Override

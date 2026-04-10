@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.mojang.datafixers.util.Pair;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
@@ -15,7 +16,6 @@ import com.uncreated.civilized.core.building.production.bills.strategy.Productio
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
 import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
@@ -24,6 +24,7 @@ import com.uncreated.civilized.ui.menu.item.management.ReadonlySlot;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -34,15 +35,16 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class EditCraftingRecipeMenu extends ItemManagementMenu implements ContainerListener {
+public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.crafting.Recipe<TRecipeInput>, TRecipeInput extends RecipeInput>
+      extends ItemManagementMenu implements ContainerListener {
 
    private final int productionBillIndex;
    @Getter
@@ -56,7 +58,7 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
    @Nullable
    private ServerLevel serverLevel;
    @Nullable
-   private RecipeHolder<CraftingRecipe> recipe;
+   private RecipeHolder<TRecipe> recipe;
    private final boolean isNewBill;
 
    @Getter
@@ -72,8 +74,13 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
    private boolean desiredProductionEnabled;
 
    // client constructor
-   public EditCraftingRecipeMenu(int containerId, Inventory playerInventory, FriendlyByteBuf extraDataFromServer) {
+   public EditRecipeMenu(
+         MenuType<? extends ItemManagementMenu> menuType,
+         int containerId,
+         Inventory playerInventory,
+         FriendlyByteBuf extraDataFromServer) {
       this(
+            menuType,
             containerId,
             playerInventory,
             new SimpleContainer(extraDataFromServer.readInt()),
@@ -83,7 +90,8 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
             extraDataFromServer.readBoolean());
    }
 
-   public EditCraftingRecipeMenu(
+   public EditRecipeMenu(
+         MenuType<? extends ItemManagementMenu> menuType,
          int containerId,
          Inventory playerInventory,
          Container craftingMenuContainer,
@@ -91,24 +99,22 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
          Building building,
          int productionBillIndex,
          boolean isNewBill) {
-      super(GuiRegistry.CHOOSE_CRAFTING_RECIPE_MENU.get(), containerId);
+      super(menuType, containerId);
       this.container = craftingMenuContainer;
       this.resultContainer = new SimpleContainer(1);
       this.settlement = settlement;
       this.building = building;
       this.productionBillIndex = productionBillIndex;
       this.isNewBill = isNewBill;
-      if (playerInventory.player.level() instanceof ServerLevel serverLevel) {
-         this.serverLevel = serverLevel;
+      if (playerInventory.player.level() instanceof ServerLevel sLevel) {
+         this.serverLevel = sLevel;
       }
 
-      int slotIndex = 0;
-      for (int y = 0; y < 3; y++) {
-         for (int x = 0; x < 3; x++) {
-            this.addSlot(new EyedropperSlot(craftingMenuContainer, slotIndex, 51 + 18 * x, 20 + 18 * y));
-            slotIndex++;
-         }
-      }
+      List<EyedropperSlot> inputSlots = setupInputSlots(craftingMenuContainer);
+      if (inputSlots.isEmpty())
+         throw new IllegalStateException("Edit recipe menu needs at least 1 input slot.");
+
+      inputSlots.forEach(this::addSlot);
 
       outputSlot = new ReadonlySlot(resultContainer, 0, 141, 20 + 18);
       this.addSlot(outputSlot);
@@ -123,7 +129,7 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
          desiredProductionStrategyType = ProductionStrategyType.PRODUCE_INFINITE;
          desiredProductionEnabled = true;
       } else {
-         existingBill = artisanHouseState.getProductionBills(ProductionType.CRAFTING).get(productionBillIndex);
+         existingBill = artisanHouseState.getProductionBills(getProductionType()).get(productionBillIndex);
 
          List<ItemStack> inputItems = existingBill.getInputItems();
          for (int i = 0; i < inputItems.size(); i++) {
@@ -146,6 +152,8 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
       }
    }
 
+   protected abstract List<EyedropperSlot> setupInputSlots(Container craftingMenuContainer);
+
    @Override
    public void slotsChanged(Container container) {
       super.slotsChanged(container);
@@ -166,7 +174,7 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
          ProductionBill newBill =
                new ProductionBill(
                      recipe.id().location().getPath(),
-                     ProductionType.CRAFTING,
+                     getProductionType(),
                      desiredProductionStrategyType,
                      desiredProductionBillAmount,
                      desiredProductionEnabled, // note: currently no support for enabling production from this menu yet
@@ -191,6 +199,8 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
       }
    }
 
+   public abstract ProductionType getProductionType();
+
    @Override
    public void slotChanged(AbstractContainerMenu craftingContainerMenu, int i, ItemStack itemStack) {
 
@@ -206,35 +216,36 @@ public class EditCraftingRecipeMenu extends ItemManagementMenu implements Contai
    }
 
    private void computeRecipeAndDisplay(AbstractContainerMenu craftingContainerMenu) {
-      List<ItemStack> inputItems = craftingContainerMenu.getItems().subList(0, 9);
 
-      CraftingInput craftingInput = CraftingInput.of(3, 3, inputItems);
+      Optional<Pair<RecipeHolder<TRecipe>, TRecipeInput>> recipeResult =
+            getRecipeFromInputContainer(craftingContainerMenu.getItems(), serverLevel, serverLevel.recipeAccess());
 
-      Optional<RecipeHolder<CraftingRecipe>> recipe =
-            serverLevel.recipeAccess()
-                  .getRecipeFor(RecipeType.CRAFTING, CraftingInput.of(3, 3, inputItems), serverLevel);
-
-      if (recipe.isEmpty()) {
+      if (recipeResult.isEmpty()) {
          outputSlot.set(ItemStack.EMPTY);
          this.recipe = null;
          return;
       }
 
-      this.recipe = recipe.get();
-      ItemStack resultItem = recipe.get().value().assemble(craftingInput, serverLevel.registryAccess());
+      this.recipe = recipeResult.get().getFirst();
+      ItemStack resultItem = this.recipe.value().assemble(recipeResult.get().getSecond(), serverLevel.registryAccess());
 
       outputSlot.set(resultItem);
    }
+
+   protected abstract Optional<Pair<RecipeHolder<TRecipe>, TRecipeInput>> getRecipeFromInputContainer(
+         NonNullList<ItemStack> recipeInputItems,
+         ServerLevel serverLevel,
+         RecipeManager recipeManager);
 
    public static void serverReceiveDesiredProductionBillAmount(
          EditProductionBillUpdateState packet,
          IPayloadContext context) {
 
-      if (!(context.player().containerMenu instanceof EditCraftingRecipeMenu editCraftingRecipeMenu))
+      if (!(context.player().containerMenu instanceof EditRecipeMenu editRecipeMenu))
          return;
 
-      editCraftingRecipeMenu.setDesiredProductionStrategyType(packet.desiredProductionStrategyType());
-      editCraftingRecipeMenu.setDesiredProductionBillAmount(packet.desiredProductionAmount());
+      editRecipeMenu.setDesiredProductionStrategyType(packet.desiredProductionStrategyType());
+      editRecipeMenu.setDesiredProductionBillAmount(packet.desiredProductionAmount());
    }
 
    public int getDefaultProductionAmount() {

@@ -17,7 +17,7 @@ import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.ui.menu.building.residence.artisan.EditCraftingRecipeMenu;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.crafting.EditCraftingRecipeMenu;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
