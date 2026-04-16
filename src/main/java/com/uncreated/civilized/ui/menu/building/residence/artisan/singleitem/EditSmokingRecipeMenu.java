@@ -10,6 +10,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.EditRecipeMenu;
 import com.uncreated.civilized.ui.menu.item.management.EyedropperSlot;
+import com.uncreated.civilized.ui.menu.item.management.ReadonlySlot;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
@@ -51,6 +52,11 @@ public class EditSmokingRecipeMenu extends EditRecipeMenu<SmokingRecipe, SingleR
    @Override
    protected List<EyedropperSlot> setupInputSlots(Container craftingMenuContainer) {
       return List.of(new EyedropperSlot(craftingMenuContainer, 0, 51 + 18, 20 + 18));
+   }
+
+   @Override
+   protected ReadonlySlot setupOutputSlot(Container resultContainer) {
+      return new ReadonlySlot(resultContainer, 0, 90, 24);
    }
 
    @Override

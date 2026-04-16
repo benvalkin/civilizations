@@ -3,10 +3,11 @@ package com.uncreated.civilized.entity.behaviour.worker.farmer;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
@@ -34,8 +35,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class HarvestCrops extends WorkTaskBehaviour {
    public static final Logger LOGGER = LogUtils.getLogger();
    private long lastWorkTime;
-   private final List<BlockPos> farmland = Lists.newArrayList();
-   private final List<BlockPos> maturesCrops = Lists.newArrayList();
+   private @Nullable BlockPos nextFarmland = null;
+   private @Nullable BlockPos nextMaturesCropToHarvest = null;
    private MediumDistanceTravelTask travelHelper;
    private Building workSite;
 
@@ -47,7 +48,9 @@ public class HarvestCrops extends WorkTaskBehaviour {
                   MemoryModuleType.WALK_TARGET,
                   MemoryStatus.VALUE_ABSENT,
                   MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT));
+                  MemoryStatus.VALUE_PRESENT,
+                  AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(),
+                  MemoryStatus.VALUE_ABSENT));
    }
 
    @Override
@@ -56,8 +59,8 @@ public class HarvestCrops extends WorkTaskBehaviour {
          return false;
 
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
-      findFarmland(level);
-      return !maturesCrops.isEmpty();
+      findFarmBlocks(level);
+      return nextMaturesCropToHarvest != null;
    }
 
    @Override
@@ -76,13 +79,10 @@ public class HarvestCrops extends WorkTaskBehaviour {
 
    @Override
    protected boolean canStillUse(ServerLevel level, CivilizedVillager entity, long gameTime) {
-
+      super.canStillUse(level, entity, gameTime);
       Optional<GlobalPos> optional = entity.getBrain().getMemory(MemoryModuleType.JOB_SITE);
       if (optional.isEmpty()) {
          LOGGER.info("Villager will stop working because they have no more job site.");
-         return false;
-      } else if (maturesCrops.isEmpty()) {
-         LOGGER.info("Villager will stop working because there are no more crops to havest.");
          return false;
       }
 
@@ -103,30 +103,36 @@ public class HarvestCrops extends WorkTaskBehaviour {
 
          lastWorkTime = tickTime;
 
-         findFarmland(level);
-         LOGGER.info("Villager found {} crops to harvest.", maturesCrops.size());
+         findFarmBlocks(level);
+         LOGGER.info("Villager found a crop to harvest.");
 
-         if (!maturesCrops.isEmpty()) {
-            BlockPos cropPos = maturesCrops.getFirst();
+         if (nextMaturesCropToHarvest == null) {
+            doStop(level, villager, tickTime);
+            return;
+         }
 
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(cropPos, 0.25f, 1));
-            villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(cropPos));
+         BlockState cropState = level.getBlockState(nextMaturesCropToHarvest);
+         if (!(cropState.getBlock() instanceof CropBlock cropBlock))
+            return;
 
-            toolHits++;
-            villager.swing(InteractionHand.MAIN_HAND, true);
+         villager.getBrain()
+               .setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(nextMaturesCropToHarvest, 0.25f, 1));
+         villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(nextMaturesCropToHarvest));
 
-            if (toolHits == 4) {
-               BlockState cropState = level.getBlockState(cropPos);
-               List<ItemStack> drops = getDrops(level.getBlockState(cropPos), level, cropPos);
-               drops.forEach(i -> villager.getInventory().addItem(i));
-               LOGGER.info("Villager's inventory now has: {}", villager.getInventory().getItems());
+         toolHits++;
+         villager.swing(InteractionHand.MAIN_HAND, true);
 
-               level.setBlockAndUpdate(cropPos, getCropReplantState(cropState, (CropBlock) cropState.getBlock()));
-               villager.playSound(SoundEvents.CROP_BREAK, 1.0f, 1.0f);
-               toolHits = 0;
+         if (toolHits == 4) {
+            List<ItemStack> drops =
+                  getDrops(level.getBlockState(nextMaturesCropToHarvest), level, nextMaturesCropToHarvest);
+            drops.forEach(i -> villager.getInventory().addItem(i));
+            LOGGER.info("Villager's inventory now has: {}", villager.getInventory().getItems());
 
-               villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
-            }
+            level.setBlockAndUpdate(nextMaturesCropToHarvest, getCropReplantState(cropState, cropBlock));
+            villager.playSound(SoundEvents.CROP_BREAK, 1.0f, 1.0f);
+            toolHits = 0;
+
+            villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
          }
       }
    }
@@ -149,22 +155,20 @@ public class HarvestCrops extends WorkTaskBehaviour {
       return drops;
    }
 
-   private void findFarmland(ServerLevel serverLevel) {
-      farmland.clear();
-      maturesCrops.clear();
+   private void findFarmBlocks(ServerLevel serverLevel) {
+      nextFarmland = null;
+      nextMaturesCropToHarvest = null;
 
-      workSite.getBounds().traverseBlocksWithin(traversal -> {
-         BlockPos b = traversal.getCurrentBlockPos();
+      workSite.getBounds().traverseBlocksWithinTerminateYChecksIfCanSeeSky(b -> {
 
-         if (isMatureCrop(b, serverLevel)) {
-            maturesCrops.add(b);
+         if (isFarmland(b, serverLevel)) {
+            nextFarmland = b.immutable();
          }
-         if (isFarmland(b.below(), serverLevel)) {
-            farmland.add(b);
+         BlockPos above = b.above().immutable();
+         if (isMatureCrop(above, serverLevel)) {
+            nextMaturesCropToHarvest = above;
          }
-         if (serverLevel.canSeeSky(b))
-            traversal.skipToNextXZ();
-      });
+      }, serverLevel);
    }
 
    private boolean isFarmland(BlockPos blockPos, ServerLevel serverLevel) {

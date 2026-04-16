@@ -12,7 +12,7 @@ public class EditSmeltingRecipeScreen extends EditRecipeScreen<EditSmeltingRecip
 
    private static final ResourceLocation MENU_TEXTURE =
          ResourceLocation
-               .fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/container/artisan_house_edit_smelting_recipe.png");
+               .fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/container/artisan_house_edit_cooking_recipe.png");
 
    public EditSmeltingRecipeScreen(EditSmeltingRecipeMenu menu, Inventory playerInventory, Component title) {
       super(MENU_TEXTURE, menu, playerInventory, title);

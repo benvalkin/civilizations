@@ -23,14 +23,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
-public class ArtisanHouseState extends BuildingState {
+public abstract class ArtisanHouseState extends BuildingState {
 
-   private Map<ProductionType, List<ProductionBill>> productionLines;
+   private final Map<ProductionType, List<ProductionBill>> productionLines;
 
    protected ArtisanHouseState(Building building) {
       super(building);
 
       productionLines = new HashMap<>();
+      for (ProductionType productionType : getSupportedProductionTypes())
+         productionLines.put(productionType, new ArrayList<>());
+
+      assert !getSupportedProductionTypes().isEmpty() : "House must support at least one ProductionType.";
    }
 
    public <Order extends ProductionOrder> List<Order> createProductionOrders(
@@ -39,8 +43,10 @@ public class ArtisanHouseState extends BuildingState {
 
       RecipeManager recipeManager = serverLevel.getServer().getRecipeManager();
 
-      List<ProductionBill> productionBills = this.productionLines.get(machine.getProductionType());
+      List<ProductionBill> productionBills =
+            this.productionLines.getOrDefault(machine.getProductionType(), new ArrayList<>());
       List<Order> productionOrders = new LinkedList<>();
+
       for (int i = 0; i < productionBills.size(); i++) {
 
          ProductionBill bill = productionBills.get(i);
@@ -58,11 +64,8 @@ public class ArtisanHouseState extends BuildingState {
    }
 
    public void applyNbt(CompoundTag compoundTag, HolderLookup.Provider registryAccess) {
-
       for (ProductionType productionType : getSupportedProductionTypes()) {
-
          readProductionLine(compoundTag, registryAccess, productionType);
-
       }
    }
 
@@ -79,7 +82,7 @@ public class ArtisanHouseState extends BuildingState {
          return;
 
       CompoundTag billsTag = compoundTag.getCompound(key);
-      List<ProductionBill> productionBills = productionLines.get(productionType);
+      List<ProductionBill> productionBills = new ArrayList<>();
       ListTag list = billsTag.getList("production_bills", ListTag.TAG_COMPOUND);
       for (Tag tag : list) {
          if (!(tag instanceof CompoundTag bt))
@@ -160,7 +163,9 @@ public class ArtisanHouseState extends BuildingState {
    }
 
    public List<ProductionBill> getProductionBills(ProductionType productionType) {
-      return tryGetProductionBills(productionType).orElseThrow();
+      return tryGetProductionBills(productionType).orElseThrow(
+            () -> new UnsupportedOperationException(
+                  "Artisan building does not support production type: " + productionType));
    }
 
    public void addBill(ProductionBill productionBill) {
@@ -185,21 +190,20 @@ public class ArtisanHouseState extends BuildingState {
 
    }
 
-   protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of();
-   }
+   protected abstract List<ProductionType> getSupportedProductionTypes();
 
-   protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return List.of();
-   }
+   protected abstract List<ProductionBill> getDefaultProductionBills(ProductionType productionType);
 
    public boolean tryLoadDefaultProductionBills() {
 
+      boolean result = false;
       for (Map.Entry<ProductionType, List<ProductionBill>> line : productionLines.entrySet()) {
-         if (line.getValue().isEmpty())
+         if (line.getValue().isEmpty()) {
             productionLines.put(line.getKey(), getDefaultProductionBills(line.getKey()));
+            result = true;
+         }
       }
 
-      return true;
+      return result;
    }
 }

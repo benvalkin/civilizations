@@ -2,6 +2,9 @@ package com.uncreated.civilized.ui.menu.building.inn;
 
 import java.util.List;
 
+import com.uncreated.civilized.ui.components.buttons.buildingtab.HomeTabButton;
+import com.uncreated.civilized.ui.components.buttons.buildingtab.ManageResidentsTabButton;
+import com.uncreated.civilized.ui.components.buttons.buildingtab.SettingsTabButton;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.BuildingSettingsTab;
@@ -14,10 +17,6 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
 public class InnBuildingScreen extends ABuildingScreen {
-
-   private Button tab1;
-   private Button tab2;
-   private Button tab3;
 
    public InnBuildingScreen(BuildingScreenContext context, Component title) {
       super(context, title);
@@ -33,34 +32,13 @@ public class InnBuildingScreen extends ABuildingScreen {
    }
 
    @Override
-   public List<Button.Builder> createTabButtons() {
-
+   public List<Button> createTabButtons() {
       return List.of(
-            Button.builder(Component.literal("I"), this::onClickTab1)
-                  .pos(leftPos - 18, topPos)
-                  .size(18, 18)
-                  .tooltip(Tooltip.create(Component.literal("Information"))),
-
-            Button.builder(Component.literal("R"), this::onClickTab2)
-                  .pos(leftPos - 18, topPos + 20)
-                  .size(18, 18)
-                  .tooltip(Tooltip.create(Component.literal("Visitors"))),
-
-            Button.builder(Component.literal("O"), this::onClickTab3)
-                  .pos(leftPos - 18, topPos + 40)
-                  .size(18, 18)
-                  .tooltip(Tooltip.create(Component.literal("Building Settings"))));
-   }
-
-   private void onClickTab1(Button button) {
-      changeTab(0);
-   }
-
-   private void onClickTab2(Button button) {
-      changeTab(1);
-   }
-
-   private void onClickTab3(Button button) {
-      changeTab(2);
+            new HomeTabButton(this, 0),
+            new ManageResidentsTabButton(
+                  this,
+                  1,
+                  Tooltip.create(Component.translatable("menu.building.inn.visitors.count.heading"))),
+            new SettingsTabButton(this, 2));
    }
 }

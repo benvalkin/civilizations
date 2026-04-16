@@ -116,7 +116,7 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
 
       inputSlots.forEach(this::addSlot);
 
-      outputSlot = new ReadonlySlot(resultContainer, 0, 141, 20 + 18);
+      outputSlot = setupOutputSlot(resultContainer);
       this.addSlot(outputSlot);
 
       ArtisanHouseState artisanHouseState = (ArtisanHouseState) building.getState();
@@ -133,6 +133,9 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
 
          List<ItemStack> inputItems = existingBill.getInputItems();
          for (int i = 0; i < inputItems.size(); i++) {
+            if (i >= slots.size())
+               continue;
+
             slots.get(i).set(inputItems.get(i));
          }
 
@@ -153,6 +156,8 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
    }
 
    protected abstract List<EyedropperSlot> setupInputSlots(Container craftingMenuContainer);
+
+   protected abstract ReadonlySlot setupOutputSlot(Container resultSlotContainer);
 
    @Override
    public void slotsChanged(Container container) {

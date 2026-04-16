@@ -9,11 +9,11 @@ public class BoundsTraversal {
 
    @Getter(AccessLevel.PUBLIC)
    @Setter(AccessLevel.PACKAGE)
-   private BlockPos currentBlockPos;
+   private BlockPos.MutableBlockPos currentBlockPos;
    private boolean shouldSkipToNextXZ;
    private boolean shouldTerminate;
 
-   BoundsTraversal(BlockPos currentBlockPos) {
+   BoundsTraversal(BlockPos.MutableBlockPos currentBlockPos) {
       this.currentBlockPos = currentBlockPos;
       shouldSkipToNextXZ = false;
       shouldTerminate = false;

@@ -92,7 +92,7 @@ public class BuildingBounds {
       }
    }
 
-   public void traverseBlocksWithinTerminateYChecksIfCanSeeSky(Consumer<BlockPos> action, Level level) {
+   public void traverseBlocksWithinTerminateYChecksIfCanSeeSky(Consumer<BlockPos.MutableBlockPos> action, Level level) {
       BlockPos.MutableBlockPos current = lowerCorner.mutable();
 
       for (int x = lowerCorner.getX(); x <= upperCorner.getX(); x++) {

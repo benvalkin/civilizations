@@ -17,7 +17,11 @@ import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.EditRecipeMenu;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.crafting.EditCraftingRecipeMenu;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.singleitem.EditBlastingRecipeMenu;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.singleitem.EditSmeltingRecipeMenu;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.singleitem.EditSmokingRecipeMenu;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
@@ -34,7 +38,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record RequestEditRecipeProductionScreen(UUID buildingId, int containerSize, ProductionType productionType,
-                                                int productionBillIndex, boolean isNewBill) implements CustomPacketPayload {
+      int productionBillIndex, boolean isNewBill) implements CustomPacketPayload {
 
    public static final Type<RequestEditRecipeProductionScreen> TYPE =
          new Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "request_edit_recipe_screen"));
@@ -77,16 +81,40 @@ public record RequestEditRecipeProductionScreen(UUID buildingId, int containerSi
       if (existingBills.isEmpty())
          return;
 
-      if (packet.productionBillIndex() >= existingBills.get().size())
+      if (!packet.isNewBill() && packet.productionBillIndex() >= existingBills.get().size())
          return;
 
       Settlement settlement = ClientSettlementsStore.INSTANCE.get(building.get().getSettlementId());
 
-      TriFunction<Integer, Inventory, Player, EditCraftingRecipeMenu> menuSupplier = switch (packet.productionType) {
+      TriFunction<Integer, Inventory, Player, EditRecipeMenu<?, ?>> menuSupplier = switch (packet.productionType) {
       case CRAFTING -> (i, inventory, player) -> new EditCraftingRecipeMenu(
             i,
             inventory,
             new SimpleContainer(9),
+            settlement,
+            building.get(),
+            packet.productionBillIndex(),
+            packet.isNewBill());
+      case SMELTING -> (i, inventory, player) -> new EditSmeltingRecipeMenu(
+            i,
+            inventory,
+            new SimpleContainer(1),
+            settlement,
+            building.get(),
+            packet.productionBillIndex(),
+            packet.isNewBill());
+      case BLASTING -> (i, inventory, player) -> new EditBlastingRecipeMenu(
+            i,
+            inventory,
+            new SimpleContainer(1),
+            settlement,
+            building.get(),
+            packet.productionBillIndex(),
+            packet.isNewBill());
+      case SMOKING -> (i, inventory, player) -> new EditSmokingRecipeMenu(
+            i,
+            inventory,
+            new SimpleContainer(1),
             settlement,
             building.get(),
             packet.productionBillIndex(),
@@ -110,7 +138,6 @@ public record RequestEditRecipeProductionScreen(UUID buildingId, int containerSi
             buffer.writeInt(packet.containerSize());
             buffer.writeUUID(settlement.getSettlementId());
             buffer.writeUUID(building.get().getBuildingId());
-            buffer.writeEnum(packet.productionType());
             buffer.writeInt(packet.productionBillIndex());
             buffer.writeBoolean(packet.isNewBill());
          }

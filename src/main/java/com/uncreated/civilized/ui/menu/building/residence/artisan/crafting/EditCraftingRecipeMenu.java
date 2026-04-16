@@ -11,6 +11,7 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.EditRecipeMenu;
 import com.uncreated.civilized.ui.menu.item.management.EyedropperSlot;
+import com.uncreated.civilized.ui.menu.item.management.ReadonlySlot;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
@@ -63,8 +64,13 @@ public class EditCraftingRecipeMenu extends EditRecipeMenu<CraftingRecipe, Craft
    }
 
    @Override
+   protected ReadonlySlot setupOutputSlot(Container resultContainer) {
+      return new ReadonlySlot(resultContainer, 0, 141, 20 + 18);
+   }
+
+   @Override
    public ProductionType getProductionType() {
-      return null;
+      return ProductionType.CRAFTING;
    }
 
    @Override

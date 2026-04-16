@@ -82,7 +82,7 @@ public class GuiSetupEvents {
                         buildingMenu,
                         inventory,
                         Component.translatable(
-                              "menu.building.residence.production_bills.edit_crafting_recipe.description")));
+                              "menu.building.residence.production_bills.edit_smelting_recipe.description")));
 
       event.register(
             GuiRegistry.EDIT_SMOKING_RECIPE_MENU.get(), // do not remove cast - it seems to cause compile errors even
@@ -95,7 +95,7 @@ public class GuiSetupEvents {
                         buildingMenu,
                         inventory,
                         Component.translatable(
-                              "menu.building.residence.production_bills.edit_crafting_recipe.description")));
+                              "menu.building.residence.production_bills.edit_smoking_recipe.description")));
 
       event.register(
             GuiRegistry.EDIT_BLASTING_RECIPE_MENU.get(), // do not remove cast - it seems to cause compile errors even
@@ -108,6 +108,6 @@ public class GuiSetupEvents {
                         buildingMenu,
                         inventory,
                         Component.translatable(
-                              "menu.building.residence.production_bills.edit_crafting_recipe.description")));
+                              "menu.building.residence.production_bills.edit_blasting_recipe.description")));
    }
 }

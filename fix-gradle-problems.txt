@@ -1,0 +1,10 @@
+If you see this build error that won't go away:
+
+intellij Unable to load class 'Class 'ijJvmDebugger1_d080tv64n6pkctrq33jomyrt1$_run_closure1$_closure2$_closure3' not found in class loader 'VisitableURLClassLoader(ClassLoaderScopeIdentifier.Id{coreAndPlugins:init-file:/private/var/folders/7n/46x7f3kj291fkdmjwhrpwx7m0000gn/T/ijJvmDebugger1.gradle:groovy-dsl:/private/var/folders/7n/46x7f3kj291fkdmjwhrpwx7m0000gn/T/ijJvmDebugger1.gradle:InitScript(local)})' of type 'org.gradle.internal.classloader.VisitableURLClassLoader'.'. This is an unexpected error. Please file a bug containing the idea.log file.
+
+
+Try run this to stop Gradle Daemons. Corrupted daemon processes can cause class loading issues. Open your terminal and run:
+./gradlew --stop.
+
+
+also try deleting the .gradle folder at the top of the project.

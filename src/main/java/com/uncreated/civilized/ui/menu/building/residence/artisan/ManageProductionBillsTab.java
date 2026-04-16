@@ -50,7 +50,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
             width,
             height,
             font,
-            Component.translatable("menu.building.residence.production_bills.tab.heading"),
+            productionType.getHeading(),
             context);
       this.productionType = productionType;
 
@@ -64,6 +64,10 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
                         Tooltip.create(
                               Component.translatable("menu.building.residence.production_bills.add_bill.tooltip")))
                   .build();
+
+      ArtisanHouseState state = (ArtisanHouseState) context.building().getState();
+      if (state.tryLoadDefaultProductionBills())
+         ClientBuildingStore.INSTANCE.replicateChange(context.building(), StoreOperation.UPDATE);
 
       refresh();
    }
@@ -146,10 +150,6 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
    public void refresh() {
 
       ArtisanHouseState state = (ArtisanHouseState) context.building().getState();
-      if (state.tryLoadDefaultProductionBills())
-         ClientBuildingStore.INSTANCE.replicateChange(context.building(), StoreOperation.UPDATE);
-
       scrollView = createScrollView(state.getProductionBills(productionType));
-
    }
 }

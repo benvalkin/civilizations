@@ -87,8 +87,8 @@
   "menu.building.management.requirements.tooltip.not_satisfied": "Requirement not satisfied",
   "menu.building.management.requirements.tooltip.not_satisfied_hint": "Complete all the building requirements to establish this building.",
   "menu.building.residence.info.tab.heading": "Information",
-  "menu.building.residence.production_bills.heading.empty": "No production orders found. Add recipes to automatically produce items.",
-  "menu.building.residence.production_bills.tab.heading": "Production Bills",
+  "menu.building.residence.production_bills.heading.empty": "No production bills found. Add recipes to automatically produce items.",
+  "menu.building.residence.crafting_production.tab.heading": "Crafting Production",
   "menu.building.residence.residents.button.assign_resident": "Assign",
   "menu.building.residence.residents.button.evict_resident": "Evict",
   "menu.building.residence.residents.count": "Residents: %s",
@@ -230,5 +230,10 @@
   "gui.misc.amount": "Amount",
   "gui.misc.quantity": "Quantity:",
   "gui.misc.button.delete": "Delete",
-  "gui.misc.button.add": "Add"
+  "gui.misc.button.add": "Add",
+  "menu.building.residence.blasting_production.tab.heading": "Blasting Production",
+  "menu.building.residence.smelting_production.tab.heading": "Smelting Production",
+  "menu.building.residence.smoking_production.tab.heading": "Smoking Production",
+  "menu.building.residence.production_bills.edit_smoking_recipe.description": "Smoking Production",
+  "menu.building.residence.production_bills.edit_blasting_recipe.description": "Blasting Production"
 }

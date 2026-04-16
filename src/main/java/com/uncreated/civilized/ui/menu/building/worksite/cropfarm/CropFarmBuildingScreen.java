@@ -19,7 +19,6 @@ public class CropFarmBuildingScreen extends WorksiteBuildingScreen {
 
    @Override
    protected List<ATab> createTabs(int contentLeftPos, int contentTopPos, int tabWidth, int tabHeight) {
-
       return List.of(
             new CropFarmInfoTab(0, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
             new ManageWorkersTab(1, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),

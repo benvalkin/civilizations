@@ -10,12 +10,12 @@ import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
-import com.uncreated.civilized.ui.menu.building.residence.artisan.ArtisanBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.BakeryBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.WorksiteBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.AnimalFarmBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.CropFarmBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.grove.GroveBuildingScreen;
-import com.uncreated.civilized.ui.tabs.AMenuScreenWithTabs;
+import com.uncreated.civilized.ui.tabs.AScreenWithTabs;
 import com.uncreated.civilized.ui.tabs.ATab;
 
 import lombok.Getter;
@@ -26,7 +26,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public abstract class ABuildingScreen extends AMenuScreenWithTabs {
+public abstract class ABuildingScreen extends AScreenWithTabs {
    private static final ResourceLocation MENU_TEXTURE =
          ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "textures/gui/building_menu.png");
 
@@ -58,14 +58,24 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs {
 
    protected abstract List<ATab> createTabs(int contentLeftPos, int contentTopPos, int tabWidth, int tabHeight);
 
-   protected abstract List<Button.Builder> createTabButtons();
+   protected abstract List<Button> createTabButtons();
 
    protected void init() {
       super.init();
 
-      createTabButtons().forEach(builder -> addRenderableWidget(builder.build()));
+      createTabButtons().forEach(this::addRenderableWidget);
 
       changeToDefaultTabIfNotSet();
+   }
+
+   @Override
+   public int getFirstTabButtonX() {
+      return leftPos - 12;
+   }
+
+   @Override
+   public int getFirstTabButtonY() {
+      return topPos + 14;
    }
 
    @Override
@@ -84,7 +94,7 @@ public abstract class ABuildingScreen extends AMenuScreenWithTabs {
       if (buildingType == BuildingType.INN)
          return new InnBuildingScreen(context, component);
       if (buildingType.isArtisanBuilding())
-         return new ArtisanBuildingScreen(context, component);
+         return new BakeryBuildingScreen(context, component);
       if (buildingType.isPermanentResidence())
          return new ResidenceBuildingScreen(context, component);
       if (buildingType.isWorksite()) {

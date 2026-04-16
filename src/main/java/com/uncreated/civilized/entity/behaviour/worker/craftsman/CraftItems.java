@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -202,7 +203,7 @@ public class CraftItems extends WorkTaskBehaviour {
          if (!pendingOutput.canProduce())
             continue;
 
-         if (pendingOutput.stockDeficit() <= 0)
+         if (order.getBill().getProductionStrategy().getType() == ProductionStrategyType.PRODUCE_INFINITE && pendingOutput.stockDeficit() <= 0)
             continue;
 
          return Optional.of(Pair.of(order, pendingOutput));

@@ -13,7 +13,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 
-public abstract class AMenuScreenWithTabs extends Screen implements IRefreshableUI {
+public abstract class AScreenWithTabs extends Screen implements IRefreshableUI {
    private List<ATab> tabs;
    @Getter
    @Nullable
@@ -25,7 +25,7 @@ public abstract class AMenuScreenWithTabs extends Screen implements IRefreshable
    protected final int imageWidth;
    protected final int imageHeight;
 
-   public AMenuScreenWithTabs(Component title, int imageWidth, int imageHeight) {
+   public AScreenWithTabs(Component title, int imageWidth, int imageHeight) {
       super(title);
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
@@ -58,6 +58,10 @@ public abstract class AMenuScreenWithTabs extends Screen implements IRefreshable
 
       return currentTab;
    }
+
+   public abstract int getFirstTabButtonX();
+
+   public abstract int getFirstTabButtonY();
 
    public ATab changeToDefaultTabIfNotSet() {
       if (currentTab == null) {

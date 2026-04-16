@@ -16,6 +16,11 @@ public class BakerHouseState extends ArtisanHouseState {
    }
 
    @Override
+   protected List<ProductionType> getSupportedProductionTypes() {
+      return List.of(ProductionType.CRAFTING, ProductionType.SMELTING);
+   }
+
+   @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
 
       return switch (productionType) {
