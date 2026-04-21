@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
@@ -18,8 +17,8 @@ import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -40,16 +39,7 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
    private ItemStack handHeld;
 
    public BreedAnimals(Class<T> animalMobType) {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get(),
-                  MemoryStatus.VALUE_PRESENT));
+      super(WorkStates.BREEDING_ANIMALS, 120 * 20, 30 * 20);
       this.animalMobType = animalMobType;
    }
 
@@ -79,7 +69,7 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
                   behaviour::isCorrectFood,
                   StorehouseOrder.Origin.AUTOMATIC,
                   2,
-                  16);
+                  8);
       taskItemRequirement.setExpiry(12000);
       logisticsManager.registerOrder(home, taskItemRequirement);
       ImportUpTo importOrder =
@@ -88,14 +78,15 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
                   "animal_food",
                   taskItemRequirement.getItemSearch(),
                   StorehouseOrder.Origin.AUTOMATIC,
-                  16,
-                  2);
+                  8,
+                  8);
       importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home, importOrder);
 
       List<ItemStack> animalFoodItemsInventory = getAnimalFoodItemsInventory(villager, breedableAnimals.getFirst());
       if (animalFoodItemsInventory.stream().mapToInt(ItemStack::getCount).sum() < 2) {
-         villager.getBrain().eraseMemory(AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get());
+         getStateMachine().queueActionOnce(WorkStates.FETCHING_WORK_INPUT_FROM_HOME);
+         getStateMachine().queueActionOnce(this.getState());
          return false;
       }
       this.handHeld = animalFoodItemsInventory.getFirst();

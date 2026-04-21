@@ -1,5 +1,6 @@
 package com.uncreated.civilized.core.building.production;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,4 +33,7 @@ public class RecipeProductionSystem {
       return machineType.cast(machineInstance);
    }
 
+   public Collection<RecipeProductionMachine<?>> registeredMachines() {
+      return machines.values();
+   }
 }

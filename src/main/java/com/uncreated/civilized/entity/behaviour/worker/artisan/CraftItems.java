@@ -1,16 +1,13 @@
-package com.uncreated.civilized.entity.behaviour.worker.craftsman;
+package com.uncreated.civilized.entity.behaviour.worker.artisan;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
@@ -22,7 +19,6 @@ import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
 import com.uncreated.civilized.core.building.logistics.orders.imports.ImportOrder;
 import com.uncreated.civilized.core.building.production.PendingProductionOutput;
-import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.production.lines.crafting.CraftingMachine;
 import com.uncreated.civilized.core.building.production.lines.crafting.CraftingOrder;
 import com.uncreated.civilized.core.building.production.orders.ProductionOrder;
@@ -30,8 +26,8 @@ import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -42,12 +38,11 @@ import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CraftingTableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CraftItems extends WorkTaskBehaviour {
    public static final Logger LOGGER = LogUtils.getLogger();
-   private final Predicate<Block> findWorkBlock;
    private long lastWorkTime;
    private LoadedBuilding home;
    @Nullable
@@ -60,18 +55,8 @@ public class CraftItems extends WorkTaskBehaviour {
    private List<Container> ingredientsChests = new ArrayList<>();
    private List<Container> stockChests = new ArrayList<>();
 
-   public CraftItems(Predicate<Block> findWorkBlock) {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.HOME,
-                  MemoryStatus.VALUE_PRESENT),
-            20 * 60 * 4,
-            20 * 60 * 4);
-      this.findWorkBlock = findWorkBlock;
+   public CraftItems() {
+      super(WorkStates.CRAFTING_ITEMS, 90 * 20, 10 * 20);
    }
 
    @Override
@@ -94,7 +79,7 @@ public class CraftItems extends WorkTaskBehaviour {
       home.getBuilding().getBounds().traverseBlocksWithin(traversal -> {
          BlockState blockState = level.getBlockState(traversal.getCurrentBlockPos());
 
-         if (findWorkBlock.test(blockState.getBlock())) {
+         if (blockState.getBlock() instanceof CraftingTableBlock) {
             workBlock = traversal.getCurrentBlockPos();
             traversal.terminate();
          }
@@ -121,10 +106,9 @@ public class CraftItems extends WorkTaskBehaviour {
          importOrders.forEach(i -> logisticsManager.registerOrder(home.getBuilding(), i));
       }
 
-      if (tryGetNextProductionOrder().isEmpty()) {
-         // if we cannot craft right now, we should try do a logistics run instead
-         villager.getBrain().setMemory(AIRegistry.MM_IMPORT_DESIRED.get(), true);
-
+      if (craftingMachine.tryGetNextOrder(ingredientsChests, stockChests).isEmpty()) {
+         // if we cannot craft right now, we should fetch imports from the storehouse
+         getStateMachine().queueActionOnce(WorkStates.FETCHING_IMPORTS_FROM_STOREHOUSE);
          return false;
       }
 
@@ -135,12 +119,16 @@ public class CraftItems extends WorkTaskBehaviour {
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
       travelHelper = new MediumDistanceTravelTask(villager, workBlock, 2);
+      itemsCrafted = false;
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
       villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+
+      if (itemsCrafted)
+         getStateMachine().queueActionOnce(WorkStates.DROPPING_OFF_WORK_OUTPUT_AT_HOME);
    }
 
    @Override
@@ -148,9 +136,11 @@ public class CraftItems extends WorkTaskBehaviour {
       return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT);
    }
 
-   private int applyWorkSpeedMultiplier(int requiredToolHits) {
-      return requiredToolHits / workSpeedMultiplier;
+   private int applyWorkSpeedMultiplier(int workIntervalTicks) {
+      return workIntervalTicks / workSpeedMultiplier;
    }
+
+   private boolean itemsCrafted;
 
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long gameTime) {
@@ -164,7 +154,8 @@ public class CraftItems extends WorkTaskBehaviour {
 
          lastWorkTime = gameTime;
 
-         Optional<Pair<ProductionOrder, PendingProductionOutput>> nextOrder = tryGetNextProductionOrder();
+         Optional<Pair<ProductionOrder, PendingProductionOutput>> nextOrder =
+               craftingMachine.tryGetNextOrder(ingredientsChests, stockChests);
          if (nextOrder.isEmpty()) {
             // nothing more to craft
             doStop(level, villager, gameTime);
@@ -174,41 +165,21 @@ public class CraftItems extends WorkTaskBehaviour {
          PendingProductionOutput pendingOutput = nextOrder.get().getSecond();
          ItemStack resultItem = pendingOutput.assembledRecipe().resultItem();
          if (!villager.getWorkOutputInventory().canAddItem(resultItem)) {
-            // nothing more to craft
+            // cannot craft recipe because villager's inventory is full
             doStop(level, villager, gameTime);
             return;
          }
 
          villager.getWorkOutputInventory().addItem(resultItem);
-         pendingOutput.consumeIngredients();
+         pendingOutput.consumeIngredients(pendingOutput.getConsumableIngredients());
+
+         craftingMachine.consumeToken();
 
          villager.swing(InteractionHand.MAIN_HAND, true);
          villager.setItemSlot(EquipmentSlot.MAINHAND, resultItem.copyWithCount(1));
          villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(workBlock));
 
-         villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
+         itemsCrafted = true;
       }
-   }
-
-   private Optional<Pair<ProductionOrder, PendingProductionOutput>> tryGetNextProductionOrder() {
-
-      for (int i = 0; i < craftingMachine.getOrders().size(); i++) {
-         ProductionOrder order = craftingMachine.getOrders().get(i);
-
-         if (order.getBill().getProductionType() != ProductionType.CRAFTING)
-            continue;
-
-         PendingProductionOutput pendingOutput = order.getNextOutput(ingredientsChests, stockChests);
-
-         if (!pendingOutput.canProduce())
-            continue;
-
-         if (order.getBill().getProductionStrategy().getType() == ProductionStrategyType.PRODUCE_INFINITE && pendingOutput.stockDeficit() <= 0)
-            continue;
-
-         return Optional.of(Pair.of(order, pendingOutput));
-
-      }
-      return Optional.empty();
    }
 }

@@ -29,6 +29,6 @@ public class ImportExactly extends ImportOrder {
 
    @Override
    protected int getItemCountForNextShipment(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return Math.clamp(shipmentItemCount, 0, sourceStock.getCount());
+      return Math.min(shipmentItemCount, sourceStock.getCount());
    }
 }

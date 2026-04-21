@@ -1,9 +1,11 @@
 package com.uncreated.civilized.util;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
+
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,6 +23,15 @@ public class ContainerHelper {
             return itemstack.isEmpty() ? ItemStack.EMPTY : itemstack;
          }
       }
+   }
+
+   public static ItemStack addItemNicely(List<Container> containers, ItemStack stack) {
+      for (Container container : containers) {
+         stack = addItemNicely(container, stack);
+         if (stack.isEmpty())
+            break;
+      }
+      return stack;
    }
 
    private static void moveItemToEmptySlots(Container container, ItemStack stack) {
@@ -88,7 +99,7 @@ public class ContainerHelper {
 
    public static Optional<ItemSearchResult> findItem(Container container, Predicate<ItemStack> itemSearch) {
 
-      for (int i = 0 ; i < container.getContainerSize(); i++) {
+      for (int i = 0; i < container.getContainerSize(); i++) {
          ItemStack item = container.getItem(i);
          if (itemSearch.test(item))
             return Optional.of(new ItemSearchResult(item, i));
@@ -101,7 +112,7 @@ public class ContainerHelper {
 
       AggregateItemStack result = new AggregateItemStack();
 
-      for (int i = 0 ; i < container.getContainerSize(); i++) {
+      for (int i = 0; i < container.getContainerSize(); i++) {
          ItemStack item = container.getItem(i);
          if (itemSearch.test(item))
             result.add(item);
@@ -110,5 +121,6 @@ public class ContainerHelper {
       return result;
    }
 
-   public record ItemSearchResult(ItemStack itemStack, int slot) {}
+   public record ItemSearchResult(ItemStack itemStack, int slot) {
+   }
 }

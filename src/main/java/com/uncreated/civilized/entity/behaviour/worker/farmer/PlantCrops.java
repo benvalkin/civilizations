@@ -3,6 +3,7 @@ package com.uncreated.civilized.entity.behaviour.worker.farmer;
 import java.util.List;
 import java.util.Optional;
 
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
@@ -45,14 +46,7 @@ public class PlantCrops extends WorkTaskBehaviour {
    private Building workSite;
 
    public PlantCrops() {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT));
+      super(WorkStates.PLANTING_CROPS, 120 * 20, 30 * 20);
    }
 
    @Override

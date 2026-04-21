@@ -4,20 +4,17 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
@@ -31,14 +28,7 @@ public class SlaughterAnimals<T extends Animal> extends WorkTaskBehaviour {
    private final Class<T> animalMobType;
 
    public SlaughterAnimals(Class<T> animalMobType) {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT));
+      super(WorkStates.SLAUGHTERING_ANIMALS, 120 * 20, 30 * 20);
       this.animalMobType = animalMobType;
    }
 
@@ -65,18 +55,19 @@ public class SlaughterAnimals<T extends Animal> extends WorkTaskBehaviour {
                   workSite.getBlockPos(),
                   (v, d, closEnough) -> closeEnoughBounds.contains(v.position()),
                   Math.max((int) closeEnoughBounds.getXsize() / 2, (int) closeEnoughBounds.getZsize() / 2));
+
+      killedAnimals = false;
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
+
+      if (killedAnimals)
+         getStateMachine().queueActionOnce(WorkStates.DROPPING_OFF_WORK_OUTPUT_AT_HOME);
    }
 
-   @Override
-   protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
-      return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT)
-            && killableAnimals.size() > 4;
-   }
+   private boolean killedAnimals;
 
    private List<Animal> killableAnimals;
 
@@ -93,8 +84,10 @@ public class SlaughterAnimals<T extends Animal> extends WorkTaskBehaviour {
          lastWorkTime = gameTime;
 
          killableAnimals = getKillableAdultAnimals(level);
-         if (killableAnimals.size() <= 4)
+         if (killableAnimals.size() <= 4) {
+            doStop(level, villager, gameTime);
             return;
+         }
 
          villager.swing(InteractionHand.MAIN_HAND, true);
 
@@ -109,7 +102,8 @@ public class SlaughterAnimals<T extends Animal> extends WorkTaskBehaviour {
             i.remove(Entity.RemovalReason.KILLED);
          });
 
-         villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
+         killedAnimals = true;
+
       }
    }
 

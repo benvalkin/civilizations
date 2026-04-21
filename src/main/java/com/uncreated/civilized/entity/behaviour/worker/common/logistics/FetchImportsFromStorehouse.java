@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
@@ -17,29 +16,20 @@ import com.uncreated.civilized.core.building.logistics.orders.imports.ImportOrde
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class PickupImportsAtStorehouse extends ExchangeResourcesAtBuilding {
+public class FetchImportsFromStorehouse extends ExchangeResourcesAtBuilding {
 
    private static final Logger LOGGER = LogUtils.getLogger();
 
    private Building home;
    private LoadedSettlement settlement;
 
-   public PickupImportsAtStorehouse() {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  AIRegistry.MM_IMPORT_DESIRED.get(),
-                  MemoryStatus.VALUE_PRESENT));
+   public FetchImportsFromStorehouse() {
+      super(WorkStates.FETCHING_IMPORTS_FROM_STOREHOUSE, 120 * 20, 30 * 20);
    }
 
    @Override
@@ -72,13 +62,11 @@ public class PickupImportsAtStorehouse extends ExchangeResourcesAtBuilding {
    @Override
    protected void exchangeResources(ServerLevel level, CivilizedVillager villager, long tickTime) {
 
-      villager.getBrain().eraseMemory(AIRegistry.MM_IMPORT_DESIRED.get());
-
       LogisticsOrders<ImportOrder> importOrders = settlement.getBehaviour().getLogisticsManager().getImportOrders(home);
-      boolean areThereItemsToImport = false;
 
       List<Container> source = LogisticsOrder.findChests(level, targetbuilding);
       List<Container> destination = LogisticsOrder.findChests(level, home);
+      boolean importsPossible = false;
       for (ImportOrder order : importOrders.orders()) {
 
          PendingShipment shipment = order.getNextShipment(source, destination);
@@ -86,11 +74,11 @@ public class PickupImportsAtStorehouse extends ExchangeResourcesAtBuilding {
             continue;
 
          if (order.takeShipment(villager, shipment))
-            areThereItemsToImport = true;
+            importsPossible = true;
       }
 
-      if (areThereItemsToImport)
-         villager.getBrain().setMemory(AIRegistry.MM_BUSY_OFFLOADING_IMPORTS.get(), true);
+      if (importsPossible)
+         getStateMachine().queueActionOnce(WorkStates.DROPPING_OFF_IMPORTS_AT_HOME);
    }
 
    private boolean areThereItemsToImport(LoadedSettlement settlement) {

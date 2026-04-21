@@ -1,25 +1,25 @@
 package com.uncreated.civilized.entity.behaviour.worker.common;
 
-import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
+import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
+import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class IdleStrollOutsideWorksite extends Behavior<CivilizedVillager> {
+public class IdleStrollOutsideWorksite extends WorkTaskBehaviour {
    public static final Logger LOGGER = LogUtils.getLogger();
    private final int maxHorizontalDist;
    private final int maxVerticalDist;
@@ -29,17 +29,7 @@ public class IdleStrollOutsideWorksite extends Behavior<CivilizedVillager> {
    private MediumDistanceTravelTask travelHelper;
 
    public IdleStrollOutsideWorksite(int maxHorizontalDist, int maxVerticalDist, float strollSpeedModifier) {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(),
-                  MemoryStatus.VALUE_ABSENT),
-            20 * 15);
+      super(WorkStates.STROLL_OUTSIDE_WORKSITE, 120 * 15, 0);
       this.maxHorizontalDist = maxHorizontalDist;
       this.maxVerticalDist = maxVerticalDist;
       this.speedModifier = strollSpeedModifier;
@@ -47,13 +37,17 @@ public class IdleStrollOutsideWorksite extends Behavior<CivilizedVillager> {
 
    @Override
    protected boolean checkExtraStartConditions(ServerLevel level, CivilizedVillager villager) {
+      Optional<Building> worksite = ServerBuildingsStore.INSTANCE.find(villager.getInfo().getPrimaryWorksiteId());
+      if (worksite.isEmpty())
+         return false;
+
+      workSite = worksite.get();
       return true;
    }
 
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       nextWorkTime = gameTime;
-      workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
 
       AABB tooCloseBounds = workSite.getBounds().getEncapsulatingAABB();
       AABB closeEnoughBounds = tooCloseBounds.inflate(4);
@@ -66,10 +60,10 @@ public class IdleStrollOutsideWorksite extends Behavior<CivilizedVillager> {
                   Math.max((int) closeEnoughBounds.getXsize() / 2, (int) closeEnoughBounds.getZsize() / 2));
    }
 
-   @Override
-   protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
-      return villager.getBrain().checkMemory(AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(), MemoryStatus.VALUE_ABSENT);
-   }
+   // @Override
+   // protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
+   // return villager.getBrain().checkMemory(AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(), MemoryStatus.VALUE_ABSENT);
+   // }
 
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {

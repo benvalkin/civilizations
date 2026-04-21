@@ -12,7 +12,8 @@ public class ProduceUpTo implements IProductionStrategy {
 
    @Override
    public int calculateStockDeficit(AggregateItemStack stockChestsStock) {
-      return Math.clamp(max - stockChestsStock.getCount(), 0, stockChestsStock.getCount());
+      int diff = Math.clamp(max - stockChestsStock.getCount(), 0, max);
+      return Math.min(diff, max);
    }
 
    @Override

@@ -31,6 +31,10 @@ public class ProductionBill {
    private final List<ItemStack> inputItems;
    private final ItemStack displayItem;
 
+   private final int startingProductionTokens = DEFAULT_STARTING_PRODUCTION_TOKENS;
+
+   public static final int DEFAULT_STARTING_PRODUCTION_TOKENS = 8;
+
    public ProductionBill(
          String minecraftRecipeName,
          ProductionType productionType,

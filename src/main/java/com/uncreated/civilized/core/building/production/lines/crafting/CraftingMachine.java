@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 public class CraftingMachine extends RecipeProductionMachine<CraftingOrder> {
 
    @Override
-   public CraftingOrder createOrder(String key, ProductionBill bill, ServerLevel serverLevel) {
+   public CraftingOrder createOrderFromBill(String key, ProductionBill bill, ServerLevel serverLevel) {
       return new CraftingOrder(key, bill, serverLevel);
    }
 

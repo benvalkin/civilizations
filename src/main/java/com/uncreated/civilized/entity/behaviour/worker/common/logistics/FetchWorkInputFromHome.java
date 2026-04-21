@@ -2,7 +2,6 @@ package com.uncreated.civilized.entity.behaviour.worker.common.logistics;
 
 import java.util.Optional;
 
-import com.google.common.collect.ImmutableMap;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
@@ -12,25 +11,16 @@ import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequi
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class PickupWorkResourcesFromHome extends ExchangeResourcesAtBuilding {
+public class FetchWorkInputFromHome extends ExchangeResourcesAtBuilding {
 
    private LoadedSettlement settlement;
 
-   public PickupWorkResourcesFromHome() {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get(),
-                  MemoryStatus.VALUE_ABSENT));
+   public FetchWorkInputFromHome() {
+      super(WorkStates.FETCHING_WORK_INPUT_FROM_HOME, 120 * 20, 30 * 20);
    }
 
    @Override
@@ -62,20 +52,19 @@ public class PickupWorkResourcesFromHome extends ExchangeResourcesAtBuilding {
       LogisticsOrders<TaskItemRequirement> taskItemRequirements =
             logisticsManager.getTaskItemRequirements(targetbuilding);
 
-      boolean holdingWorkItems = false;
       for (TaskItemRequirement requirement : taskItemRequirements.orders()) {
 
          PendingRequiredItems requiredItems = requirement.getRequiredItemsToTake(targetbuilding, villager, level);
-         if (!requiredItems.shouldTake() || requiredItems.villagerHasRequiredItems())
+
+         if (!requiredItems.isStockSufficient()) {
+            getStateMachine().queueActionOnce(WorkStates.FETCHING_IMPORTS_FROM_STOREHOUSE);
+            continue;
+         }
+
+         if (!requiredItems.willTake())
             continue;
 
-         if (requirement.takeRequiredItems(villager, requiredItems))
-            holdingWorkItems = true;
+         requirement.takeRequiredItems(villager, requiredItems);
       }
-
-      if (holdingWorkItems)
-         villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get(), true);
-      else
-         villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get(), false);
    }
 }

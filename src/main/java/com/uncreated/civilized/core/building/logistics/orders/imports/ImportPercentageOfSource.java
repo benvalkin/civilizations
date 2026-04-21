@@ -32,6 +32,7 @@ public class ImportPercentageOfSource extends ImportOrder {
    protected int getItemCountForNextShipment(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
       long requiredDestinationStock = Math.round(requiredPercentageOfSource * sourceStock.getCount());
 
-      return Math.clamp(requiredDestinationStock - destinationStock.getCount(), 0, 64);
+      return Math
+            .min(Math.clamp(requiredDestinationStock - destinationStock.getCount(), 0, 64), sourceStock.getCount());
    }
 }

@@ -1,37 +1,37 @@
 package com.uncreated.civilized.core.building.entity.behaviour;
 
-import java.util.List;
-
 import com.uncreated.civilized.core.building.entity.LoadedBuilding;
-import com.uncreated.civilized.core.building.production.lines.crafting.CraftingMachine;
-import com.uncreated.civilized.core.building.production.lines.crafting.CraftingOrder;
+import com.uncreated.civilized.core.building.production.RecipeProductionMachine;
+import com.uncreated.civilized.core.building.production.RecipeProductionSystem;
 import com.uncreated.civilized.core.building.state.ArtisanHouseState;
 
+import lombok.Getter;
 import net.minecraft.server.level.ServerLevel;
 
-public class ArtisanHouseBehaviour extends BuildingBehaviour {
+public abstract class ArtisanHouseBehaviour extends BuildingBehaviour {
+
+   @Getter
+   private RecipeProductionSystem recipeProductionSystem; // null on client
 
    protected ArtisanHouseBehaviour(LoadedBuilding entity) {
       super(entity);
+
+      if (!entity.getLevel().isClientSide()) {
+         recipeProductionSystem = new RecipeProductionSystem();
+      }
    }
+
+   protected abstract void registerProductionMachines(RecipeProductionSystem recipeProductionSystem);
 
    @Override
    public void start() {
 
       ArtisanHouseState artisanHouseState = (ArtisanHouseState) getBuilding().getState();
 
-      // CRAFTING
+      registerProductionMachines(recipeProductionSystem);
 
-      CraftingMachine machine =
-            getEntity().getBehaviour().getRecipeProductionSystem().getMachine(CraftingMachine.class);
-
-      List<CraftingOrder> productionOrders =
-            artisanHouseState.createProductionOrders(
-                  getEntity().getBehaviour().getRecipeProductionSystem().getMachine(CraftingMachine.class),
-                  (ServerLevel) getEntity().getLevel());
-
-      for (CraftingOrder productionOrder : productionOrders) {
-         machine.registerOrder(productionOrder);
+      for (RecipeProductionMachine<?> machine : recipeProductionSystem.registeredMachines()) {
+         artisanHouseState.createProductionOrders(machine, (ServerLevel) getEntity().getLevel());
       }
    }
 }

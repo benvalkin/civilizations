@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
@@ -18,8 +17,8 @@ import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.util.ContainerHelper;
 
 import net.minecraft.core.BlockPos;
@@ -30,7 +29,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
@@ -49,14 +47,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
    private ItemStack handHeld;
 
    public CutDownTrees() {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT));
+      super(WorkStates.CUTTING_DOWN_TREES, 120 * 20, 30 * 20);
    }
 
    @Override
@@ -85,7 +76,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
             ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
       if (tool.isEmpty()) {
          // todo: send notification that the villager is missing tool
-         villager.getBrain().eraseMemory(AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get());
+         getStateMachine().queueActionOnce(WorkStates.FETCHING_WORK_INPUT_FROM_HOME);
          return false;
       }
       this.handHeld = tool.get().itemStack();
@@ -97,14 +88,18 @@ public class CutDownTrees extends WorkTaskBehaviour {
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
-      travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 5);
+      travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 8);
       villager.setItemSlot(EquipmentSlot.MAINHAND, handHeld);
+      hasWood = false;
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
       villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+
+      if (hasWood)
+         getStateMachine().queueActionOnce(WorkStates.DROPPING_OFF_WORK_OUTPUT_AT_HOME);
    }
 
    @Override
@@ -121,6 +116,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
    }
 
    private int toolHits = 0;
+   private boolean hasWood;
 
    private int applyWorkSpeedMultiplier(int requiredToolHits) {
       return requiredToolHits / workSpeedMultiplier;
@@ -164,7 +160,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
             level.destroyBlock(pos, false);
             toolHits = 0;
 
-            villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
+            hasWood = true;
          }
       }
    }

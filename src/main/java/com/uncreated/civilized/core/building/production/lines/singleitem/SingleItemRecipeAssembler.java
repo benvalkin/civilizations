@@ -1,13 +1,17 @@
 package com.uncreated.civilized.core.building.production.lines.singleitem;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import com.uncreated.civilized.core.building.production.orders.recipe.AssembledRecipe;
 import com.uncreated.civilized.core.building.production.orders.recipe.RecipeAssembler;
+import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.Getter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
@@ -26,6 +30,38 @@ public class SingleItemRecipeAssembler extends RecipeAssembler<SingleItemRecipe,
 
       this.recipe = singleItemRecipe;
       this.registryAccess = registryAccess;
+   }
+
+   public RecipeSatisfiedResult isRecipeSatisfied(List<Container> containers) {
+
+      Ingredient singleIngredient = getRecipe().placementInfo().ingredients().getFirst();
+
+      for (int c = 0; c < containers.size(); c++) {
+         Container container = containers.get(c);
+         for (int s = 0; s < container.getContainerSize(); s++) {
+
+            ItemStack itemStack = container.getItem(s);
+            if (itemStack.isEmpty())
+               continue;
+
+            ItemStack candidateIngredient = container.getItem(s).copy();
+
+            if (singleIngredient.acceptsItem(candidateIngredient.getItemHolder())) {
+               return new RecipeSatisfiedResult(
+                       true,
+                       1,
+                       1,
+                       List.of(candidateIngredient));
+            }
+         }
+      }
+
+      // otherwise, we don't have the correct ingredients to satisfy the recipe
+      return new RecipeSatisfiedResult(
+              false,
+              0,
+              1,
+              List.of(ItemStack.EMPTY));
    }
 
    public AssembledRecipe<SingleRecipeInput> assembleRecipe(List<ItemStack> availableIngredients) {

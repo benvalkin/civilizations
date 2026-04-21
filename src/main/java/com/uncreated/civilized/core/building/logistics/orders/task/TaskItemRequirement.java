@@ -25,7 +25,7 @@ public abstract class TaskItemRequirement extends LogisticsOrder {
       this.taskName = taskName;
    }
 
-   protected abstract boolean canTake(AggregateItemStack sourceStock);
+   protected abstract boolean isStockSufficient(AggregateItemStack sourceStock);
 
    protected abstract boolean villagerHasRequiredItems(Container villagerInventory);
 
@@ -43,16 +43,23 @@ public abstract class TaskItemRequirement extends LogisticsOrder {
 
       PendingRequiredItems.StockInfo stockInfo = new PendingRequiredItems.StockInfo(sourceChests, sourceStock);
 
-      int amountToTake = getItemCountRequiredForTask(sourceStock);
-      boolean shouldTake = canTake(sourceStock) && amountToTake > 0;
+      int requiredAmountToTake = getItemCountRequiredForTask(sourceStock);
+      boolean isStockSufficient = isStockSufficient(sourceStock);
+      boolean willTake = isStockSufficient && requiredAmountToTake > 0;
       boolean villagerHasRequiredItems = villagerHasRequiredItems(villager.getWorkInputInventory());
 
-      return new PendingRequiredItems(itemSearch, amountToTake, shouldTake, villagerHasRequiredItems, stockInfo);
+      return new PendingRequiredItems(
+            itemSearch,
+            requiredAmountToTake,
+            isStockSufficient,
+            willTake,
+            villagerHasRequiredItems,
+            stockInfo);
    }
 
    public boolean takeRequiredItems(CivilizedVillager villager, PendingRequiredItems pendingRequiredItems) {
 
-      int quota = pendingRequiredItems.amount();
+      int quota = pendingRequiredItems.requiredAmountToTake();
 
       for (Container source : pendingRequiredItems.stock().getSourceChests()) {
          int transferred = ContainerHelper.transferNicely(source, villager.getWorkInputInventory(), itemSearch, quota);
@@ -63,15 +70,15 @@ public abstract class TaskItemRequirement extends LogisticsOrder {
             break;
       }
 
-      return quota < pendingRequiredItems.amount();
+      return quota < pendingRequiredItems.requiredAmountToTake();
    }
 
    public boolean returnItems(CivilizedVillager villager, PendingRequiredItems pendingRequiredItems) {
 
-      int quota = pendingRequiredItems.amount();
+      int quota = pendingRequiredItems.requiredAmountToTake();
 
       for (Container source : pendingRequiredItems.stock().getSourceChests()) {
-         int transferred = ContainerHelper.transferNicely(source, villager.getLogisticsInventory(), itemSearch, quota);
+         int transferred = ContainerHelper.transferNicely(villager.getLogisticsInventory(), source, itemSearch, quota);
 
          quota -= transferred;
 
@@ -79,6 +86,6 @@ public abstract class TaskItemRequirement extends LogisticsOrder {
             break;
       }
 
-      return quota < pendingRequiredItems.amount();
+      return quota < pendingRequiredItems.requiredAmountToTake();
    }
 }

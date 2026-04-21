@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
@@ -19,8 +18,8 @@ import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 import com.uncreated.civilized.util.ContainerHelper;
 
 import net.minecraft.core.BlockPos;
@@ -44,24 +43,16 @@ public class MineOres extends WorkTaskBehaviour {
    private Building workSite;
    private MediumDistanceTravelTask travelHelper;
 
-   int workSpeedMultiplier = 2;
+   private int workSpeedMultiplier = 2;
+   private float minerLuckChange = 0.2f; // percentage chance to successfully mine an ore
+   private int minerMaxYield = 2; // max ore item yield per ore block mined
+
    private boolean foundOres = false;
    Map<BlockPos, Long> recentlyMinedBlocks;
    private ItemStack handHeld;
 
    public MineOres() {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(),
-                  MemoryStatus.VALUE_ABSENT),
-            20 * 60 * 4,
-            20 * 60 * 4);
+      super(WorkStates.MINING_ORES, 90 * 20, 30 * 20);
       recentlyMinedBlocks = new HashMap<>();
    }
 
@@ -90,7 +81,8 @@ public class MineOres extends WorkTaskBehaviour {
             ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
       if (tool.isEmpty()) {
          // todo: send notification that the villager is missing tool
-         villager.getBrain().eraseMemory(AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get());
+         getStateMachine().queueActionOnce(WorkStates.FETCHING_WORK_INPUT_FROM_HOME);
+         getStateMachine().queueActionOnce(this.getState());
          return false;
       }
       this.handHeld = tool.get().itemStack();
@@ -103,24 +95,22 @@ public class MineOres extends WorkTaskBehaviour {
       super.start(level, villager, gameTime);
       foundOres = false;
       travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 2);
-
       villager.setItemSlot(EquipmentSlot.MAINHAND, handHeld);
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
-      if (foundOres)
-         villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
 
       villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+
+      if (foundOres)
+         getStateMachine().queueActionOnce(WorkStates.DROPPING_OFF_WORK_OUTPUT_AT_HOME);
    }
 
    @Override
    protected boolean canStillUse(ServerLevel level, CivilizedVillager villager, long gameTime) {
-      return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT)
-            && villager.getBrain()
-                  .checkMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), MemoryStatus.VALUE_ABSENT);
+      return villager.getBrain().checkMemory(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT);
    }
 
    private int applyWorkSpeedMultiplier(int requiredToolHits) {
@@ -192,13 +182,13 @@ public class MineOres extends WorkTaskBehaviour {
 
       List<ItemStack> drops = Block.getDrops(blockState, level, toMine, null);
 
-      float minerEfficiency = 0.2f;
-
       for (int i = 0; i < drops.size(); i++) {
          ItemStack drop = drops.get(i);
-         if (i > 0 && villager.getRandom().nextFloat() > minerEfficiency)
+         if (i > 0 && villager.getRandom().nextFloat() > minerLuckChange)
             continue;
 
+         int adjustedYield = Math.min(drop.getCount(), minerMaxYield);
+         drop.setCount(adjustedYield);
          villager.getInventory().addItem(drop);
          foundOres = true;
       }

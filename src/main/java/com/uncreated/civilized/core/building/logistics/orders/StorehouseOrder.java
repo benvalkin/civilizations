@@ -63,7 +63,7 @@ public abstract class StorehouseOrder extends LogisticsOrder {
       int quota = pendingShipment.amount();
 
       for (Container source : pendingShipment.stock().getDestinationChests()) {
-         int transferred = ContainerHelper.transferNicely(source, villager.getLogisticsInventory(), itemSearch, quota);
+         int transferred = ContainerHelper.transferNicely(villager.getLogisticsInventory(), source, itemSearch, quota);
 
          quota -= transferred;
 

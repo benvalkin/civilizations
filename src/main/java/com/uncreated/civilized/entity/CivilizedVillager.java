@@ -26,7 +26,7 @@ import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
-import com.uncreated.civilized.entity.behaviour.worker.CoreWorkBehaviour;
+import com.uncreated.civilized.entity.behaviour.StatefulBehaviourControl;
 import com.uncreated.civilized.entity.pathfinding.VillagerGroundPathNavigation;
 import com.uncreated.civilized.entity.renderer.CivilizedVillagerRenderer;
 import com.uncreated.civilized.entity.stats.ClothingTextureRegistry;
@@ -291,13 +291,6 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
                   AIRegistry.MM_CROP_FIELD_CENTER.get(),
                   AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(),
                   AIRegistry.MM_DIALOGUE_TARGET.get(),
-                  AIRegistry.MM_HAS_NON_IDLE_WORK_TASK.get(),
-                  AIRegistry.MM_HAS_WORK_INPUT_RESOURCES.get(),
-                  AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(),
-                  AIRegistry.MM_BUSY_OFFLOADING_IMPORTS.get(),
-                  AIRegistry.MM_BUSY_OFFLOADING_EXPORTS.get(),
-                  AIRegistry.MM_EXPORT_DESIRED.get(),
-                  AIRegistry.MM_IMPORT_DESIRED.get(),
                   MemoryModuleType.JOB_SITE,
                   MemoryModuleType.HOME,
                   MemoryModuleType.PATH,
@@ -375,7 +368,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
          // runningBehaviours.stream().map(BehaviorControl::debugString).toList());
 
          Optional<BehaviorControl<? super CivilizedVillager>> workBehaviour =
-               runningBehaviours.stream().filter(b -> b instanceof CoreWorkBehaviour).findFirst();
+               runningBehaviours.stream().filter(b -> b instanceof StatefulBehaviourControl).findFirst();
          if (workBehaviour.isPresent()) {
             this.getEntityData().set(CURRENT_WORK_BEHAVIOUR, workBehaviour.get().debugString());
          } else {

@@ -9,9 +9,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 @Getter
-public class ExportAlways extends ExportOrder {
+public class ExportEverything extends ExportOrder {
 
-   public ExportAlways(Level level, String key, Predicate<ItemStack> itemSearch, Origin origin) {
+   public ExportEverything(Level level, String key, Predicate<ItemStack> itemSearch, Origin origin) {
       super(level, key, itemSearch, origin);
    }
 
@@ -22,6 +22,6 @@ public class ExportAlways extends ExportOrder {
 
    @Override
    protected int getItemCountForNextShipment(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return 64;
+      return Math.min(64, sourceStock.getCount());
    }
 }

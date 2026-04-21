@@ -7,24 +7,31 @@ import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.logistics.LogisticsManager;
+import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportUpTo;
+import com.uncreated.civilized.core.building.logistics.orders.task.ToolRequirement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
+import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
-import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
+import com.uncreated.civilized.util.ContainerHelper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -39,18 +46,10 @@ public class HarvestCrops extends WorkTaskBehaviour {
    private @Nullable BlockPos nextMaturesCropToHarvest = null;
    private MediumDistanceTravelTask travelHelper;
    private Building workSite;
+   private ItemStack handHeld;
 
    public HarvestCrops() {
-      super(
-            ImmutableMap.of(
-                  MemoryModuleType.LOOK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.WALK_TARGET,
-                  MemoryStatus.VALUE_ABSENT,
-                  MemoryModuleType.JOB_SITE,
-                  MemoryStatus.VALUE_PRESENT,
-                  AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(),
-                  MemoryStatus.VALUE_ABSENT));
+      super(WorkStates.HARVESTING_CROPS, 120 * 20, 30 * 20);
    }
 
    @Override
@@ -58,7 +57,42 @@ public class HarvestCrops extends WorkTaskBehaviour {
       if (!super.checkExtraStartConditions(level, villager))
          return false;
 
-      workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
+      Optional<Building> worksite = ServerBuildingsStore.INSTANCE.find(villager.getInfo().getPrimaryWorksiteId());
+      if (worksite.isEmpty())
+         return false;
+
+      this.workSite = worksite.get();
+
+      Optional<Building> home = ServerBuildingsStore.INSTANCE.find(villager.getInfo().getHomeBuildingId());
+      if (home.isEmpty())
+         return false;
+
+      Optional<LoadedSettlement> loadedSettlement = LoadedSettlements.checkLoaded(home.get().getSettlementId());
+      if (loadedSettlement.isEmpty())
+         return false;
+
+      LogisticsManager logisticsManager = loadedSettlement.get().getBehaviour().getLogisticsManager();
+
+      ToolRequirement toolRequirement =
+            new ToolRequirement(level, "harvest_crops", HoeItem.class, StorehouseOrder.Origin.AUTOMATIC);
+      toolRequirement.setExpiry(12000);
+      logisticsManager.registerOrder(home.get(), toolRequirement);
+      ImportUpTo importOrder =
+            new ImportUpTo(level, "hoe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1);
+      importOrder.setExpiry(12000);
+      logisticsManager.registerOrder(home.get(), importOrder);
+
+      Optional<ContainerHelper.ItemSearchResult> tool =
+            ContainerHelper.findItem(villager.getWorkInputInventory(), toolRequirement.getItemSearch());
+
+      if (tool.isEmpty()) {
+         // todo: send notification that the villager is missing tool
+         getStateMachine().queueActionOnce(WorkStates.FETCHING_WORK_INPUT_FROM_HOME);
+         getStateMachine().queueActionOnce(this.getState());
+         return false;
+      }
+      this.handHeld = tool.get().itemStack();
+
       findFarmBlocks(level);
       return nextMaturesCropToHarvest != null;
    }
@@ -68,13 +102,19 @@ public class HarvestCrops extends WorkTaskBehaviour {
       super.start(level, villager, gameTime);
       workSite = ServerBuildingsStore.INSTANCE.get(villager.getInfo().getPrimaryWorksiteId());
       travelHelper = new MediumDistanceTravelTask(villager, workSite.getBlockPos(), 5);
-      LOGGER.info("Villager started harvesting crops.");
+      hasWorkOutputItems = false;
+      villager.setItemSlot(EquipmentSlot.MAINHAND, handHeld);
    }
 
    @Override
-   protected void stop(ServerLevel level, CivilizedVillager entity, long gameTime) {
-      super.stop(level, entity, gameTime);
-      LOGGER.info("Villager stopped harvesting crops.");
+   protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
+      super.stop(level, villager, gameTime);
+
+      villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+
+      if (hasWorkOutputItems)
+         getStateMachine().queueActionOnce(WorkStates.DROPPING_OFF_WORK_OUTPUT_AT_HOME);
+
    }
 
    @Override
@@ -82,7 +122,6 @@ public class HarvestCrops extends WorkTaskBehaviour {
       super.canStillUse(level, entity, gameTime);
       Optional<GlobalPos> optional = entity.getBrain().getMemory(MemoryModuleType.JOB_SITE);
       if (optional.isEmpty()) {
-         LOGGER.info("Villager will stop working because they have no more job site.");
          return false;
       }
 
@@ -90,6 +129,7 @@ public class HarvestCrops extends WorkTaskBehaviour {
    }
 
    private int toolHits = 0;
+   boolean hasWorkOutputItems;
 
    @Override
    protected void tick(ServerLevel level, CivilizedVillager villager, long tickTime) {
@@ -104,7 +144,6 @@ public class HarvestCrops extends WorkTaskBehaviour {
          lastWorkTime = tickTime;
 
          findFarmBlocks(level);
-         LOGGER.info("Villager found a crop to harvest.");
 
          if (nextMaturesCropToHarvest == null) {
             doStop(level, villager, tickTime);
@@ -126,13 +165,12 @@ public class HarvestCrops extends WorkTaskBehaviour {
             List<ItemStack> drops =
                   getDrops(level.getBlockState(nextMaturesCropToHarvest), level, nextMaturesCropToHarvest);
             drops.forEach(i -> villager.getInventory().addItem(i));
-            LOGGER.info("Villager's inventory now has: {}", villager.getInventory().getItems());
 
             level.setBlockAndUpdate(nextMaturesCropToHarvest, getCropReplantState(cropState, cropBlock));
             villager.playSound(SoundEvents.CROP_BREAK, 1.0f, 1.0f);
             toolHits = 0;
 
-            villager.getBrain().setMemory(AIRegistry.MM_HAS_WORK_OUTPUT_RESOURCES.get(), true);
+            hasWorkOutputItems = true;
          }
       }
    }

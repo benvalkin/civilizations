@@ -37,7 +37,7 @@ public class TaskConsumableItemRequirement extends TaskItemRequirement {
    }
 
    @Override
-   protected boolean canTake(AggregateItemStack sourceStock) {
+   protected boolean isStockSufficient(AggregateItemStack sourceStock) {
       return sourceStock.getCount() >= minAmount;
    }
 

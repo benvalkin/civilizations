@@ -22,6 +22,6 @@ public class ImportGreedy extends ImportOrder {
 
    @Override
    protected int getItemCountForNextShipment(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return 64;
+      return Math.min(64, sourceStock.getCount());
    }
 }

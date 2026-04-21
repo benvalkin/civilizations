@@ -72,7 +72,7 @@ public abstract class ProductionOrder {
          ImportOrder importOrder =
                new ImportExactly(
                      level,
-                     getKey() + "_ingredient_" + i,
+                     String.format("ingredients_%s_%s_%s", bill.getProductionType(), getKey(), i),
                      in -> ingredient.acceptsItem(in.getItemHolder()),
                      LogisticsOrder.Origin.AUTOMATIC,
                      stockDeficit);

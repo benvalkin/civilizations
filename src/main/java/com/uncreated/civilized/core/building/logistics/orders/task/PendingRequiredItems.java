@@ -1,27 +1,25 @@
 package com.uncreated.civilized.core.building.logistics.orders.task;
 
+import java.util.Collection;
+import java.util.function.Predicate;
+
 import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
+
 import lombok.Getter;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Collection;
-import java.util.function.Predicate;
+public record PendingRequiredItems(Predicate<ItemStack> itemSearch, int requiredAmountToTake, boolean isStockSufficient,
+      boolean willTake, boolean villagerHasRequiredItems, PendingRequiredItems.StockInfo stock) {
 
-public record PendingRequiredItems(Predicate<ItemStack> itemSearch,
-                                   int amount,
-                                   boolean shouldTake,
-                                   boolean villagerHasRequiredItems,
-                                   PendingRequiredItems.StockInfo stock) {
+   @Getter
+   public static class StockInfo {
+      private final Collection<Container> sourceChests;
+      private final AggregateItemStack sourceStock;
 
-    @Getter
-    public static class StockInfo {
-        private final Collection<Container> sourceChests;
-        private final AggregateItemStack sourceStock;
-
-        public StockInfo(Collection<Container> sourceChests, AggregateItemStack sourceStock) {
-            this.sourceChests = sourceChests;
-            this.sourceStock = sourceStock;
-        }
-    }
+      public StockInfo(Collection<Container> sourceChests, AggregateItemStack sourceStock) {
+         this.sourceChests = sourceChests;
+         this.sourceStock = sourceStock;
+      }
+   }
 }

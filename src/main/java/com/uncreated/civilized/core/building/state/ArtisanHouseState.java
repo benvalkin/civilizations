@@ -2,7 +2,6 @@ package com.uncreated.civilized.core.building.state;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +36,7 @@ public abstract class ArtisanHouseState extends BuildingState {
       assert !getSupportedProductionTypes().isEmpty() : "House must support at least one ProductionType.";
    }
 
-   public <Order extends ProductionOrder> List<Order> createProductionOrders(
+   public <Order extends ProductionOrder> void createProductionOrders(
          RecipeProductionMachine<Order> machine,
          ServerLevel serverLevel) {
 
@@ -45,7 +44,6 @@ public abstract class ArtisanHouseState extends BuildingState {
 
       List<ProductionBill> productionBills =
             this.productionLines.getOrDefault(machine.getProductionType(), new ArrayList<>());
-      List<Order> productionOrders = new LinkedList<>();
 
       for (int i = 0; i < productionBills.size(); i++) {
 
@@ -56,11 +54,10 @@ public abstract class ArtisanHouseState extends BuildingState {
          if (recipe.isEmpty())
             continue;
 
-         String key = "order_" + i;;
-         productionOrders.add(machine.createOrder(key, bill, serverLevel));
+         String key = "productionBill_" + i;
+         Order order = machine.createOrderFromBill(key, bill, serverLevel);
+         machine.registerOrder(order);
       }
-
-      return productionOrders;
    }
 
    public void applyNbt(CompoundTag compoundTag, HolderLookup.Provider registryAccess) {

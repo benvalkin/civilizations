@@ -1,22 +1,26 @@
 package com.uncreated.civilized.entity.behaviour.worker.common.logistics;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+
+import org.slf4j.Logger;
+
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.behaviour.BehaviourState;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
 import com.uncreated.civilized.util.ContainerHelper;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import org.slf4j.Logger;
-
-import java.util.*;
-import java.util.function.Predicate;
 
 public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
 
@@ -26,8 +30,8 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
    private List<ChestBlockEntity> chestsAtTarget;
    private MediumDistanceTravelTask travelHelper;
 
-   public ExchangeResourcesAtBuilding(Map<MemoryModuleType<?>, MemoryStatus> entryCondition) {
-      super(entryCondition);
+   public ExchangeResourcesAtBuilding(BehaviourState workState, int duration, int cooldownDuration) {
+      super(workState, duration, cooldownDuration);
    }
 
    protected abstract Optional<Building> findTargetBuilding(ServerLevel level, CivilizedVillager villager);
@@ -42,8 +46,7 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
       this.targetbuilding = targetBuilding.get();
 
       chestsAtTarget =
-              this.targetbuilding
-                  .getBounds()
+            this.targetbuilding.getBounds()
                   .getBlockEntitiesInsideBuilding(level)
                   .stream()
                   .filter(b -> b instanceof ChestBlockEntity)
@@ -59,18 +62,15 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
    @Override
    protected void start(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.start(level, villager, gameTime);
-      LOGGER.info("Villager going to exchange resources at {}.", targetbuilding.toStringLite());
+      // LOGGER.info("Villager going to exchange resources at {}.", targetbuilding.toStringLite());
 
-      travelHelper =
-            new MediumDistanceTravelTask(
-                  villager,
-                  targetbuilding.getBlockPos(), 3);
+      travelHelper = new MediumDistanceTravelTask(villager, targetbuilding.getBlockPos(), 3);
    }
 
    @Override
    protected void stop(ServerLevel level, CivilizedVillager villager, long gameTime) {
       super.stop(level, villager, gameTime);
-      LOGGER.info("Villager finished exchange resources at {}.", targetbuilding.toStringLite());
+      // LOGGER.info("Villager finished exchange resources at {}.", targetbuilding.toStringLite());
    }
 
    @Override
@@ -121,12 +121,7 @@ public abstract class ExchangeResourcesAtBuilding extends WorkTaskBehaviour {
       int transferRemaining = quota;
       for (var chest : chestsAtTarget) {
 
-         int transferred =
-                 ContainerHelper.transferNicely(
-                         chest,
-                         villagerInventory,
-                         itemSearch,
-                         transferRemaining);
+         int transferred = ContainerHelper.transferNicely(chest, villagerInventory, itemSearch, transferRemaining);
 
          transferRemaining -= transferred;
 

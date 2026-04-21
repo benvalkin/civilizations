@@ -6,11 +6,11 @@ import lombok.Getter;
 import net.neoforged.bus.api.Event;
 
 @Getter
-public final class RecipeProductionMachineRegisteredEvent extends Event {
+public final class OnCreateCustomRecipeProductionMachine extends Event {
    private final BuildingBehaviour buildingBehaviour;
    private final RecipeProductionSystem recipeProductionSystem;
 
-   public RecipeProductionMachineRegisteredEvent(
+   public OnCreateCustomRecipeProductionMachine(
          BuildingBehaviour buildingBehaviour,
          RecipeProductionSystem recipeProductionSystem) {
       this.buildingBehaviour = buildingBehaviour;

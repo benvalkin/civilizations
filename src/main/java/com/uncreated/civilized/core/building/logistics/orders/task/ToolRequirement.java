@@ -42,7 +42,7 @@ public class ToolRequirement extends TaskItemRequirement {
    }
 
    @Override
-   protected boolean canTake(AggregateItemStack sourceStock) {
+   protected boolean isStockSufficient(AggregateItemStack sourceStock) {
       return sourceStock.getCount() > 0;
    }
 

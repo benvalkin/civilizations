@@ -215,7 +215,7 @@ public class ScrollListView<Model, ElementWidget extends AbstractWidget> extends
          return false;
       } else {
          this.setScrollAmount(this.scrollAmount() - p_386550_ * this.scrollRate());
-         LOGGER.info("Scroll amount: " + scrollAmount());
+         LOGGER.info("Scroll requiredAmountToTake: " + scrollAmount());
          return true;
       }
    }

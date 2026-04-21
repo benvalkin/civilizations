@@ -6,17 +6,20 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.entity.behaviour.BehaviourStates;
 import com.uncreated.civilized.entity.behaviour.IdleStrollAroundSettlement;
 import com.uncreated.civilized.entity.behaviour.UpdateActivityFromSchedule;
+import com.uncreated.civilized.entity.behaviour.worker.artisan.CraftItems;
+import com.uncreated.civilized.entity.behaviour.worker.artisan.furnace.SmeltItems;
 import com.uncreated.civilized.entity.behaviour.worker.common.IdleStrollAroundWorksite;
 import com.uncreated.civilized.entity.behaviour.worker.common.IdleStrollOutsideWorksite;
-import com.uncreated.civilized.entity.behaviour.worker.common.logistics.OffloadExportsAtStorehouse;
-import com.uncreated.civilized.entity.behaviour.worker.common.logistics.OffloadImportsAtHome;
-import com.uncreated.civilized.entity.behaviour.worker.common.logistics.OffloadWorkResourcesAtHome;
-import com.uncreated.civilized.entity.behaviour.worker.common.logistics.PickupExportsAtHome;
-import com.uncreated.civilized.entity.behaviour.worker.common.logistics.PickupImportsAtStorehouse;
-import com.uncreated.civilized.entity.behaviour.worker.common.logistics.PickupWorkResourcesFromHome;
-import com.uncreated.civilized.entity.behaviour.worker.craftsman.CraftItems;
+import com.uncreated.civilized.entity.behaviour.worker.common.logistics.CheckLogisticsOpportunities;
+import com.uncreated.civilized.entity.behaviour.worker.common.logistics.DropOffExportsAtStorehouse;
+import com.uncreated.civilized.entity.behaviour.worker.common.logistics.DropOffImportsAtHome;
+import com.uncreated.civilized.entity.behaviour.worker.common.logistics.DropoffWorkOutputAtHome;
+import com.uncreated.civilized.entity.behaviour.worker.common.logistics.FetchExportsFromHome;
+import com.uncreated.civilized.entity.behaviour.worker.common.logistics.FetchImportsFromStorehouse;
+import com.uncreated.civilized.entity.behaviour.worker.common.logistics.FetchWorkInputFromHome;
 import com.uncreated.civilized.entity.behaviour.worker.farmer.HarvestCrops;
 import com.uncreated.civilized.entity.behaviour.worker.farmer.PlantCrops;
 import com.uncreated.civilized.entity.behaviour.worker.miner.MineOres;
@@ -27,7 +30,6 @@ import com.uncreated.civilized.entity.behaviour.worker.woodcutter.ReplantSapling
 
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.animal.Cow;
-import net.minecraft.world.level.block.CraftingTableBlock;
 
 public class WorkActivities {
 
@@ -49,16 +51,22 @@ public class WorkActivities {
             getMinimalLookBehavior(),
             Pair.of(
                   1,
-                  new CoreWorkBehaviour(
+                  new WorkBehaviourControl(
                         ImmutableList.of(
-                              Pair.of(new PickupExportsAtHome(), 20 * 30),
-                              Pair.of(new OffloadExportsAtStorehouse(), 20 * 30),
-                              Pair.of(new OffloadImportsAtHome(), 20 * 30),
-                              Pair.of(new HarvestCrops(), 20 * 30),
-                              Pair.of(new PlantCrops(), 20 * 30),
-                              Pair.of(new OffloadWorkResourcesAtHome(), 20 * 30),
-                              Pair.of(new IdleStrollAroundWorksite(5, 3, 0.25f), 20 * 30),
-                              Pair.of(new IdleStrollAroundSettlement(5, 3, 0.25f), 20 * 30)))),
+                              new HarvestCrops(),
+                              new PlantCrops(),
+                              new CheckLogisticsOpportunities(),
+                              new DropoffWorkOutputAtHome(),
+                              new FetchExportsFromHome(),
+                              new DropOffExportsAtStorehouse(),
+                              new FetchImportsFromStorehouse(),
+                              new DropOffImportsAtHome(),
+                              new FetchWorkInputFromHome(),
+                              new IdleStrollAroundWorksite(5, 3, 0.25f),
+                              new IdleStrollAroundSettlement(5, 3, 0.25f)),
+                        ImmutableList.of(WorkStates.HARVESTING_CROPS, WorkStates.PLANTING_CROPS),
+                        ImmutableList
+                              .of(WorkStates.STROLL_AROUND_WORKSITE, BehaviourStates.IDLE_STROLL_AROUND_SETTLEMENT))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 
@@ -67,17 +75,25 @@ public class WorkActivities {
             getMinimalLookBehavior(),
             Pair.of(
                   1,
-                  new CoreWorkBehaviour(
+                  new WorkBehaviourControl(
                         ImmutableList.of(
-                              Pair.of(new PickupExportsAtHome(), 20 * 30),
-                              Pair.of(new OffloadExportsAtStorehouse(), 20 * 30),
-                              Pair.of(new OffloadImportsAtHome(), 20 * 30),
-                              Pair.of(new PickupWorkResourcesFromHome(), 20 * 30),
-                              Pair.of(new CutDownTrees(), 20 * 30),
-                              Pair.of(new ReplantSaplings(), 20 * 30),
-                              Pair.of(new OffloadWorkResourcesAtHome(), 20 * 30),
-                              Pair.of(new IdleStrollAroundWorksite(5, 3, 0.25f), 20 * 30),
-                              Pair.of(new IdleStrollAroundSettlement(5, 3, 0.25f), 20 * 30)))),
+                              new CutDownTrees(),
+                              new ReplantSaplings(),
+                              new CheckLogisticsOpportunities(),
+                              new DropoffWorkOutputAtHome(),
+                              new FetchExportsFromHome(),
+                              new DropOffExportsAtStorehouse(),
+                              new FetchImportsFromStorehouse(),
+                              new DropOffImportsAtHome(),
+                              new FetchWorkInputFromHome(),
+                              new IdleStrollAroundWorksite(5, 3, 0.25f),
+                              new IdleStrollAroundSettlement(5, 3, 0.25f)),
+                        ImmutableList.of(
+                              WorkStates.CHECK_LOGISTICS_OPPORTUNITIES,
+                              WorkStates.CUTTING_DOWN_TREES,
+                              WorkStates.REPLANT_SAPLINGS),
+                        ImmutableList
+                              .of(WorkStates.STROLL_AROUND_WORKSITE, BehaviourStates.IDLE_STROLL_AROUND_SETTLEMENT))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 
@@ -86,16 +102,21 @@ public class WorkActivities {
             getMinimalLookBehavior(),
             Pair.of(
                   1,
-                  new CoreWorkBehaviour(
+                  new WorkBehaviourControl(
                         ImmutableList.of(
-                              Pair.of(new PickupExportsAtHome(), 20 * 30),
-                              Pair.of(new OffloadExportsAtStorehouse(), 20 * 30),
-                              Pair.of(new OffloadImportsAtHome(), 20 * 30),
-                              Pair.of(new PickupWorkResourcesFromHome(), 20 * 30),
-                              Pair.of(new MineOres(), 60),
-                              Pair.of(new OffloadWorkResourcesAtHome(), 60),
-                              Pair.of(new IdleStrollAroundWorksite(5, 3, 0.25f), 20 * 30),
-                              Pair.of(new IdleStrollAroundSettlement(5, 3, 0.25f), 20 * 30)))),
+                              new MineOres(),
+                              new CheckLogisticsOpportunities(),
+                              new DropoffWorkOutputAtHome(),
+                              new FetchExportsFromHome(),
+                              new DropOffExportsAtStorehouse(),
+                              new FetchImportsFromStorehouse(),
+                              new DropOffImportsAtHome(),
+                              new FetchWorkInputFromHome(),
+                              new IdleStrollAroundWorksite(5, 3, 0.25f),
+                              new IdleStrollAroundSettlement(5, 3, 0.25f)),
+                        ImmutableList.of(WorkStates.MINING_ORES, WorkStates.CHECK_LOGISTICS_OPPORTUNITIES),
+                        ImmutableList
+                              .of(WorkStates.STROLL_AROUND_WORKSITE, BehaviourStates.IDLE_STROLL_AROUND_SETTLEMENT))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 
@@ -104,17 +125,25 @@ public class WorkActivities {
             getMinimalLookBehavior(),
             Pair.of(
                   1,
-                  new CoreWorkBehaviour(
+                  new WorkBehaviourControl(
                         ImmutableList.of(
-                              Pair.of(new PickupExportsAtHome(), 20 * 30),
-                              Pair.of(new OffloadExportsAtStorehouse(), 20 * 30),
-                              Pair.of(new OffloadImportsAtHome(), 20 * 30),
-                              Pair.of(new PickupWorkResourcesFromHome(), 20 * 30),
-                              Pair.of(new BreedAnimals<>(Cow.class), 20 * 30),
-                              Pair.of(new SlaughterAnimals<>(Cow.class), 20 * 30),
-                              Pair.of(new OffloadWorkResourcesAtHome(), 20 * 30),
-                              Pair.of(new IdleStrollOutsideWorksite(4, 3, 0.25f), 20 * 30),
-                              Pair.of(new IdleStrollAroundSettlement(5, 3, 0.25f), 20 * 30)))),
+                              new BreedAnimals<>(Cow.class),
+                              new SlaughterAnimals<>(Cow.class),
+                              new CheckLogisticsOpportunities(),
+                              new DropoffWorkOutputAtHome(),
+                              new FetchExportsFromHome(),
+                              new DropOffExportsAtStorehouse(),
+                              new FetchImportsFromStorehouse(),
+                              new DropOffImportsAtHome(),
+                              new FetchWorkInputFromHome(),
+                              new IdleStrollOutsideWorksite(4, 3, 0.25f),
+                              new IdleStrollAroundSettlement(5, 3, 0.25f)),
+                        ImmutableList.of(
+                              WorkStates.CHECK_LOGISTICS_OPPORTUNITIES,
+                              WorkStates.BREEDING_ANIMALS,
+                              WorkStates.SLAUGHTERING_ANIMALS),
+                        ImmutableList
+                              .of(WorkStates.STROLL_OUTSIDE_WORKSITE, BehaviourStates.IDLE_STROLL_AROUND_SETTLEMENT))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 
@@ -123,16 +152,25 @@ public class WorkActivities {
             getMinimalLookBehavior(),
             Pair.of(
                   1,
-                  new CoreWorkBehaviour(
+                  new WorkBehaviourControl(
                         ImmutableList.of(
-                              Pair.of(new CraftItems(b -> b instanceof CraftingTableBlock), 60),
-                              Pair.of(new OffloadWorkResourcesAtHome(), 60),
-                              Pair.of(new PickupExportsAtHome(), 20 * 30),
-                              Pair.of(new OffloadExportsAtStorehouse(), 20 * 30),
-                              Pair.of(new PickupImportsAtStorehouse(), 20 * 30),
-                              Pair.of(new OffloadImportsAtHome(), 20 * 30),
-                              Pair.of(new IdleStrollAroundWorksite(4, 3, 0.25f), 20 * 30),
-                              Pair.of(new IdleStrollAroundSettlement(5, 3, 0.25f), 20 * 30)))),
+                              new SmeltItems(),
+                              new CraftItems(),
+                              new CheckLogisticsOpportunities(),
+                              new DropoffWorkOutputAtHome(),
+                              new FetchExportsFromHome(),
+                              new DropOffExportsAtStorehouse(),
+                              new FetchImportsFromStorehouse(),
+                              new DropOffImportsAtHome(),
+                              new IdleStrollAroundWorksite(4, 3, 0.25f),
+                              new IdleStrollAroundSettlement(5, 3, 0.25f)),
+                        ImmutableList.of(
+
+                              WorkStates.CHECK_LOGISTICS_OPPORTUNITIES,
+                              WorkStates.SMELTING_ITEMS,
+                              WorkStates.CRAFTING_ITEMS),
+                        ImmutableList
+                              .of(WorkStates.STROLL_AROUND_WORKSITE, BehaviourStates.IDLE_STROLL_AROUND_SETTLEMENT))),
             Pair.of(99, UpdateActivityFromSchedule.create()));
    }
 }

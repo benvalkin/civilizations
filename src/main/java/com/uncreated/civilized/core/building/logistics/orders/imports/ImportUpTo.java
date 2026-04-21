@@ -27,11 +27,11 @@ public class ImportUpTo extends ImportOrder {
 
    @Override
    protected boolean shouldShip(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return destinationStock.getCount() < max;
+      return destinationStock.getCount() <= max;
    }
 
    @Override
    protected int getItemCountForNextShipment(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return Math.clamp(shipmentItemCount, 0, 64);
+      return Math.min(shipmentItemCount, sourceStock.getCount());
    }
 }
