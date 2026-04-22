@@ -68,7 +68,7 @@ public class CutDownTrees extends WorkTaskBehaviour {
       toolRequirement.setExpiry(12000);
       logisticsManager.registerOrder(home, toolRequirement);
       ImportUpTo importOrder =
-            new ImportUpTo(level, "axe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1);
+            new ImportUpTo(level, "axe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1, 1);
       importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home, importOrder);
 

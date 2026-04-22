@@ -10,6 +10,8 @@ import java.util.function.Predicate;
 public record PendingShipment(Predicate<ItemStack> itemSearch,
                               int amount,
                               boolean shouldShip,
+                              int stockDeficitAtDestination,
+                              int stockSurplusAtDestination,
                               PendingShipment.StockInfo stock) {
 
     @Getter

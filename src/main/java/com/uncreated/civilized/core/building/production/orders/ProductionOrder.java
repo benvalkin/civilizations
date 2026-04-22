@@ -7,8 +7,8 @@ import java.util.Optional;
 
 import com.uncreated.civilized.core.building.logistics.AggregateItemStack;
 import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
-import com.uncreated.civilized.core.building.logistics.orders.imports.ImportExactly;
 import com.uncreated.civilized.core.building.logistics.orders.imports.ImportOrder;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportUpTo;
 import com.uncreated.civilized.core.building.production.PendingProductionOutput;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.orders.recipe.AssembledRecipe;
@@ -70,11 +70,13 @@ public abstract class ProductionOrder {
       for (int i = 0; i < ingredients.size(); i++) {
          Ingredient ingredient = ingredients.get(i);
          ImportOrder importOrder =
-               new ImportExactly(
+               new ImportUpTo(
                      level,
                      String.format("ingredients_%s_%s_%s", bill.getProductionType(), getKey(), i),
                      in -> ingredient.acceptsItem(in.getItemHolder()),
                      LogisticsOrder.Origin.AUTOMATIC,
+                     1,
+                     16,
                      stockDeficit);
          importOrders.add(importOrder);
       }

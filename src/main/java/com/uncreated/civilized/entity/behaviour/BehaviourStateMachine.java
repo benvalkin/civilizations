@@ -46,4 +46,8 @@ public class BehaviourStateMachine {
 
       return Optional.ofNullable(queue.poll());
    }
+
+   boolean hasQueuedActions() {
+      return !queue.isEmpty();
+   }
 }

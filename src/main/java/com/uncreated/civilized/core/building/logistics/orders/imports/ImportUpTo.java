@@ -10,28 +10,22 @@ import net.minecraft.world.level.Level;
 
 @Getter
 public class ImportUpTo extends ImportOrder {
-   protected final int shipmentItemCount;
-   protected final int max;
+   protected final int upTo;
 
    public ImportUpTo(
          Level level,
          String key,
          Predicate<ItemStack> itemSearch,
          Origin origin,
-         int shipmentItemCount,
-         int max) {
-      super(level, key, itemSearch, origin);
-      this.shipmentItemCount = shipmentItemCount;
-      this.max = max;
+         int minShipmentSize,
+         int maxShipmentSize,
+         int upTo) {
+      super(level, key, itemSearch, origin, minShipmentSize, maxShipmentSize);
+      this.upTo = upTo;
    }
 
    @Override
-   protected boolean shouldShip(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return destinationStock.getCount() <= max;
-   }
-
-   @Override
-   protected int getItemCountForNextShipment(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
-      return Math.min(shipmentItemCount, sourceStock.getCount());
+   protected int getDeficitAtDestination(AggregateItemStack sourceStock, AggregateItemStack destinationStock) {
+      return upTo - destinationStock.getCount();
    }
 }

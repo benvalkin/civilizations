@@ -78,6 +78,7 @@ public class BreedAnimals<T extends Animal> extends WorkTaskBehaviour {
                   "animal_food",
                   taskItemRequirement.getItemSearch(),
                   StorehouseOrder.Origin.AUTOMATIC,
+                  1,
                   8,
                   8);
       importOrder.setExpiry(12000);

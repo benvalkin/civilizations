@@ -73,7 +73,8 @@ public abstract class StatefulBehaviourControl<StateMachine extends BehaviourSta
 
       currentBehaviour.tickOrStop(serverLevel, civilizedVillager, currentTicks);
 
-      if (currentBehaviour.getStatus() == Behavior.Status.STOPPED) {
+      if (currentBehaviour.getStatus() == Behavior.Status.STOPPED
+            || stateMachine.isIdle() && stateMachine.hasQueuedActions()) {
          Optional<BehaviourState> nextState = stateMachine.pollNextAction();
 
          if (nextState.isPresent()) {

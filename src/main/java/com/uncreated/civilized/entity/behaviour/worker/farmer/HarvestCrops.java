@@ -78,7 +78,7 @@ public class HarvestCrops extends WorkTaskBehaviour {
       toolRequirement.setExpiry(12000);
       logisticsManager.registerOrder(home.get(), toolRequirement);
       ImportUpTo importOrder =
-            new ImportUpTo(level, "hoe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1);
+            new ImportUpTo(level, "hoe", toolRequirement.getItemSearch(), StorehouseOrder.Origin.AUTOMATIC, 1, 1, 1);
       importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home.get(), importOrder);
 

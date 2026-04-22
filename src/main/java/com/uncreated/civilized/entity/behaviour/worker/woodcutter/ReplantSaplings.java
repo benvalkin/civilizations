@@ -77,8 +77,9 @@ public class ReplantSaplings extends WorkTaskBehaviour {
                   "saplings",
                   taskItemRequirement.getItemSearch(),
                   StorehouseOrder.Origin.AUTOMATIC,
-                  32,
-                  8);
+                  1,
+                  8,
+                  32);
       importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home, importOrder);
 

@@ -3,33 +3,28 @@ package com.uncreated.civilized.entity.behaviour.worker.common.logistics;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.logistics.LogisticsManager;
 import com.uncreated.civilized.core.building.logistics.PendingShipment;
 import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrder;
-import com.uncreated.civilized.core.building.logistics.orders.LogisticsOrders;
-import com.uncreated.civilized.core.building.logistics.orders.StorehouseOrder;
-import com.uncreated.civilized.core.building.logistics.orders.exports.ExportEverything;
-import com.uncreated.civilized.core.building.logistics.orders.exports.ExportOrder;
-import com.uncreated.civilized.core.building.logistics.orders.task.PendingRequiredItems;
-import com.uncreated.civilized.core.building.logistics.orders.task.TaskItemRequirement;
+import com.uncreated.civilized.core.building.logistics.orders.imports.ImportOrder;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
+import com.uncreated.civilized.util.ContainerHelper;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public class FetchExportsFromHome extends ExchangeResourcesAtBuilding {
 
    private Building storehouse;
    private LoadedSettlement settlement;
-   private Collection<PendingShipment> pendingShipments;
 
    public FetchExportsFromHome() {
       super(WorkStates.FETCHING_EXPORTS_FROM_HOME, 120 * 20, 30 * 20);
@@ -56,7 +51,7 @@ public class FetchExportsFromHome extends ExchangeResourcesAtBuilding {
 
       settlement = loadedSettlement.get();
 
-      if (!areThereItemsToExport(settlement))
+      if (!areThereItemsToExport(settlement, targetbuilding, storehouse))
          return false;
 
       return true;
@@ -64,57 +59,97 @@ public class FetchExportsFromHome extends ExchangeResourcesAtBuilding {
 
    @Override
    protected void exchangeResources(ServerLevel level, CivilizedVillager villager, long tickTime) {
-      boolean holdingExportResources = false;
 
       dumpInventoryToChests(villager.getWorkInputInventory());
       dumpInventoryToChests(villager.getLogisticsInventory());
-      Set<Item> toExport = dumpInventoryToChests(villager.getWorkOutputInventory());
+      dumpInventoryToChests(villager.getWorkOutputInventory());
 
-      LogisticsManager logisticsManager = settlement.getBehaviour().getLogisticsManager();
-
-      toExport.forEach(item -> {
-         ExportEverything exportOrder =
-               new ExportEverything(level, item.toString(), i -> i.is(item), StorehouseOrder.Origin.AUTOMATIC);
-         exportOrder.setExpiry(12000);
-         logisticsManager.registerOrder(targetbuilding, exportOrder);
-      });
-
-      List<Container> source = LogisticsOrder.findChests(level, targetbuilding);
-      List<Container> destination = LogisticsOrder.findChests(level, storehouse);
-      for (StorehouseOrder order : logisticsManager.getExportOrders(targetbuilding).orders()) {
-
-         PendingShipment shipment = order.getNextShipment(source, destination);
-         if (order.takeShipment(villager, shipment))
-            holdingExportResources = true;
-      }
-
-      // add back any items that are also mandated by import orders and task requirements
-      for (StorehouseOrder order : logisticsManager.getImportOrders(targetbuilding).orders()) {
-         PendingShipment shipment = order.getNextShipment(destination, source); // note: param inversion is correct here
-         order.returnShipment(villager, shipment);
-      }
-      for (TaskItemRequirement requirement : logisticsManager.getTaskItemRequirements(targetbuilding).orders()) {
-         PendingRequiredItems shipment = requirement.getRequiredItemsToTake(targetbuilding, villager, level);
-         requirement.returnItems(villager, shipment);
-      }
-
-      if (holdingExportResources)
+      if (takeEverythingButLeaveImportOrders(villager, level))
          getStateMachine().queueActionOnce(WorkStates.DROPPING_OFF_EXPORTS_AT_STOREHOUSE);
    }
 
-   private boolean areThereItemsToExport(LoadedSettlement settlement) {
-
-      List<Container> source = LogisticsOrder.findChests(settlement.getLevel(), targetbuilding);
-      List<Container> destination = LogisticsOrder.findChests(settlement.getLevel(), storehouse);
+   public boolean takeEverythingButLeaveImportOrders(CivilizedVillager villager, Level level) {
 
       LogisticsManager logisticsManager = settlement.getBehaviour().getLogisticsManager();
-      LogisticsOrders<ExportOrder> exportOrders = logisticsManager.getExportOrders(targetbuilding);
 
-      for (ExportOrder order : exportOrders.orders()) {
+      List<Container> buildingContainers = LogisticsOrder.findChests(level, targetbuilding);
+      List<Container> storehouseContainers = LogisticsOrder.findChests(level, storehouse);
 
-         PendingShipment shipment = order.getNextShipment(source, destination);
-         if (shipment.shouldShip()) {
-            return true;
+      Collection<ImportOrder> importOrders = logisticsManager.getImportOrders(targetbuilding).orders();
+
+      boolean holdingExportItems = false;
+      for (Container buildingContainer : buildingContainers) {
+
+         for (int i = 0; i < buildingContainer.getContainerSize(); i++) {
+            ItemStack item = buildingContainer.getItem(i);
+
+            if (item.isEmpty())
+               continue;
+
+            int toTake =
+                  adjustTakeSizeIfMandatedByImportOrder(item, buildingContainers, storehouseContainers, importOrders);
+
+            ItemStack remainder =
+                  ContainerHelper.addItemNicely(villager.getLogisticsInventory(), item.copyWithCount(toTake));
+            item.shrink(toTake);
+            ContainerHelper.addItemNicely(buildingContainer, remainder);
+            buildingContainer.setItem(i, item);
+            holdingExportItems = true;
+         }
+      }
+
+      return holdingExportItems;
+   }
+
+   private static int adjustTakeSizeIfMandatedByImportOrder(
+         ItemStack item,
+         List<Container> buildingContainers,
+         List<Container> storehouseContainers,
+         Collection<ImportOrder> storehouseOrders) {
+      int toSendBack = 0;
+      boolean mandatedByImportOrder = false;
+      for (ImportOrder order : storehouseOrders) {
+         if (!order.getItemSearch().test(item))
+            continue;
+
+         mandatedByImportOrder = true;
+         // this item is madated by an import order
+         PendingShipment nextShipment = order.getNextShipment(storehouseContainers, buildingContainers);
+         if (nextShipment.stockSurplusAtDestination() <= 0)
+            continue; // if building does not have a surplus of this item, we cannot export it back to the
+         // storehouse
+
+         int extra = Math.min(nextShipment.stockSurplusAtDestination(), item.getCount());
+         if (extra > toSendBack)
+            toSendBack = extra;
+      }
+
+      if (mandatedByImportOrder)
+         return toSendBack;
+      else
+         return item.getCount();
+   }
+
+   public static boolean areThereItemsToExport(LoadedSettlement settlement, Building targetbuilding, Building storehouse) {
+
+      List<Container> buildingContainers = LogisticsOrder.findChests(settlement.getLevel(), targetbuilding);
+      List<Container> storehouseContainers = LogisticsOrder.findChests(settlement.getLevel(), storehouse);
+
+      LogisticsManager logisticsManager = settlement.getBehaviour().getLogisticsManager();
+      Collection<ImportOrder> importOrders = logisticsManager.getImportOrders(targetbuilding).orders();
+
+      for (Container buildingContainer : buildingContainers) {
+
+         for (int i = 0; i < buildingContainer.getContainerSize(); i++) {
+            ItemStack item = buildingContainer.getItem(i);
+
+            if (item.isEmpty())
+               continue;
+
+            int toTake = adjustTakeSizeIfMandatedByImportOrder(item, buildingContainers, storehouseContainers, importOrders);
+
+            if (toTake > 0)
+               return true;
          }
       }
 

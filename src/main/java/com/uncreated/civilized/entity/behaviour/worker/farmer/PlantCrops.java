@@ -3,10 +3,8 @@ package com.uncreated.civilized.entity.behaviour.worker.farmer;
 import java.util.List;
 import java.util.Optional;
 
-import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import org.slf4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.building.Building;
@@ -21,6 +19,7 @@ import com.uncreated.civilized.core.settlement.entity.LoadedSettlement;
 import com.uncreated.civilized.core.settlement.entity.LoadedSettlements;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.behaviour.MediumDistanceTravelTask;
+import com.uncreated.civilized.entity.behaviour.worker.WorkStates;
 import com.uncreated.civilized.entity.behaviour.worker.WorkTaskBehaviour;
 
 import net.minecraft.core.BlockPos;
@@ -30,7 +29,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -85,8 +83,9 @@ public class PlantCrops extends WorkTaskBehaviour {
                   "seeds",
                   taskItemRequirement.getItemSearch(),
                   StorehouseOrder.Origin.AUTOMATIC,
-                  32,
-                  8);
+                  1,
+                  16,
+                  32);
       importOrder.setExpiry(12000);
       logisticsManager.registerOrder(home, importOrder);
 
