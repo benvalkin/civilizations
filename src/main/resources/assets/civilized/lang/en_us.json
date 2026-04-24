@@ -235,5 +235,8 @@
   "menu.building.residence.smelting_production.tab.heading": "Smelting Production",
   "menu.building.residence.smoking_production.tab.heading": "Smoking Production",
   "menu.building.residence.production_bills.edit_smoking_recipe.description": "Smoking Production",
-  "menu.building.residence.production_bills.edit_blasting_recipe.description": "Blasting Production"
+  "menu.building.residence.production_bills.edit_blasting_recipe.description": "Blasting Production",
+  "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.baker": "Bakers can only produce recipes containing wheat, dough or flour in them.",
+  "menu.building.residence.production_bills.edit_recipe.done.tooltip.invalid_recipe": "Invalid recipe.",
+  "menu.building.residence.production_bills.edit_recipe.done.tooltip.recipe_not_allowed": "Recipe not allowed."
 }

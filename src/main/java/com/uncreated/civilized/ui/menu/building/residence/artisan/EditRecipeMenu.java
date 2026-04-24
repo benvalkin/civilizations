@@ -18,6 +18,7 @@ import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
+import com.uncreated.civilized.networking.packets.TellProductionBillRecipeAllowed;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
 import com.uncreated.civilized.ui.menu.item.management.EyedropperSlot;
 import com.uncreated.civilized.ui.menu.item.management.ReadonlySlot;
@@ -56,7 +57,11 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
    private final ReadonlySlot outputSlot;
 
    @Nullable
+   private final ServerPlayer player;
+
+   @Nullable
    private ServerLevel serverLevel;
+
    @Nullable
    private RecipeHolder<TRecipe> recipe;
    private final boolean isNewBill;
@@ -72,6 +77,7 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
    @Getter
    @Setter
    private boolean desiredProductionEnabled;
+   private boolean recipeAllowed;
 
    // client constructor
    public EditRecipeMenu(
@@ -106,9 +112,13 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
       this.building = building;
       this.productionBillIndex = productionBillIndex;
       this.isNewBill = isNewBill;
-      if (playerInventory.player.level() instanceof ServerLevel sLevel) {
+      if (playerInventory.player instanceof ServerPlayer serverPlayer)
+         this.player = serverPlayer;
+      else
+         this.player = null;
+
+      if (playerInventory.player.level() instanceof ServerLevel sLevel)
          this.serverLevel = sLevel;
-      }
 
       List<EyedropperSlot> inputSlots = setupInputSlots(craftingMenuContainer);
       if (inputSlots.isEmpty())
@@ -121,6 +131,7 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
 
       ArtisanHouseState artisanHouseState = (ArtisanHouseState) building.getState();
 
+      recipeAllowed = false;
       if (isNewBill) {
          existingBill = null;
          outputSlot.set(ItemStack.EMPTY);
@@ -174,7 +185,7 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
 
       ArtisanHouseState artisanHouseState = (ArtisanHouseState) building.getState();
 
-      if (recipe != null) {
+      if (recipe != null && recipeAllowed) {
 
          ProductionBill newBill =
                new ProductionBill(
@@ -228,13 +239,30 @@ public abstract class EditRecipeMenu<TRecipe extends net.minecraft.world.item.cr
       if (recipeResult.isEmpty()) {
          outputSlot.set(ItemStack.EMPTY);
          this.recipe = null;
+         tellClientRecipeAllowed(RecipeAllowed.INVALID_RECIPE);
          return;
       }
 
       this.recipe = recipeResult.get().getFirst();
-      ItemStack resultItem = this.recipe.value().assemble(recipeResult.get().getSecond(), serverLevel.registryAccess());
+      TRecipeInput recipeInput = recipeResult.get().getSecond();
+      ItemStack resultItem = this.recipe.value().assemble(recipeInput, serverLevel.registryAccess());
 
       outputSlot.set(resultItem);
+
+      ArtisanHouseState artisanHouseState = (ArtisanHouseState) building.getState();
+      recipeAllowed = artisanHouseState.recipeAllowed(getProductionType(), recipeInput, serverLevel);
+
+      if (recipeAllowed)
+         tellClientRecipeAllowed(RecipeAllowed.ALLOWED);
+      else
+         tellClientRecipeAllowed(RecipeAllowed.NOT_ALLOWED);
+   }
+
+   protected void tellClientRecipeAllowed(RecipeAllowed result) {
+      if (player == null)
+         return;
+
+      PacketDistributor.sendToPlayer(player, new TellProductionBillRecipeAllowed(result));
    }
 
    protected abstract Optional<Pair<RecipeHolder<TRecipe>, TRecipeInput>> getRecipeFromInputContainer(

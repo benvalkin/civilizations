@@ -13,14 +13,18 @@ import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import com.uncreated.civilized.core.building.production.orders.ProductionOrder;
 
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 public abstract class ArtisanHouseState extends BuildingState {
@@ -203,5 +207,19 @@ public abstract class ArtisanHouseState extends BuildingState {
       }
 
       return result;
+   }
+
+   public abstract boolean recipeAllowed(ProductionType productionType, RecipeInput recipeInput, ServerLevel level);
+   public abstract Tooltip getAllowedRecipeHelpTooltip();
+
+   protected static boolean recipeHasAtLeastOneIngredientWithTag(RecipeInput recipeInput, List<TagKey<Item>> allowedTags) {
+      for (int i = 0; i < recipeInput.size(); ++i) {
+         ItemStack item = recipeInput.getItem(i);
+
+         if (allowedTags.stream().anyMatch(item::is))
+            return true;
+      }
+
+      return false;
    }
 }

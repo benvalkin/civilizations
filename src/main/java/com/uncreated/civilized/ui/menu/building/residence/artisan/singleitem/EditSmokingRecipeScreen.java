@@ -2,6 +2,7 @@ package com.uncreated.civilized.ui.menu.building.residence.artisan.singleitem;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import com.mojang.datafixers.util.Pair;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.EditRecipeScreen;
 
 import net.minecraft.network.chat.Component;
@@ -16,5 +17,9 @@ public class EditSmokingRecipeScreen extends EditRecipeScreen<EditSmokingRecipeM
 
    public EditSmokingRecipeScreen(EditSmokingRecipeMenu menu, Inventory playerInventory, Component title) {
       super(MENU_TEXTURE, menu, playerInventory, title);
+   }
+
+   protected Pair<Integer, Integer> getRecipeAllowedIconXYOffset() {
+      return Pair.of(67, 22);
    }
 }

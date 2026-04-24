@@ -27,7 +27,7 @@ public abstract class ItemManagementScreen<T extends ItemManagementMenu> extends
    protected int imageHeight; // it seems like shadowing the base AbstractContainerScreen's imageHeight (but not
                               // imageWidth) makes the scaling work nicely...
 
-   private Button done;
+   protected Button done;
 
    public ItemManagementScreen(ResourceLocation menuTexture, T menu, Inventory playerInventory, Component title) {
       super(menu, playerInventory, title);

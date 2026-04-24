@@ -20,7 +20,7 @@ public class BuildingState {
 
    public static BuildingState create(Building building) {
       return switch (building.getBuildingType()) {
-      case BAKER_HOUSE -> new BakerHouseState(building);
+      case BAKER_HOUSE -> new BakeryState(building);
       case CROP_FARM -> new CropFarmState(building);
       case GROVE -> new GroveState(building);
       case CATTLE_FARM, SHEEP_FARM, HOG_FARM, CHICKEN_FARM -> new AnimalFarmState(building);

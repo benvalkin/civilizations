@@ -18,6 +18,7 @@ import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.networking.packets.RequestBuildingItemManagementScreen;
 import com.uncreated.civilized.networking.packets.RequestEditRecipeProductionScreen;
 import com.uncreated.civilized.networking.packets.ShowBuildingScreen;
+import com.uncreated.civilized.networking.packets.TellProductionBillRecipeAllowed;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.crafting.EditCraftingRecipeMenu;
 import com.uncreated.civilized.ui.menu.dialogue.VillagerDialogueScreen;
 
@@ -96,5 +97,10 @@ public class PacketRegistry {
             EditProductionBillUpdateState.TYPE,
             EditProductionBillUpdateState.CODEC,
             EditCraftingRecipeMenu::serverReceiveDesiredProductionBillAmount);
+
+      registrar.playToClient(
+            TellProductionBillRecipeAllowed.TYPE,
+            TellProductionBillRecipeAllowed.STREAM_CODEC,
+            TellProductionBillRecipeAllowed::clientReceiveRecipeAllowed);
    }
 }
