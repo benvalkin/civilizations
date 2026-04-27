@@ -3,10 +3,10 @@ package com.uncreated.civilized;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
-import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementRegistry;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.settlement.entity.events.SettlementEntityEvents;
+import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementRegistry;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
+import com.uncreated.civilized.core.settlement.entity.events.SettlementEntityEvents;
 import com.uncreated.civilized.core.settlement.events.SettlementStoreEvents;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.events.VillagerStoreEvents;
@@ -26,7 +26,6 @@ import com.uncreated.civilized.ui.events.UIUpdateEvents;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -110,8 +109,8 @@ public class CivilizedMod {
 
    // Add the example block item to the building blocks tab
    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-      if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS)
-         event.accept(BlockRegistry.EXAMPLE_BLOCK_ITEM);
+      // if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS)
+      // event.accept(BlockRegistry.EXAMPLE_BLOCK_ITEM);
    }
 
    // You can use SubscribeEvent and let the Event Bus discover methods to call
@@ -135,7 +134,7 @@ public class CivilizedMod {
 
    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with
    // @SubscribeEvent
-   @EventBusSubscriber(modid = CIVILIZED_MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+   @EventBusSubscriber(modid = CIVILIZED_MOD_ID, value = Dist.CLIENT)
    public static class ClientModEvents {
       @SubscribeEvent
       public static void onClientSetup(FMLClientSetupEvent event) {

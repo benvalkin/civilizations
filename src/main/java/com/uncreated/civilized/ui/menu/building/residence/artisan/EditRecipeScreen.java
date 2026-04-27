@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import com.mojang.datafixers.util.Pair;
 import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
-import com.uncreated.civilized.core.building.state.ArtisanHouseState;
+import com.uncreated.civilized.core.building.state.artisan.ArtisanHouseState;
 import com.uncreated.civilized.networking.packets.EditProductionBillUpdateState;
 import com.uncreated.civilized.ui.components.widget.ItemQuantitySelectorWidget;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementScreen;

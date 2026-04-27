@@ -82,7 +82,6 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
          ServerVillagerStore.INSTANCE.setDirty();
          ServerVillagerStore.INSTANCE.replicateChange(villagerInfo, StoreOperation.UPDATE);
       }
-
       if (homeChanged) {
          oldHome.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
          home.ifPresent(b -> ServerBuildingsStore.INSTANCE.replicateChange(b, StoreOperation.UPDATE));
@@ -140,9 +139,12 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       } else if (villagerInfo.getOccupation() == VillagerOccupation.RANCHER) {
          filter =
                b -> b == BuildingType.CATTLE_FARM || b == BuildingType.CHICKEN_FARM || b == BuildingType.SHEEP_FARM
-                     || b == BuildingType.HOG_FARM;
-
-      } else if (villagerInfo.getOccupation() == VillagerOccupation.BAKER) {
+                     || b == BuildingType.PIG_FARM;
+      } else if (villagerInfo.getOccupation() == VillagerOccupation.BEEKEEPER) {
+         filter = b -> b == BuildingType.BEE_FARM;
+      } else if (villagerInfo.getOccupation() == VillagerOccupation.FISHERMAN) {
+         filter = b -> b == BuildingType.FISHING_SPOT;
+      } else if (villagerInfo.getOccupation().isArtisan()) { // an artisan's worksite is their own home
          return ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
       } else
          return Optional.empty();

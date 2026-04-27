@@ -19,7 +19,7 @@ public class AnimalFoodEyedropperSlot extends EyedropperSlot {
       return switch (buildingType) {
       case CATTLE_FARM -> stack.is(ItemTags.COW_FOOD);
       case SHEEP_FARM -> stack.is(ItemTags.SHEEP_FOOD);
-      case HOG_FARM -> stack.is(ItemTags.PIG_FOOD);
+      case PIG_FARM -> stack.is(ItemTags.PIG_FOOD);
       case CHICKEN_FARM -> stack.is(ItemTags.CHICKEN_FOOD);
       default -> throw new IllegalArgumentException();
       };

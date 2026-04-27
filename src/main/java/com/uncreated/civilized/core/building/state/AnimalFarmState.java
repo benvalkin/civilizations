@@ -64,7 +64,7 @@ public class AnimalFarmState extends BuildingState {
          case SHEEP_FARM:
             foodSlots[0] = new ItemStack(Items.WHEAT);
             break;
-         case HOG_FARM:
+         case PIG_FARM:
             foodSlots[0] = new ItemStack(Items.POTATO);
             foodSlots[1] = new ItemStack(Items.CARROT);
             foodSlots[2] = new ItemStack(Items.BEETROOT);
@@ -72,6 +72,11 @@ public class AnimalFarmState extends BuildingState {
          case CHICKEN_FARM:
             foodSlots[0] = new ItemStack(Items.WHEAT_SEEDS);
             foodSlots[1] = new ItemStack(Items.BEETROOT_SEEDS);
+            break;
+         case BEE_FARM:
+            foodSlots[0] = new ItemStack(Items.POPPY);
+            foodSlots[1] = new ItemStack(Items.DANDELION);
+            foodSlots[2] = new ItemStack(Items.OXEYE_DAISY);
             break;
          }
       }

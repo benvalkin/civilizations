@@ -7,7 +7,7 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
-import com.uncreated.civilized.core.building.state.ArtisanHouseState;
+import com.uncreated.civilized.core.building.state.artisan.ArtisanHouseState;
 import com.uncreated.civilized.networking.packets.RequestEditRecipeProductionScreen;
 import com.uncreated.civilized.ui.components.buttons.TrashcanButton;
 import com.uncreated.civilized.ui.components.widget.ItemDisplayWidget;

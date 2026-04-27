@@ -11,6 +11,10 @@ import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.BakeryBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.BlacksmithBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.ButcheryBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.CraftsmanHouseBuildingScreen;
+import com.uncreated.civilized.ui.menu.building.residence.artisan.MasonBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.WorksiteBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.AnimalFarmBuildingScreen;
 import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.CropFarmBuildingScreen;
@@ -93,8 +97,18 @@ public abstract class ABuildingScreen extends AScreenWithTabs {
 
       if (buildingType == BuildingType.INN)
          return new InnBuildingScreen(context, component);
-      if (buildingType.isArtisanBuilding())
-         return new BakeryBuildingScreen(context, component);
+      if (buildingType.isArtisanBuilding()) {
+         if (buildingType == BuildingType.BAKER_HOUSE)
+            return new BakeryBuildingScreen(context, component);
+         else if (buildingType == BuildingType.BUTCHER_HOUSE)
+            return new ButcheryBuildingScreen(context, component);
+         else if (buildingType == BuildingType.BLACKSMITH_HOUSE)
+            return new BlacksmithBuildingScreen(context, component);
+         else if (buildingType == BuildingType.MASON_HOUSE)
+            return new MasonBuildingScreen(context, component);
+         else
+            return new CraftsmanHouseBuildingScreen(context, component);
+      }
       if (buildingType.isPermanentResidence())
          return new ResidenceBuildingScreen(context, component);
       if (buildingType.isWorksite()) {

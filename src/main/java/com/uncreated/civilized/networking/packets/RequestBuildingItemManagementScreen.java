@@ -73,7 +73,7 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
                   i,
                   inventory,
                   player) -> new ChooseSaplingsMenu(i, inventory, new SimpleContainer(1), settlement, building.get());
-            case CATTLE_FARM, SHEEP_FARM, HOG_FARM, CHICKEN_FARM -> (
+            case CATTLE_FARM, SHEEP_FARM, PIG_FARM, CHICKEN_FARM -> (
                   i,
                   inventory,
                   player) -> new ChooseAnimalFoodMenu(i, inventory, new SimpleContainer(3), settlement, building.get());

@@ -1,43 +1,52 @@
 package com.uncreated.civilized.core.building;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 
 public enum BuildingType {
    NONE,
    INN,
    TOWN_HALL,
+   TOWN_SQUARE,
    STOREHOUSE,
    CHURCH,
    TAVERN,
    FARMER_HOUSE,
    RANCHER_HOUSE,
    WOODCUTTER_HOUSE,
+   STONECUTTER_HOUSE,
    MINER_HOUSE,
+   FISHERMAN_HOUSE,
    BEEKEEPER_HOUSE,
    BAKER_HOUSE,
    BUTCHER_HOUSE,
-   TANNER_HOUSE,
    BLACKSMITH_HOUSE,
+   TOOLSMITH_HOUSE,
+   WEAPONSMITH_HOUSE,
+   ARMORER_HOUSE,
    CARPENTER_HOUSE,
+   MASON_HOUSE,
+   LEATHERWORKER_HOUSE,
+   WEAVER_HOUSE,
+   FLETCHER_HOUSE,
+   CARTOGRAPHER_HOUSE,
+   ARTIST_HOUSE,
    GROVE,
    CROP_FARM,
    CATTLE_FARM,
-   HOG_FARM,
+   PIG_FARM,
    SHEEP_FARM,
    CHICKEN_FARM,
    QUARRY,
    MINE,
+   BEE_FARM,
+   FISHING_SPOT,
    BARRACKS,
-   GUARD_POST;
+   GUARD_POST,
+   FANCY_HOUSE;
 
    public String translationKey() {
       return "building." + this.name().toLowerCase();
@@ -57,29 +66,46 @@ public enum BuildingType {
       return switch (this) {
       case FARMER_HOUSE, CROP_FARM -> VillagerOccupation.FARMER;
       case WOODCUTTER_HOUSE, GROVE -> VillagerOccupation.WOODCUTTER;
+      case STONECUTTER_HOUSE, QUARRY -> VillagerOccupation.STONECUTTER;
       case MINER_HOUSE, MINE -> VillagerOccupation.MINER;
-      case RANCHER_HOUSE, CATTLE_FARM, CHICKEN_FARM, SHEEP_FARM, HOG_FARM -> VillagerOccupation.RANCHER;
+      case RANCHER_HOUSE, CATTLE_FARM, CHICKEN_FARM, SHEEP_FARM, PIG_FARM -> VillagerOccupation.RANCHER;
+      case BEEKEEPER_HOUSE -> VillagerOccupation.BEEKEEPER;
+      case FISHERMAN_HOUSE -> VillagerOccupation.FISHERMAN;
       case BAKER_HOUSE -> VillagerOccupation.BAKER;
       case BUTCHER_HOUSE -> VillagerOccupation.BUTCHER;
-      case TANNER_HOUSE -> VillagerOccupation.TANNER;
       case BLACKSMITH_HOUSE -> VillagerOccupation.BLACKSMITH;
+      case TOOLSMITH_HOUSE -> VillagerOccupation.TOOLSMITH;
+      case WEAPONSMITH_HOUSE -> VillagerOccupation.WEAPONSMITH;
+      case ARMORER_HOUSE -> VillagerOccupation.ARMORER;
       case CARPENTER_HOUSE -> VillagerOccupation.CARPENTER;
+      case MASON_HOUSE -> VillagerOccupation.MASON;
+      case LEATHERWORKER_HOUSE -> VillagerOccupation.LEATHERWORKER;
+      case WEAVER_HOUSE -> VillagerOccupation.WEAVER;
+      case CARTOGRAPHER_HOUSE -> VillagerOccupation.CARTOGRAPHER;
+      case ARTIST_HOUSE -> VillagerOccupation.ARTIST;
+      case CHURCH -> VillagerOccupation.PRIEST;
+      case BARRACKS, GUARD_POST -> VillagerOccupation.SOLDIER;
+      case TAVERN -> VillagerOccupation.TAVERN_KEEPER;
       default -> VillagerOccupation.UNEMPLOYED;
       };
    }
 
    public boolean isPermanentResidence() {
+
+      if (isWorksite())
+         return false;
+
       return switch (this) {
-      case FARMER_HOUSE, RANCHER_HOUSE, WOODCUTTER_HOUSE, MINER_HOUSE, BEEKEEPER_HOUSE, BAKER_HOUSE, BUTCHER_HOUSE,
-            TANNER_HOUSE, BLACKSMITH_HOUSE, CARPENTER_HOUSE, BARRACKS, GUARD_POST ->
-         true;
-      default -> false;
+      case INN, STOREHOUSE, TOWN_SQUARE -> false;
+      default -> true;
       };
    }
 
    public boolean isArtisanBuilding() {
       return switch (this) {
-      case BAKER_HOUSE, BUTCHER_HOUSE, TANNER_HOUSE, BLACKSMITH_HOUSE, CARPENTER_HOUSE -> true;
+      case BAKER_HOUSE, BUTCHER_HOUSE, LEATHERWORKER_HOUSE, WEAVER_HOUSE, BLACKSMITH_HOUSE, TOOLSMITH_HOUSE, WEAPONSMITH_HOUSE,
+           ARMORER_HOUSE, CARPENTER_HOUSE, MASON_HOUSE, ARTIST_HOUSE, CARTOGRAPHER_HOUSE ->
+         true;
       default -> false;
       };
    }
@@ -98,24 +124,16 @@ public enum BuildingType {
 
    public boolean isWorksite() {
       return switch (this) {
-      case GROVE, CROP_FARM, CATTLE_FARM, HOG_FARM, SHEEP_FARM, CHICKEN_FARM, QUARRY, MINE -> true;
+      case GROVE, CROP_FARM, CATTLE_FARM, PIG_FARM, SHEEP_FARM, CHICKEN_FARM, QUARRY, MINE, BEE_FARM, FISHING_SPOT ->
+         true;
       default -> false;
       };
    }
 
    public boolean isAnimalFarm() {
       return switch (this) {
-      case CATTLE_FARM, HOG_FARM, SHEEP_FARM, CHICKEN_FARM -> true;
+      case CATTLE_FARM, PIG_FARM, SHEEP_FARM, CHICKEN_FARM, BEE_FARM -> true;
       default -> false;
-      };
-   }
-
-   public Collection<Item> getAnimalFoodItems() {
-      return switch (this) {
-      case CATTLE_FARM, SHEEP_FARM -> List.of(Items.WHEAT);
-      case CHICKEN_FARM -> List.of(Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, Items.BEETROOT_SEEDS);
-      case HOG_FARM -> List.of(Items.CARROT, Items.POTATO, Items.BEETROOT);
-      default -> List.of();
       };
    }
 }

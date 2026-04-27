@@ -36,14 +36,14 @@ public class ProductionBill {
    public static final int DEFAULT_STARTING_PRODUCTION_TOKENS = 8;
 
    public ProductionBill(
-         String minecraftRecipeName,
+         String recipeName,
          ProductionType productionType,
          ProductionStrategyType productionStrategyType,
          int billAmount,
          boolean enabled,
          List<ItemStack> inputItems,
          ItemStack displayItem) {
-      this.minecraftRecipeName = minecraftRecipeName;
+      this.minecraftRecipeName = recipeName;
       this.productionType = productionType;
       this.billAmount = billAmount;
       this.enabled = enabled;

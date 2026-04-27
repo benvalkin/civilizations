@@ -2,13 +2,16 @@ package com.uncreated.civilized.neoforge.registration.creativetab;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.neoforge.registration.ItemRegistry;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class CreativeTab {
@@ -26,22 +29,14 @@ public class CreativeTab {
                      .title(Component.translatable("itemGroup.civilized")) // The language key for the title of your
                                                                            // CreativeModeTab
                      .withTabsBefore(CreativeModeTabs.COMBAT)
-                     .icon(() -> ItemRegistry.FARMER_HOUSE.get().getDefaultInstance())
+                     .icon(() -> ItemRegistry.BUILDING_DEEDS.get(BuildingType.FARMER_HOUSE).get().getDefaultInstance())
                      .displayItems((parameters, output) -> {
                         output.accept(ItemRegistry.SETTLEMENT_MANDATE.get());
                         output.accept(ItemRegistry.COIN.get());
                         output.accept(ItemRegistry.COIN_STACK.get());
-                        output.accept(ItemRegistry.STOREHOUSE.get());
-                        output.accept(ItemRegistry.INN.get());
-                        output.accept(ItemRegistry.FARMER_HOUSE.get());
-                        output.accept(ItemRegistry.WOODCUTTER_HOUSE.get());
-                        output.accept(ItemRegistry.RANCHER_HOUSE.get());
-                        output.accept(ItemRegistry.MINER_HOUSE.get());
-                        output.accept(ItemRegistry.BAKER_HOUSE.get());
-                        output.accept(ItemRegistry.CROP_FARM.get());
-                        output.accept(ItemRegistry.GROVE.get());
-                        output.accept(ItemRegistry.CATTLE_FARM.get());
-                        output.accept(ItemRegistry.MINE.get());
+                        for (DeferredItem<Item> buildingDeed : ItemRegistry.BUILDING_DEEDS.values()) {
+                           output.accept(buildingDeed.get());
+                        }
                      })
                      .build());
 }
