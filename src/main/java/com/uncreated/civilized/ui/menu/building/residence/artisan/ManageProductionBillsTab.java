@@ -43,15 +43,7 @@ public class ManageProductionBillsTab extends ABuildingScreenTab {
          Font font,
          BuildingScreenContext context,
          ProductionType productionType) {
-      super(
-            index,
-            x,
-            y,
-            width,
-            height,
-            font,
-            productionType.getHeading(),
-            context);
+      super(index, x, y, width, height, font, productionType.heading(), context);
       this.productionType = productionType;
 
       addProductionBill =

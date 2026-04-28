@@ -6,6 +6,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -24,36 +25,36 @@ public class BlacksmithHouseState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING, ProductionType.SMELTING);
+      return List.of(ProductionTypes.CRAFTING, ProductionTypes.SMELTING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:iron_ingot",
-                  ProductionType.CRAFTING,
-                  Collections.nCopies(9, new ItemStack(Items.IRON_NUGGET)),
-                  new ItemStack(Items.IRON_INGOT)));
-      case SMELTING -> List.of(
-            createDefaultBill(
-                  "minecraft:charcoal",
-                  ProductionType.SMELTING,
-                  List.of(new ItemStack(Items.OAK_LOG)),
-                  new ItemStack(Items.CHARCOAL)),
-            createDefaultBill(
-                  "minecraft:iron_ingot",
-                  ProductionType.SMELTING,
-                  List.of(new ItemStack(Items.IRON_ORE)),
-                  new ItemStack(Items.IRON_INGOT)),
-            createDefaultBill(
-                  "minecraft:copper_ingot",
-                  ProductionType.SMELTING,
-                  List.of(new ItemStack(Items.COPPER_ORE)),
-                  new ItemStack(Items.COPPER_INGOT)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:iron_ingot",
+                     ProductionTypes.CRAFTING,
+                     Collections.nCopies(9, new ItemStack(Items.IRON_NUGGET)),
+                     new ItemStack(Items.IRON_INGOT)));
+      if (productionType.is(ProductionTypes.SMELTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:charcoal",
+                     ProductionTypes.SMELTING,
+                     List.of(new ItemStack(Items.OAK_LOG)),
+                     new ItemStack(Items.CHARCOAL)),
+               createDefaultBill(
+                     "minecraft:iron_ingot",
+                     ProductionTypes.SMELTING,
+                     List.of(new ItemStack(Items.IRON_ORE)),
+                     new ItemStack(Items.IRON_INGOT)),
+               createDefaultBill(
+                     "minecraft:copper_ingot",
+                     ProductionTypes.SMELTING,
+                     List.of(new ItemStack(Items.COPPER_ORE)),
+                     new ItemStack(Items.COPPER_INGOT)));
+      return List.of();
    }
 
    private static final List<TagKey<Item>> ALLOWED_INGREDIENT_TAGS =

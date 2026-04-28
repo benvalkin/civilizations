@@ -2,6 +2,7 @@ package com.uncreated.civilized.core.villagerinfo;
 
 import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
+import com.uncreated.civilized.CivilizedMod;
 import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.BuildingTypes;
 import com.uncreated.civilized.entity.behaviour.worker.WorkActivities;
@@ -10,11 +11,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 
+@EventBusSubscriber(modid = CivilizedMod.CIVILIZED_MOD_ID)
 public class VillagerOccupations {
 
    private static final ResourceKey<Registry<VillagerOccupation>> OCCUPATION_TYPES_KEY =
@@ -25,6 +28,12 @@ public class VillagerOccupations {
 
    public static final DeferredRegister<VillagerOccupation> OCCUPATION_TYPES =
          DeferredRegister.create(OCCUPATION_TYPES_INTERNAL, CIVILIZED_MOD_ID);
+
+   private static void registerOccupation(
+         RegisterEvent.RegisterHelper<VillagerOccupation> registry,
+         VillagerOccupation occupation) {
+      registry.register(occupation.resourceLocation(), occupation);
+   }
 
    public static ResourceLocation createResourceKey(String villagerOccupationName) {
       return ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, villagerOccupationName);
@@ -67,14 +76,6 @@ public class VillagerOccupations {
          registerOccupation(registry, CARTOGRAPHER);
          registerOccupation(registry, ARTIST);
       });
-   }
-
-   private static void registerOccupation(
-         RegisterEvent.RegisterHelper<VillagerOccupation> registry,
-         VillagerOccupation occupation) {
-      ResourceLocation resourceLocation =
-            ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, occupation.toString());
-      registry.register(resourceLocation, occupation);
    }
 
    public static final VillagerOccupation UNEMPLOYED =

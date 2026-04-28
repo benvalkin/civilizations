@@ -6,6 +6,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 import com.uncreated.civilized.tag.CommonTags;
 
 import net.minecraft.client.gui.components.Tooltip;
@@ -25,31 +26,31 @@ public class BakeryState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING, ProductionType.SMELTING);
+      return List.of(ProductionTypes.CRAFTING, ProductionTypes.SMELTING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:bread",
-                  ProductionType.CRAFTING,
-                  Collections.nCopies(3, new ItemStack(Items.WHEAT)),
-                  new ItemStack(Items.BREAD)),
-            createDefaultBill(
-                  "minecraft:sugar",
-                  ProductionType.CRAFTING,
-                  List.of(new ItemStack(Items.SUGAR_CANE)),
-                  new ItemStack(Items.SUGAR)));
-      case SMELTING -> List.of(
-            createDefaultBill(
-                  "minecraft:baked_potato",
-                  ProductionType.SMELTING,
-                  List.of(new ItemStack(Items.POTATO)),
-                  new ItemStack(Items.BAKED_POTATO)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:bread",
+                     ProductionTypes.CRAFTING,
+                     Collections.nCopies(3, new ItemStack(Items.WHEAT)),
+                     new ItemStack(Items.BREAD)),
+               createDefaultBill(
+                     "minecraft:sugar",
+                     ProductionTypes.CRAFTING,
+                     List.of(new ItemStack(Items.SUGAR_CANE)),
+                     new ItemStack(Items.SUGAR)));
+      if (productionType.is(ProductionTypes.SMELTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:baked_potato",
+                     ProductionTypes.SMELTING,
+                     List.of(new ItemStack(Items.POTATO)),
+                     new ItemStack(Items.BAKED_POTATO)));
+      return List.of();
    }
 
    private static final List<TagKey<Item>> ALLOWED_INGREDIENT_TAGS =

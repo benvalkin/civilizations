@@ -193,7 +193,7 @@ public abstract class CookItemsWithFuel extends WorkTaskBehaviour {
       List<PendingProductionOutput.ConsumableIngredientStack> toSmelt = pendingOutput.getConsumableIngredients();
 
       PendingProductionOutput.ConsumableIngredientStack fuel =
-            pendingOutput.getConsumableFuel(cookingMachine.getProductionType().getRecipeType(), 8, level);
+            pendingOutput.getConsumableFuel(cookingMachine.getProductionType().recipeType(), 8, level);
 
       // try place fuel, or leave alone if there is already fuel
       if (!fuel.subStacks().isEmpty()) {

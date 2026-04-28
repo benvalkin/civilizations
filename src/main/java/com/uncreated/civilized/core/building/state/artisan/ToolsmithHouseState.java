@@ -5,6 +5,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -24,43 +25,42 @@ public class ToolsmithHouseState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING);
+      return List.of(ProductionTypes.CRAFTING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:stone_axe",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        new ItemStack(Items.COBBLESTONE),
-                        new ItemStack(Items.COBBLESTONE),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.COBBLESTONE),
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY),
-                  new ItemStack(Items.STONE_AXE)),
-            createDefaultBill(
-                  "minecraft:stone_pickaxe",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        new ItemStack(Items.COBBLESTONE),
-                        new ItemStack(Items.COBBLESTONE),
-                        new ItemStack(Items.COBBLESTONE),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY),
-                  new ItemStack(Items.STONE_PICKAXE)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:stone_axe",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           new ItemStack(Items.COBBLESTONE),
+                           new ItemStack(Items.COBBLESTONE),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.COBBLESTONE),
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY),
+                     new ItemStack(Items.STONE_AXE)),
+               createDefaultBill(
+                     "minecraft:stone_pickaxe",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           new ItemStack(Items.COBBLESTONE),
+                           new ItemStack(Items.COBBLESTONE),
+                           new ItemStack(Items.COBBLESTONE),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY),
+                     new ItemStack(Items.STONE_PICKAXE)));
+      return List.of();
    }
 
    private static final List<TagKey<Item>> ALLOWED_OUTPUT_TAGS = List.of(Tags.Items.TOOLS);

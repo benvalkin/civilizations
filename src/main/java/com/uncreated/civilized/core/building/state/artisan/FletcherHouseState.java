@@ -5,6 +5,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -23,57 +24,56 @@ public class FletcherHouseState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING);
+      return List.of(ProductionTypes.CRAFTING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:bow",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STRING),
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STRING),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STRING)),
-                  new ItemStack(Items.BOW)),
-            createDefaultBill(
-                  "minecraft:arrow",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.FLINT),
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.FEATHER),
-                        ItemStack.EMPTY),
-                  new ItemStack(Items.ARROW)),
-            createDefaultBill(
-                  "minecraft:fishing_rod",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STRING),
-                        new ItemStack(Items.STICK),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STRING)),
-                  new ItemStack(Items.FISHING_ROD)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:bow",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STRING),
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STRING),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STRING)),
+                     new ItemStack(Items.BOW)),
+               createDefaultBill(
+                     "minecraft:arrow",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.FLINT),
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.FEATHER),
+                           ItemStack.EMPTY),
+                     new ItemStack(Items.ARROW)),
+               createDefaultBill(
+                     "minecraft:fishing_rod",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STRING),
+                           new ItemStack(Items.STICK),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STRING)),
+                     new ItemStack(Items.FISHING_ROD)));
+      return List.of();
    }
 
    private static final List<TagKey<Item>> ALLOWED_INGREDIENT_TAGS = List.of(Tags.Items.FEATHERS, Tags.Items.STRINGS);

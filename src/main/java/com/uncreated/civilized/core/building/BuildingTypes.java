@@ -4,8 +4,9 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 
 import java.util.List;
 
+import com.uncreated.civilized.CivilizedMod;
 import com.uncreated.civilized.core.building.entity.behaviour.ArtisanHouseBehaviour;
-import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 import com.uncreated.civilized.core.building.state.CropFarmState;
 import com.uncreated.civilized.core.building.state.GroveState;
 import com.uncreated.civilized.core.building.state.animalfarm.BeeFarmState;
@@ -41,11 +42,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 
+@EventBusSubscriber(modid = CivilizedMod.CIVILIZED_MOD_ID)
 public class BuildingTypes {
 
    private static final ResourceKey<Registry<BuildingType>> BUILDING_TYPES_KEY =
@@ -58,6 +61,12 @@ public class BuildingTypes {
 
    public static ResourceLocation createResourceKey(String buildingTypeName) {
       return ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, buildingTypeName);
+   }
+
+   private static void registerBuildingType(
+         RegisterEvent.RegisterHelper<BuildingType> registry,
+         BuildingType buildingType) {
+      registry.register(buildingType.resourceLocation(), buildingType);
    }
 
    public static BuildingType getFromResourceLocation(ResourceLocation resourceLocation) {
@@ -112,14 +121,6 @@ public class BuildingTypes {
       });
    }
 
-   private static void registerBuildingType(
-         RegisterEvent.RegisterHelper<BuildingType> registry,
-         BuildingType buildingType) {
-      ResourceLocation resourceLocation =
-            ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, buildingType.toString());
-      registry.register(resourceLocation, buildingType);
-   }
-
    public static BuildingType TOWN_HALL = BuildingType.builder(createResourceKey("town_hall")).build();
    public static BuildingType INN =
          BuildingType.builder(createResourceKey("inn"))
@@ -149,12 +150,12 @@ public class BuildingTypes {
    public static BuildingType FISHERMAN_HOUSE =
          BuildingType.builder(createResourceKey("fisherman_house")).isResidence(true).build();
    public static BuildingType BEEKEEPER_HOUSE =
-         BuildingType.builder(createResourceKey("farmer_house")).isResidence(true).build();
+         BuildingType.builder(createResourceKey("beekeeper_house")).isResidence(true).build();
 
    public static BuildingType BAKER_HOUSE =
          BuildingType.builder(createResourceKey("baker_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING, ProductionType.SMELTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING, ProductionTypes.SMELTING))
                .createState(BakeryState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(BakeryBuildingScreen::new)
@@ -163,7 +164,7 @@ public class BuildingTypes {
    public static BuildingType BUTCHER_HOUSE =
          BuildingType.builder(createResourceKey("butcher_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING, ProductionType.SMOKING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING, ProductionTypes.SMOKING))
                .createState(ButcheryState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(ButcheryBuildingScreen::new)
@@ -172,7 +173,7 @@ public class BuildingTypes {
    public static BuildingType BLACKSMITH_HOUSE =
          BuildingType.builder(createResourceKey("blacksmith_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING, ProductionType.BLASTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING, ProductionTypes.BLASTING))
                .createState(BlacksmithHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(BlacksmithBuildingScreen::new)
@@ -181,7 +182,7 @@ public class BuildingTypes {
    public static BuildingType MASON_HOUSE =
          BuildingType.builder(createResourceKey("mason_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING, ProductionType.SMELTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING, ProductionTypes.SMELTING))
                .createState(MasonHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(MasonBuildingScreen::new)
@@ -190,7 +191,7 @@ public class BuildingTypes {
    public static BuildingType CARPENTER_HOUSE =
          BuildingType.builder(createResourceKey("carpenter_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(CarpenterHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -199,7 +200,7 @@ public class BuildingTypes {
    public static BuildingType TOOLSMITH_HOUSE =
          BuildingType.builder(createResourceKey("toolsmith_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(ToolsmithHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -208,7 +209,7 @@ public class BuildingTypes {
    public static BuildingType WEAPONSMITH_HOUSE =
          BuildingType.builder(createResourceKey("weaponsmith_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(WeaponsmithHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -217,7 +218,7 @@ public class BuildingTypes {
    public static BuildingType ARMORER_HOUSE =
          BuildingType.builder(createResourceKey("armorer_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(ArmorerHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -226,7 +227,7 @@ public class BuildingTypes {
    public static BuildingType LEATHERWORKER_HOUSE =
          BuildingType.builder(createResourceKey("leatherworker_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(LeatherworkerHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -234,7 +235,7 @@ public class BuildingTypes {
    public static BuildingType WEAVER_HOUSE =
          BuildingType.builder(createResourceKey("weaver_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(WeaverHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -243,7 +244,7 @@ public class BuildingTypes {
    public static BuildingType FLETCHER_HOUSE =
          BuildingType.builder(createResourceKey("fletcher_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(FletcherHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -252,7 +253,7 @@ public class BuildingTypes {
    public static BuildingType CARTOGRAPHER_HOUSE =
          BuildingType.builder(createResourceKey("cartographer_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(CartographerHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)
@@ -261,7 +262,7 @@ public class BuildingTypes {
    public static BuildingType ARTIST_HOUSE =
          BuildingType.builder(createResourceKey("artist_house"))
                .isResidence(true)
-               .supportedProductionTypes(List.of(ProductionType.CRAFTING))
+               .supportedProductionTypes(List.of(ProductionTypes.CRAFTING))
                .createState(ArtistHouseState::new)
                .createBehaviour(ArtisanHouseBehaviour::new)
                .buildingScreenSupplier(CraftsmanHouseBuildingScreen::new)

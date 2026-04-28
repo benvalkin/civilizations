@@ -6,6 +6,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -22,34 +23,33 @@ public class CartographerHouseState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING);
+      return List.of(ProductionTypes.CRAFTING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:paper",
-                  ProductionType.CRAFTING,
-                  Collections.nCopies(3, new ItemStack(Items.SUGAR_CANE)),
-                  new ItemStack(Items.PAPER)),
-            createDefaultBill(
-                  "minecraft:planks",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        new ItemStack(Items.PAPER),
-                        new ItemStack(Items.PAPER),
-                        new ItemStack(Items.PAPER),
-                        new ItemStack(Items.PAPER),
-                        new ItemStack(Items.COMPASS),
-                        new ItemStack(Items.PAPER),
-                        new ItemStack(Items.PAPER),
-                        new ItemStack(Items.PAPER),
-                        new ItemStack(Items.PAPER)),
-                  new ItemStack(Items.MAP)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:paper",
+                     ProductionTypes.CRAFTING,
+                     Collections.nCopies(3, new ItemStack(Items.SUGAR_CANE)),
+                     new ItemStack(Items.PAPER)),
+               createDefaultBill(
+                     "minecraft:planks",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           new ItemStack(Items.PAPER),
+                           new ItemStack(Items.PAPER),
+                           new ItemStack(Items.PAPER),
+                           new ItemStack(Items.PAPER),
+                           new ItemStack(Items.COMPASS),
+                           new ItemStack(Items.PAPER),
+                           new ItemStack(Items.PAPER),
+                           new ItemStack(Items.PAPER),
+                           new ItemStack(Items.PAPER)),
+                     new ItemStack(Items.MAP)));
+      return List.of();
    }
 
    private static final List<Item> ALLOWED_INGREDIENT_ITEMS = List.of(Items.PAPER, Items.MAP);

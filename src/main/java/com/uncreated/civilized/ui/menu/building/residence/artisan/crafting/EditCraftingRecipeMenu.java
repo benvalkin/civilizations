@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.mojang.datafixers.util.Pair;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
 import com.uncreated.civilized.ui.menu.building.residence.artisan.EditRecipeMenu;
@@ -70,7 +71,7 @@ public class EditCraftingRecipeMenu extends EditRecipeMenu<CraftingRecipe, Craft
 
    @Override
    public ProductionType getProductionType() {
-      return ProductionType.CRAFTING;
+      return ProductionTypes.CRAFTING;
    }
 
    @Override

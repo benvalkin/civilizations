@@ -2,7 +2,7 @@ package com.uncreated.civilized.ui.menu.building.residence.artisan;
 
 import java.util.List;
 
-import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 import com.uncreated.civilized.ui.components.buttons.buildingtab.HomeTabButton;
 import com.uncreated.civilized.ui.components.buttons.buildingtab.ManageResidentsTabButton;
 import com.uncreated.civilized.ui.components.buttons.buildingtab.SettingsTabButton;
@@ -36,7 +36,7 @@ public class CraftsmanHouseBuildingScreen extends ABuildingScreen {
                   tabHeight,
                   this.font,
                   context,
-                  ProductionType.CRAFTING),
+                  ProductionTypes.CRAFTING),
             new ManageResidentsTab(2, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
             new BuildingSettingsTab(3, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context));
    }

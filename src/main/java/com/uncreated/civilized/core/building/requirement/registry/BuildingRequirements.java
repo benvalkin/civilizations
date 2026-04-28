@@ -32,7 +32,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 
 @EventBusSubscriber(modid = CivilizedMod.CIVILIZED_MOD_ID)
-public class BuildingRequirementRegistry {
+public class BuildingRequirements {
 
    private static final ResourceKey<Registry<BuildingRequirementList>> BUILDING_REQUIREMENTS_KEY =
          ResourceKey
@@ -80,11 +80,6 @@ public class BuildingRequirementRegistry {
          registerStandardHouse(BuildingTypes.BUTCHER_HOUSE, registry, b -> {
             b.add(new CraftingTablesPresentRequirement(1, false));
             b.add(new SmokersPresentRequirement(1, false));
-         });
-
-         registerStandardHouse(BuildingTypes.BLACKSMITH_HOUSE, registry, b -> {
-            b.add(new CraftingTablesPresentRequirement(1, false));
-            b.add(new BlastFurnacesPresentRequirement(1, false));
          });
 
          registerStandardHouse(BuildingTypes.BLACKSMITH_HOUSE, registry, b -> {

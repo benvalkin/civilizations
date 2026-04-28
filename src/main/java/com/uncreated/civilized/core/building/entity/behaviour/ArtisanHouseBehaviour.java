@@ -24,7 +24,8 @@ public class ArtisanHouseBehaviour extends BuildingBehaviour {
 
    protected void registerProductionMachines(RecipeProductionSystem recipeProductionSystem) {
       for (ProductionType productionType : getBuilding().getBuildingType().supportedProductionTypes()) {
-         productionType.registerProductionMachine(recipeProductionSystem);
+         RecipeProductionMachine<?> machine = productionType.createRecipeProductionMachine().get();
+         recipeProductionSystem.registerMachine(machine.getClass(), machine);
       }
    }
 

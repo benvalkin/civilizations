@@ -19,7 +19,7 @@ import com.uncreated.civilized.core.building.requirement.SpaceRequirement;
 import com.uncreated.civilized.core.building.requirement.SurfaceAreaRequirement;
 import com.uncreated.civilized.core.building.requirement.blockcount.BlockCountRequirement;
 import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementList;
-import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirementRegistry;
+import com.uncreated.civilized.core.building.requirement.registry.BuildingRequirements;
 import com.uncreated.civilized.ui.menu.building.EstablishBuildingScreen;
 import com.uncreated.civilized.ui.style.Colors;
 
@@ -81,7 +81,7 @@ public class BuildingDeedItem extends Item {
 
             int buildingLevel = 1;
             BuildingRequirementList requirements =
-                  BuildingRequirementRegistry.getBuildingRequirements(buildingType, buildingLevel);
+                  BuildingRequirements.getBuildingRequirements(buildingType, buildingLevel);
             List<IBuildingRequirementResult> requirementResults = Lists.newArrayList();
 
             Set<BlockPos> validFloorBlocks = Set.of();

@@ -2,7 +2,7 @@ package com.uncreated.civilized.ui.menu.building.residence.artisan;
 
 import java.util.List;
 
-import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 import com.uncreated.civilized.ui.components.buttons.buildingtab.HomeTabButton;
 import com.uncreated.civilized.ui.components.buttons.buildingtab.ManageResidentsTabButton;
 import com.uncreated.civilized.ui.components.buttons.buildingtab.SettingsTabButton;
@@ -37,7 +37,7 @@ public class BlacksmithBuildingScreen extends ABuildingScreen {
                   tabHeight,
                   this.font,
                   context,
-                  ProductionType.CRAFTING),
+                  ProductionTypes.CRAFTING),
             new ManageProductionBillsTab(
                   2,
                   contentLeftPos,
@@ -46,7 +46,7 @@ public class BlacksmithBuildingScreen extends ABuildingScreen {
                   tabHeight,
                   this.font,
                   context,
-                  ProductionType.SMELTING),
+                  ProductionTypes.SMELTING),
             new ManageResidentsTab(3, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context),
             new BuildingSettingsTab(4, contentLeftPos, contentTopPos, tabWidth, tabHeight, this.font, context));
    }

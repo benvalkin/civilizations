@@ -13,7 +13,7 @@ public class RecipeProductionSystem {
    }
 
    public <Machine extends RecipeProductionMachine<?>> void registerMachine(
-         Class<Machine> machineType,
+         Class<? extends Machine> machineType,
          Machine machine) {
 
       if (machines.containsKey(machineType)) {

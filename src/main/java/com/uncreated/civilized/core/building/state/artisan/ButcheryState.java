@@ -5,6 +5,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -23,36 +24,36 @@ public class ButcheryState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING, ProductionType.SMOKING);
+      return List.of(ProductionTypes.CRAFTING, ProductionTypes.SMOKING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:rabbit_stew",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        new ItemStack(Items.COOKED_RABBIT),
-                        new ItemStack(Items.BAKED_POTATO),
-                        new ItemStack(Items.CARROT),
-                        new ItemStack(Items.BROWN_MUSHROOM),
-                        new ItemStack(Items.BOWL)),
-                  new ItemStack(Items.RABBIT_STEW)));
-      case SMOKING -> List.of(
-            createDefaultBill(
-                  "minecraft:cooked_beef",
-                  ProductionType.SMOKING,
-                  List.of(new ItemStack(Items.BEEF)),
-                  new ItemStack(Items.COOKED_BEEF)),
-            createDefaultBill(
-                  "minecraft:cooked_porkchop",
-                  ProductionType.SMOKING,
-                  List.of(new ItemStack(Items.PORKCHOP)),
-                  new ItemStack(Items.COOKED_PORKCHOP)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:rabbit_stew",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           new ItemStack(Items.COOKED_RABBIT),
+                           new ItemStack(Items.BAKED_POTATO),
+                           new ItemStack(Items.CARROT),
+                           new ItemStack(Items.BROWN_MUSHROOM),
+                           new ItemStack(Items.BOWL)),
+                     new ItemStack(Items.RABBIT_STEW)));
+      if (productionType.is(ProductionTypes.SMOKING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:cooked_beef",
+                     ProductionTypes.SMOKING,
+                     List.of(new ItemStack(Items.BEEF)),
+                     new ItemStack(Items.COOKED_BEEF)),
+               createDefaultBill(
+                     "minecraft:cooked_porkchop",
+                     ProductionTypes.SMOKING,
+                     List.of(new ItemStack(Items.PORKCHOP)),
+                     new ItemStack(Items.COOKED_PORKCHOP)));
+      return List.of();
    }
 
    private static final List<TagKey<Item>> ALLOWED_INGREDIENT_TAGS =
@@ -65,7 +66,7 @@ public class ButcheryState extends ArtisanHouseState {
          ItemStack resultItem,
          ServerLevel level) {
 
-      if (productionType == ProductionType.SMOKING)
+      if (productionType == ProductionTypes.SMOKING)
          return true;
 
       return recipeHasAtLeastOneIngredientWithMatchingTag(recipeInput, ALLOWED_INGREDIENT_TAGS);

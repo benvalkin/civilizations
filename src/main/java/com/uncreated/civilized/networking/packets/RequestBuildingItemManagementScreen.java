@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.state.IItemManagementMenuProvider;
+import com.uncreated.civilized.core.building.state.IItemManagementMenuSupplier;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 
@@ -55,7 +55,7 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
 
       Settlement settlement = ClientSettlementsStore.INSTANCE.get(building.get().getSettlementId());
 
-      if (!(building.get().getState() instanceof IItemManagementMenuProvider itemManagementMenuProvider))
+      if (!(building.get().getState() instanceof IItemManagementMenuSupplier itemManagementMenuProvider))
          return;
 
       context.player().openMenu(new MenuProvider() {

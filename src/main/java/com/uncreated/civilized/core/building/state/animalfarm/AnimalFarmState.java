@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.state.BuildingState;
-import com.uncreated.civilized.core.building.state.IItemManagementMenuProvider;
+import com.uncreated.civilized.core.building.state.IItemManagementMenuSupplier;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
 import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodMenu;
@@ -15,7 +15,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-public abstract class AnimalFarmState extends BuildingState implements IItemManagementMenuProvider {
+public abstract class AnimalFarmState extends BuildingState implements IItemManagementMenuSupplier {
 
    public static final String FIELD_FOOD_SLOT = "food_slot_";
 

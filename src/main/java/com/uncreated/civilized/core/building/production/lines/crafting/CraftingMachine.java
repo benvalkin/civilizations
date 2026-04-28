@@ -3,6 +3,7 @@ package com.uncreated.civilized.core.building.production.lines.crafting;
 import com.uncreated.civilized.core.building.production.RecipeProductionMachine;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.server.level.ServerLevel;
 
@@ -15,6 +16,6 @@ public class CraftingMachine extends RecipeProductionMachine<CraftingOrder> {
 
    @Override
    public ProductionType getProductionType() {
-      return ProductionType.CRAFTING;
+      return ProductionTypes.CRAFTING;
    }
 }

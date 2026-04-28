@@ -10,6 +10,7 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.RecipeProductionMachine;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 import com.uncreated.civilized.core.building.production.bills.strategy.ProductionStrategyType;
 import com.uncreated.civilized.core.building.production.orders.ProductionOrder;
 import com.uncreated.civilized.core.building.state.BuildingState;
@@ -19,6 +20,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -93,7 +95,7 @@ public abstract class ArtisanHouseState extends BuildingState {
          ProductionBill bill =
                new ProductionBill(
                      bt.getString("recipe_name"),
-                     ProductionType.valueOf(bt.getString("production_type")),
+                     ProductionTypes.getFromResourceLocation(ResourceLocation.parse(bt.getString("production_type"))),
                      ProductionStrategyType.valueOf(bt.getString("production_strategy_type")),
                      bt.getInt("bill_amount"),
                      bt.getBoolean("enabled"),
@@ -126,7 +128,7 @@ public abstract class ArtisanHouseState extends BuildingState {
       for (ProductionBill bill : productionBills) {
          CompoundTag billTag = new CompoundTag();
          billTag.putString("recipe_name", bill.getMinecraftRecipeName());
-         billTag.putString("production_type", bill.getProductionType().name());
+         billTag.putString("production_type", bill.getProductionType().resourceLocation().toString());
          billTag.putString("production_strategy_type", bill.getProductionStrategy().getType().name());
          billTag.putInt("bill_amount", bill.getBillAmount());
          billTag.putBoolean("enabled", bill.isEnabled());

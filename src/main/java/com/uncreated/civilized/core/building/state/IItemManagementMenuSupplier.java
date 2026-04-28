@@ -6,7 +6,7 @@ import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMe
 
 import net.minecraft.world.entity.player.Inventory;
 
-public interface IItemManagementMenuProvider {
+public interface IItemManagementMenuSupplier {
    ItemManagementMenu createItemManagementMenu(
          Integer containerId,
          Inventory playerInventory,

@@ -5,6 +5,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -23,59 +24,59 @@ public class MasonHouseState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING, ProductionType.SMELTING);
+      return List.of(ProductionTypes.CRAFTING, ProductionTypes.SMELTING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:stone_bricks",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        new ItemStack(Items.STONE),
-                        new ItemStack(Items.STONE),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.STONE),
-                        new ItemStack(Items.STONE),
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY),
-                  new ItemStack(Items.STONE_BRICKS)),
-            createDefaultBill(
-                  "minecraft:polished_andesite",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        new ItemStack(Items.ANDESITE),
-                        new ItemStack(Items.ANDESITE),
-                        ItemStack.EMPTY,
-                        new ItemStack(Items.ANDESITE),
-                        new ItemStack(Items.ANDESITE),
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY,
-                        ItemStack.EMPTY),
-                  new ItemStack(Items.POLISHED_ANDESITE)));
-      case SMELTING -> List.of(
-            createDefaultBill(
-                  "minecraft:stone",
-                  ProductionType.SMELTING,
-                  List.of(new ItemStack(Items.COBBLESTONE)),
-                  new ItemStack(Items.STONE)),
-            createDefaultBill(
-                  "minecraft:brick",
-                  ProductionType.SMELTING,
-                  List.of(new ItemStack(Items.CLAY_BALL)),
-                  new ItemStack(Items.BRICK)),
-            createDefaultBill(
-                  "minecraft:glass",
-                  ProductionType.SMELTING,
-                  List.of(new ItemStack(Items.SAND)),
-                  new ItemStack(Items.GLASS)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:stone_bricks",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           new ItemStack(Items.STONE),
+                           new ItemStack(Items.STONE),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.STONE),
+                           new ItemStack(Items.STONE),
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY),
+                     new ItemStack(Items.STONE_BRICKS)),
+               createDefaultBill(
+                     "minecraft:polished_andesite",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           new ItemStack(Items.ANDESITE),
+                           new ItemStack(Items.ANDESITE),
+                           ItemStack.EMPTY,
+                           new ItemStack(Items.ANDESITE),
+                           new ItemStack(Items.ANDESITE),
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY,
+                           ItemStack.EMPTY),
+                     new ItemStack(Items.POLISHED_ANDESITE)));
+      if (productionType.is(ProductionTypes.SMELTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:stone",
+                     ProductionTypes.SMELTING,
+                     List.of(new ItemStack(Items.COBBLESTONE)),
+                     new ItemStack(Items.STONE)),
+               createDefaultBill(
+                     "minecraft:brick",
+                     ProductionTypes.SMELTING,
+                     List.of(new ItemStack(Items.CLAY_BALL)),
+                     new ItemStack(Items.BRICK)),
+               createDefaultBill(
+                     "minecraft:glass",
+                     ProductionTypes.SMELTING,
+                     List.of(new ItemStack(Items.SAND)),
+                     new ItemStack(Items.GLASS)));
+      return List.of();
    }
 
    private static final List<TagKey<Item>> ALLOWED_INGREDIENT_TAGS =
@@ -98,6 +99,6 @@ public class MasonHouseState extends ArtisanHouseState {
    public Tooltip getAllowedRecipeHelpTooltip() {
       return Tooltip.create(
             Component.translatable(
-                    "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.mason"));
+                  "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.mason"));
    }
 }

@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class CropFarmState extends BuildingState implements IItemManagementMenuProvider {
+public class CropFarmState extends BuildingState implements IItemManagementMenuSupplier {
 
    public static final String FIELD_CROP_SLOT = "crop_slot_";
 

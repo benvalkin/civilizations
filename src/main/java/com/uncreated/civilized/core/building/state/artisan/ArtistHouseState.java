@@ -5,6 +5,7 @@ import java.util.List;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.production.bills.ProductionBill;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.production.bills.ProductionTypes;
 
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -24,34 +25,33 @@ public class ArtistHouseState extends ArtisanHouseState {
 
    @Override
    protected List<ProductionType> getSupportedProductionTypes() {
-      return List.of(ProductionType.CRAFTING);
+      return List.of(ProductionTypes.CRAFTING);
    }
 
    @Override
    protected List<ProductionBill> getDefaultProductionBills(ProductionType productionType) {
-      return switch (productionType) {
-      case CRAFTING -> List.of(
-            createDefaultBill(
-                  "minecraft:painting",
-                  ProductionType.CRAFTING,
-                  List.of(
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.WHITE_WOOL),
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STICK),
-                        new ItemStack(Items.STICK)),
-                  new ItemStack(Items.PAINTING)),
-            createDefaultBill(
-                  "minecraft:red_wool",
-                  ProductionType.CRAFTING,
-                  List.of(new ItemStack(Items.WHITE_WOOL), new ItemStack(Items.RED_DYE)),
-                  new ItemStack(Items.RED_WOOL)));
-      default -> List.of();
-      };
+      if (productionType.is(ProductionTypes.CRAFTING))
+         return List.of(
+               createDefaultBill(
+                     "minecraft:painting",
+                     ProductionTypes.CRAFTING,
+                     List.of(
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.WHITE_WOOL),
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STICK),
+                           new ItemStack(Items.STICK)),
+                     new ItemStack(Items.PAINTING)),
+               createDefaultBill(
+                     "minecraft:red_wool",
+                     ProductionTypes.CRAFTING,
+                     List.of(new ItemStack(Items.WHITE_WOOL), new ItemStack(Items.RED_DYE)),
+                     new ItemStack(Items.RED_WOOL)));
+      return List.of();
    }
 
    private static final List<TagKey<Item>> ALLOWED_INGREDIENTS_TAGS =
