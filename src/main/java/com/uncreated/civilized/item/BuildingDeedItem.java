@@ -10,7 +10,7 @@ import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.requirement.EnclosedRoomRequirement;
 import com.uncreated.civilized.core.building.requirement.IBuildingRequirement;
@@ -38,9 +38,9 @@ import net.minecraft.world.phys.HitResult;
 public class BuildingDeedItem extends Item {
 
    @Getter
-   private final BuildingTypeOld buildingType;
+   private final BuildingType buildingType;
 
-   public BuildingDeedItem(Properties properties, BuildingTypeOld buildingType) {
+   public BuildingDeedItem(Properties properties, BuildingType buildingType) {
       super(properties);
       this.buildingType = buildingType;
    }

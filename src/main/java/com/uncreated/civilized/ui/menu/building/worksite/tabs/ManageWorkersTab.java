@@ -55,7 +55,7 @@ public class ManageWorkersTab extends ManageResidentsTab {
    @Override
    protected List<VillagerInfo> getCandidateOccupants(Building building, Settlement settlement) {
       return super.getCandidateOccupants(building, settlement).stream()
-            .filter(v -> v.getOccupation() == building.getBuildingType().getOccupation())
+            .filter(v -> v.getOccupation() == building.getBuildingType().occupation())
             .toList();
    }
 

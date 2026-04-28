@@ -5,7 +5,8 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 import java.util.List;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypes;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.inn.InnBuildingScreen;
@@ -88,41 +89,5 @@ public abstract class ABuildingScreen extends AScreenWithTabs {
       int j = (this.height - this.imageHeight) / 2;
       graphics
             .blit(RenderType::guiTextured, MENU_TEXTURE, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 384, 384);
-   }
-
-   public static ABuildingScreen factory(Building building, Settlement settlement, BuildingScreenContext context) {
-
-      BuildingTypeOld buildingType = building.getBuildingType();
-      Component component = buildingType.translationDark().withStyle(ChatFormatting.UNDERLINE);
-
-      if (buildingType == BuildingTypeOld.INN)
-         return new InnBuildingScreen(context, component);
-      if (buildingType.isArtisanBuilding()) {
-         if (buildingType == BuildingTypeOld.BAKER_HOUSE)
-            return new BakeryBuildingScreen(context, component);
-         else if (buildingType == BuildingTypeOld.BUTCHER_HOUSE)
-            return new ButcheryBuildingScreen(context, component);
-         else if (buildingType == BuildingTypeOld.BLACKSMITH_HOUSE)
-            return new BlacksmithBuildingScreen(context, component);
-         else if (buildingType == BuildingTypeOld.MASON_HOUSE)
-            return new MasonBuildingScreen(context, component);
-         else
-            return new CraftsmanHouseBuildingScreen(context, component);
-      }
-      if (buildingType.isPermanentResidence())
-         return new ResidenceBuildingScreen(context, component);
-      if (buildingType.isWorksite()) {
-
-         if (buildingType == BuildingTypeOld.CROP_FARM)
-            return new CropFarmBuildingScreen(context, component);
-         if (buildingType == BuildingTypeOld.GROVE)
-            return new GroveBuildingScreen(context, component);
-         if (buildingType.isAnimalFarm())
-            return new AnimalFarmBuildingScreen(context, component);
-
-         return new WorksiteBuildingScreen(context, component);
-      }
-
-      return new ResidenceBuildingScreen(context, component);
    }
 }

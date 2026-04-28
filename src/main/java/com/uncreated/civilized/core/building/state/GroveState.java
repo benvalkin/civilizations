@@ -1,15 +1,20 @@
 package com.uncreated.civilized.core.building.state;
 
 import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
+import com.uncreated.civilized.ui.menu.building.worksite.grove.items.ChooseSaplingsMenu;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class GroveState extends BuildingState {
+public class GroveState extends BuildingState implements IItemManagementMenuProvider {
 
    public static final String FIELD_SAPLING = "sapling";
 
@@ -51,5 +56,14 @@ public class GroveState extends BuildingState {
 
    public boolean isCorrectSapling(ItemStack stack) {
       return ItemStack.isSameItem(sapling, stack);
+   }
+
+   @Override
+   public ItemManagementMenu createItemManagementMenu(
+         Integer containerId,
+         Inventory playerInventory,
+         Building building,
+         Settlement settlement) {
+      return new ChooseSaplingsMenu(containerId, playerInventory, new SimpleContainer(1), settlement, building);
    }
 }

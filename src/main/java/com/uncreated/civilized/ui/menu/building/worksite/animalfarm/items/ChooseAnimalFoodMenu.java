@@ -4,7 +4,7 @@ import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
-import com.uncreated.civilized.core.building.state.AnimalFarmState;
+import com.uncreated.civilized.core.building.state.animalfarm.AnimalFarmState;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.neoforge.registration.gui.GuiRegistry;
@@ -43,9 +43,11 @@ public class ChooseAnimalFoodMenu extends ItemManagementMenu {
       this.settlement = settlement;
       this.building = building;
 
-      this.addSlot(new AnimalFoodEyedropperSlot(building.getBuildingType(), container, 0, 123, 52));
-      this.addSlot(new AnimalFoodEyedropperSlot(building.getBuildingType(), container, 1, 123 + 2 * 18, 52));
-      this.addSlot(new AnimalFoodEyedropperSlot(building.getBuildingType(), container, 2, 123 + 4 * 18, 52));
+      AnimalFarmState buildingState = (AnimalFarmState) building.getState();
+
+      this.addSlot(new AnimalFoodEyedropperSlot(buildingState, container, 0, 123, 52));
+      this.addSlot(new AnimalFoodEyedropperSlot(buildingState, container, 1, 123 + 2 * 18, 52));
+      this.addSlot(new AnimalFoodEyedropperSlot(buildingState, container, 2, 123 + 4 * 18, 52));
 
       AnimalFarmState animalFarmBehaviour = (AnimalFarmState) building.getState();
       animalFarmBehaviour.tryApplyDefaults();

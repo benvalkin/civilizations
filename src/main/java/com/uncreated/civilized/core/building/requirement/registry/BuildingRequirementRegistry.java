@@ -6,7 +6,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.uncreated.civilized.CivilizedMod;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypes;
 import com.uncreated.civilized.core.building.requirement.EnclosedRoomRequirement;
 import com.uncreated.civilized.core.building.requirement.SpaceRequirement;
 import com.uncreated.civilized.core.building.requirement.SurfaceAreaRequirement;
@@ -53,7 +54,7 @@ public class BuildingRequirementRegistry {
 
          registerRequirements(
                registry,
-               BuildingRequirementList.forBuilding(BuildingTypeOld.STOREHOUSE, 1)
+               BuildingRequirementList.forBuilding(BuildingTypes.STOREHOUSE, 1)
                      .add(new SpaceRequirement(30))
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 40))
                      .add(new ChestsPresentRequirement(8, false))
@@ -62,7 +63,7 @@ public class BuildingRequirementRegistry {
 
          registerRequirements(
                registry,
-               BuildingRequirementList.forBuilding(BuildingTypeOld.INN, 1)
+               BuildingRequirementList.forBuilding(BuildingTypes.INN, 1)
                      .add(new SpaceRequirement(50))
                      .add(new EnclosedRoomRequirement())
                      .add(new BlockTypeRequirement(BuildingBlockTypes.WOOD, 200))
@@ -71,57 +72,57 @@ public class BuildingRequirementRegistry {
                      .add(new SignsPresentRequirement(1, false))
                      .create());
 
-         registerStandardHouse(BuildingTypeOld.BAKER_HOUSE, registry, b -> {
+         registerStandardHouse(BuildingTypes.BAKER_HOUSE, registry, b -> {
             b.add(new CraftingTablesPresentRequirement(1, false));
             b.add(new FurnacesPresentRequirement(1, false));
          });
 
-         registerStandardHouse(BuildingTypeOld.BUTCHER_HOUSE, registry, b -> {
+         registerStandardHouse(BuildingTypes.BUTCHER_HOUSE, registry, b -> {
             b.add(new CraftingTablesPresentRequirement(1, false));
             b.add(new SmokersPresentRequirement(1, false));
          });
 
-         registerStandardHouse(BuildingTypeOld.BLACKSMITH_HOUSE, registry, b -> {
+         registerStandardHouse(BuildingTypes.BLACKSMITH_HOUSE, registry, b -> {
             b.add(new CraftingTablesPresentRequirement(1, false));
             b.add(new BlastFurnacesPresentRequirement(1, false));
          });
 
-         registerStandardHouse(BuildingTypeOld.BLACKSMITH_HOUSE, registry, b -> {
+         registerStandardHouse(BuildingTypes.BLACKSMITH_HOUSE, registry, b -> {
             b.add(new CraftingTablesPresentRequirement(1, false));
             b.add(new BlastFurnacesPresentRequirement(1, false));
          });
 
          registerRequirements(
                registry,
-               BuildingRequirementList.forBuilding(BuildingTypeOld.CROP_FARM, 1)
+               BuildingRequirementList.forBuilding(BuildingTypes.CROP_FARM, 1)
                      .add(new SurfaceAreaRequirement(40))
                      .add(new SignsPresentRequirement(1, false))
                      .create());
 
          registerRequirements(
                registry,
-               BuildingRequirementList.forBuilding(BuildingTypeOld.GROVE, 1)
+               BuildingRequirementList.forBuilding(BuildingTypes.GROVE, 1)
                      .add(new SurfaceAreaRequirement(80))
                      .add(new SignsPresentRequirement(1, false))
                      .create());
 
          registerRequirements(
                registry,
-               BuildingRequirementList.forBuilding(BuildingTypeOld.CATTLE_FARM, 1)
+               BuildingRequirementList.forBuilding(BuildingTypes.COW_FARM, 1)
                      .add(new SurfaceAreaRequirement(64))
                      .add(new SignsPresentRequirement(1, false))
                      .create());
 
          registerRequirements(
                registry,
-               BuildingRequirementList.forBuilding(BuildingTypeOld.MINE, 1)
+               BuildingRequirementList.forBuilding(BuildingTypes.MINE, 1)
                      .add(new SurfaceAreaRequirement(9))
                      .add(new SignsPresentRequirement(1, false))
                      .create());
       });
    }
 
-   public static BuildingRequirementList.BuildingRequirementListBuilder standardHouseL1(BuildingTypeOld buildingType) {
+   public static BuildingRequirementList.BuildingRequirementListBuilder standardHouseL1(BuildingType buildingType) {
       return BuildingRequirementList.forBuilding(buildingType, 1)
             .add(new EnclosedRoomRequirement())
             .add(new SpaceRequirement(15))
@@ -130,7 +131,7 @@ public class BuildingRequirementRegistry {
             .add(new SignsPresentRequirement(1, false));
    }
 
-   public static BuildingRequirementList.BuildingRequirementListBuilder standardHouseL2(BuildingTypeOld buildingType) {
+   public static BuildingRequirementList.BuildingRequirementListBuilder standardHouseL2(BuildingType buildingType) {
       return BuildingRequirementList.forBuilding(buildingType, 2)
             .add(new SpaceRequirement(30))
             .add(new EnclosedRoomRequirement())
@@ -140,7 +141,7 @@ public class BuildingRequirementRegistry {
             .add(new SignsPresentRequirement(1, false));
    }
 
-   public static BuildingRequirementList.BuildingRequirementListBuilder standardHouseL3(BuildingTypeOld buildingType) {
+   public static BuildingRequirementList.BuildingRequirementListBuilder standardHouseL3(BuildingType buildingType) {
       return BuildingRequirementList.forBuilding(buildingType, 3)
             .add(new SpaceRequirement(50))
             .add(new EnclosedRoomRequirement())
@@ -151,7 +152,7 @@ public class BuildingRequirementRegistry {
    }
 
    public static void registerStandardHouse(
-         BuildingTypeOld buildingType,
+         BuildingType buildingType,
          RegisterEvent.RegisterHelper<BuildingRequirementList> registry,
          Consumer<BuildingRequirementList.BuildingRequirementListBuilder> extras) {
       registerWithExtras(standardHouseL1(buildingType), registry, extras);
@@ -167,7 +168,7 @@ public class BuildingRequirementRegistry {
       registerRequirements(registry, builder.create());
    }
 
-   private static ResourceLocation getResourceKey(BuildingTypeOld buildingType, int upgradeLevel) {
+   private static ResourceLocation getResourceKey(BuildingType buildingType, int upgradeLevel) {
       return ResourceLocation
             .fromNamespaceAndPath(CIVILIZED_MOD_ID, buildingType.name().toLowerCase() + "_" + upgradeLevel);
    }
@@ -181,7 +182,7 @@ public class BuildingRequirementRegistry {
       return requirementList;
    }
 
-   public static BuildingRequirementList getBuildingRequirements(BuildingTypeOld buildingType, int upgradeLevel) {
+   public static BuildingRequirementList getBuildingRequirements(BuildingType buildingType, int upgradeLevel) {
       Optional<BuildingRequirementList> requirements =
             BUILDING_REQUIREMENTS_INTERNAL.stream()
                   .filter(f -> f.getBuildingType() == buildingType && f.getUpgradeLevel() == upgradeLevel)

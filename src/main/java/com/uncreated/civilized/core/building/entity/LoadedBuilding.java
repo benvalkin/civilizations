@@ -15,7 +15,7 @@ public class LoadedBuilding {
    public LoadedBuilding(Building building, Level level) {
       this.building = building;
       this.level = level;
-      behaviour = BuildingBehaviour.create(this);
+      behaviour = building.getBuildingType().createBehaviour().apply(this);
       behaviour.start();
    }
 }

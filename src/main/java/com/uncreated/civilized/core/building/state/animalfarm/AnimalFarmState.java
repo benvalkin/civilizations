@@ -1,15 +1,21 @@
-package com.uncreated.civilized.core.building.state;
+package com.uncreated.civilized.core.building.state.animalfarm;
 
 import java.util.Arrays;
 
 import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.state.BuildingState;
+import com.uncreated.civilized.core.building.state.IItemManagementMenuProvider;
+import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
+import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodMenu;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
-public class AnimalFarmState extends BuildingState {
+public abstract class AnimalFarmState extends BuildingState implements IItemManagementMenuProvider {
 
    public static final String FIELD_FOOD_SLOT = "food_slot_";
 
@@ -56,31 +62,11 @@ public class AnimalFarmState extends BuildingState {
       tag.put(tagKey, foodSlots[i].save(building.getRegistryAccess()));
    }
 
-   public void tryApplyDefaults() {
-
-      if (Arrays.stream(foodSlots).allMatch(ItemStack::isEmpty)) {
-         switch (building.getBuildingType()) {
-         case CATTLE_FARM:
-         case SHEEP_FARM:
-            foodSlots[0] = new ItemStack(Items.WHEAT);
-            break;
-         case PIG_FARM:
-            foodSlots[0] = new ItemStack(Items.POTATO);
-            foodSlots[1] = new ItemStack(Items.CARROT);
-            foodSlots[2] = new ItemStack(Items.BEETROOT);
-            break;
-         case CHICKEN_FARM:
-            foodSlots[0] = new ItemStack(Items.WHEAT_SEEDS);
-            foodSlots[1] = new ItemStack(Items.BEETROOT_SEEDS);
-            break;
-         case BEE_FARM:
-            foodSlots[0] = new ItemStack(Items.POPPY);
-            foodSlots[1] = new ItemStack(Items.DANDELION);
-            foodSlots[2] = new ItemStack(Items.OXEYE_DAISY);
-            break;
-         }
-      }
+   public final void tryApplyDefaults() {
+      tryApplyDefaults(foodSlots);
    }
+
+   public abstract void tryApplyDefaults(ItemStack[] foodSlots);
 
    public boolean isCorrectFood(ItemStack stack) {
       return Arrays.stream(foodSlots).anyMatch(i -> ItemStack.isSameItem(i, stack));
@@ -93,4 +79,15 @@ public class AnimalFarmState extends BuildingState {
    public void setFoodSlot(int i, ItemStack itemStack) {
       foodSlots[i] = itemStack;
    }
+
+   @Override
+   public ItemManagementMenu createItemManagementMenu(
+         Integer containerId,
+         Inventory playerInventory,
+         Building building,
+         Settlement settlement) {
+      return new ChooseAnimalFoodMenu(containerId, playerInventory, new SimpleContainer(3), settlement, building);
+   }
+
+   public abstract boolean isCorrectAnimalFood(ItemStack itemStack);
 }

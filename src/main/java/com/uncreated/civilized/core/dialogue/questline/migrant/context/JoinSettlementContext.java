@@ -3,7 +3,7 @@ package com.uncreated.civilized.core.dialogue.questline.migrant.context;
 import org.jetbrains.annotations.Nullable;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
@@ -20,11 +20,11 @@ import net.minecraft.world.entity.player.Player;
 @Setter
 public class JoinSettlementContext extends DialogueContext {
 
-   private final BuildingTypeOld requiredBuildingType;
+   private final BuildingType requiredBuildingType;
    private @Nullable Settlement settlement;
    private @Nullable Building unoccupiedBuilding;
 
-   public JoinSettlementContext(CivilizedVillager villager, Player player, BuildingTypeOld requiredBuildingType) {
+   public JoinSettlementContext(CivilizedVillager villager, Player player, BuildingType requiredBuildingType) {
       super(villager, player);
 
       this.requiredBuildingType = requiredBuildingType;

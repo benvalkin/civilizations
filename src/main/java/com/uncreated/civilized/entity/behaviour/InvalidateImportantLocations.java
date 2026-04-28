@@ -4,13 +4,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import com.uncreated.civilized.core.building.BuildingTypes;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
@@ -47,7 +48,7 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
 
       Optional<Building> home = invalidateHome(villagerInfo, level);
       if (home.isPresent()) {
-         villagerInfo.setOccupation(home.get().getBuildingType().getOccupation());
+         villagerInfo.setOccupation(home.get().getBuildingType().occupation());
          villagerInfo.setHomeBuildingId(home.get().getBuildingId());
          villager.getBrain()
                .setMemory(MemoryModuleType.HOME, new GlobalPos(level.dimension(), home.get().getBlockPos()));
@@ -101,7 +102,7 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       Optional<Building> currentHome = ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
       if (currentHome.isPresent()) {
          // try to move villager out of the inn if a better home is available
-         if (currentHome.get().getBuildingType() == BuildingTypeOld.INN) {
+         if (currentHome.get().getBuildingType().is(BuildingTypes.INN)) {
             Optional<Building> betterHome =
                   BuildingUtil.findUnoccupiedHome(
                         villagerInfo.getSettlementId(),
@@ -129,21 +130,21 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       if (currentWorksite.isPresent())
          return currentWorksite;
 
-      Predicate<BuildingTypeOld> filter;
+      Predicate<BuildingType> filter;
       if (villagerInfo.getOccupation() == VillagerOccupation.FARMER) {
-         filter = b -> b == BuildingTypeOld.CROP_FARM;
+         filter = b -> b.is(BuildingTypes.CROP_FARM);
       } else if (villagerInfo.getOccupation() == VillagerOccupation.WOODCUTTER) {
-         filter = b -> b == BuildingTypeOld.GROVE;
+         filter = b -> b.is(BuildingTypes.GROVE);
       } else if (villagerInfo.getOccupation() == VillagerOccupation.MINER) {
-         filter = b -> b == BuildingTypeOld.MINE;
+         filter = b -> b.is(BuildingTypes.MINE);
       } else if (villagerInfo.getOccupation() == VillagerOccupation.RANCHER) {
          filter =
-               b -> b == BuildingTypeOld.CATTLE_FARM || b == BuildingTypeOld.CHICKEN_FARM || b == BuildingTypeOld.SHEEP_FARM
-                     || b == BuildingTypeOld.PIG_FARM;
+               b -> b.is(BuildingTypes.COW_FARM) || b.is(BuildingTypes.CHICKEN_FARM) || b.is( BuildingTypes.SHEEP_FARM)
+                     || b.is(BuildingTypes.PIG_FARM);
       } else if (villagerInfo.getOccupation() == VillagerOccupation.BEEKEEPER) {
-         filter = b -> b == BuildingTypeOld.BEE_FARM;
+         filter = b -> b.is(BuildingTypes.BEE_FARM);
       } else if (villagerInfo.getOccupation() == VillagerOccupation.FISHERMAN) {
-         filter = b -> b == BuildingTypeOld.FISHING_SPOT;
+         filter = b -> b.is(BuildingTypes.FISHING_SPOT);
       } else if (villagerInfo.getOccupation().isArtisan()) { // an artisan's worksite is their own home
          return ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
       } else

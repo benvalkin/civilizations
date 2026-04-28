@@ -68,7 +68,7 @@ public class ServerBuildingsStore extends BuildingStore {
          item.putUUID(Building.FIELD_BUILDING_ID, building.getBuildingId());
          item.putUUID(Building.FIELD_SETTLEMENT_ID, building.getSettlementId());
          item.putUUID(Building.FIELD_PLACER_ID, building.getPlacerId());
-         item.putString(Building.FIELD_BUILDING_TYPE, building.getBuildingType().name());
+         item.putString(Building.FIELD_BUILDING_TYPE, building.getBuildingType().resourceLocation().toString());
          item.putLong(Building.FIELD_CENTER_POS, building.getBounds().getCenter().asLong());
          item.putLong(Building.FIELD_LOWER_CORNER_POS, building.getBounds().getLowerCorner().asLong());
          item.putLong(Building.FIELD_UPPER_CORNER_POS, building.getBounds().getUpperCorner().asLong());
@@ -107,7 +107,9 @@ public class ServerBuildingsStore extends BuildingStore {
                      .buildingId(itemTag.getUUID(Building.FIELD_BUILDING_ID))
                      .settlementId(itemTag.getUUID(Building.FIELD_SETTLEMENT_ID))
                      .placerId(itemTag.getUUID(Building.FIELD_PLACER_ID))
-                     .buildingType(BuildingTypeOld.valueOf(itemTag.getString(Building.FIELD_BUILDING_TYPE)))
+                     .buildingType(
+                           BuildingTypes
+                                 .getResourceLocation(ResourceLocation.parse(itemTag.getString(Building.FIELD_BUILDING_TYPE))))
                      .bounds(
                            new BuildingBounds(
                                  BlockPos.of(itemTag.getLong(Building.FIELD_CENTER_POS)),

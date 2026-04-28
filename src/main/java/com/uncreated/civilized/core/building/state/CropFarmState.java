@@ -3,13 +3,18 @@ package com.uncreated.civilized.core.building.state;
 import java.util.Arrays;
 
 import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.settlement.Settlement;
+import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
+import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.items.ChooseCropsMenu;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class CropFarmState extends BuildingState {
+public class CropFarmState extends BuildingState implements IItemManagementMenuProvider {
 
    public static final String FIELD_CROP_SLOT = "crop_slot_";
 
@@ -74,5 +79,14 @@ public class CropFarmState extends BuildingState {
 
    public void setCropSlot(int i, ItemStack itemStack) {
       cropSlots[i] = itemStack;
+   }
+
+   @Override
+   public ItemManagementMenu createItemManagementMenu(
+         Integer containerId,
+         Inventory playerInventory,
+         Building building,
+         Settlement settlement) {
+      return new ChooseCropsMenu(containerId, playerInventory, new SimpleContainer(3), settlement, building);
    }
 }

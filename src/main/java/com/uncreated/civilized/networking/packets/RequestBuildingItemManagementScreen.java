@@ -7,16 +7,11 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.function.TriFunction;
-
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
+import com.uncreated.civilized.core.building.state.IItemManagementMenuProvider;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
-import com.uncreated.civilized.ui.menu.building.item.management.ItemManagementMenu;
-import com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items.ChooseAnimalFoodMenu;
-import com.uncreated.civilized.ui.menu.building.worksite.cropfarm.items.ChooseCropsMenu;
-import com.uncreated.civilized.ui.menu.building.worksite.grove.items.ChooseSaplingsMenu;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
@@ -26,7 +21,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -53,9 +47,7 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
       return TYPE;
    }
 
-   public static void serverReceiveRequestScreen(
-         RequestBuildingItemManagementScreen packet,
-         IPayloadContext context) {
+   public static void serverReceiveRequestScreen(RequestBuildingItemManagementScreen packet, IPayloadContext context) {
 
       Optional<Building> building = ServerBuildingsStore.INSTANCE.find(packet.buildingId);
       if (building.isEmpty())
@@ -63,22 +55,8 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
 
       Settlement settlement = ClientSettlementsStore.INSTANCE.get(building.get().getSettlementId());
 
-      TriFunction<Integer, Inventory, Player, ItemManagementMenu> menuSupplier =
-            switch (building.get().getBuildingType()) {
-            case CROP_FARM -> (
-                  i,
-                  inventory,
-                  player) -> new ChooseCropsMenu(i, inventory, new SimpleContainer(3), settlement, building.get());
-            case GROVE -> (
-                  i,
-                  inventory,
-                  player) -> new ChooseSaplingsMenu(i, inventory, new SimpleContainer(1), settlement, building.get());
-            case CATTLE_FARM, SHEEP_FARM, PIG_FARM, CHICKEN_FARM -> (
-                  i,
-                  inventory,
-                  player) -> new ChooseAnimalFoodMenu(i, inventory, new SimpleContainer(3), settlement, building.get());
-            default -> throw new IllegalArgumentException();
-            };
+      if (!(building.get().getState() instanceof IItemManagementMenuProvider itemManagementMenuProvider))
+         return;
 
       context.player().openMenu(new MenuProvider() {
          @Override
@@ -88,7 +66,7 @@ public record RequestBuildingItemManagementScreen(UUID buildingId, int container
 
          @Override
          public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-            return menuSupplier.apply(i, inventory, player);
+            return itemManagementMenuProvider.createItemManagementMenu(i, inventory, building.get(), settlement);
          }
 
          @Override

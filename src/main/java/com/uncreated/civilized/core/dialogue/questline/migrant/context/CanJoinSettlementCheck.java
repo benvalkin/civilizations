@@ -34,7 +34,7 @@ public class CanJoinSettlementCheck implements ResponseOption.IResponseOptionEna
             Tooltip.create(
                   translatable(
                         "villager.dialogue.quest.migrant_worker.misc.response.accept.tooltip.option_enabled",
-                        joinSettlement.getRequiredBuildingType().getOccupation().translation())
+                        joinSettlement.getRequiredBuildingType().occupation().translation())
                         .withColor(Colors.VALIDATION_SUCCESS)));
    }
 }

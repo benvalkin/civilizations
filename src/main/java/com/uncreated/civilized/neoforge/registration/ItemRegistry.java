@@ -7,7 +7,8 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypes;
 import com.uncreated.civilized.item.BuildingDeedItem;
 import com.uncreated.civilized.item.CurrencyItem;
 import com.uncreated.civilized.item.SettlementMandateItem;
@@ -15,6 +16,7 @@ import com.uncreated.civilized.neoforge.registration.entity.EntityRegistry;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -22,15 +24,13 @@ public class ItemRegistry {
    // Create a Deferred Register to hold Items which will all be registered under the "civilized" namespace
    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CIVILIZED_MOD_ID);
 
-   public static final Map<BuildingTypeOld, DeferredItem<Item>> BUILDING_DEEDS = registerBuildingDeeds();
+   public static final Map<BuildingType, DeferredItem<Item>> BUILDING_DEEDS = registerBuildingDeeds();
 
-   private static Map<BuildingTypeOld, DeferredItem<Item>> registerBuildingDeeds() {
-      Map<BuildingTypeOld, DeferredItem<Item>> result = new HashMap<>();
-      for (BuildingTypeOld buildingType : BuildingTypeOld.values()) {
-         if (buildingType == BuildingTypeOld.NONE)
-            continue;
-
-         result.put(buildingType, registerBuildingDeedItem(buildingType));
+   private static Map<BuildingType, DeferredItem<Item>> registerBuildingDeeds() {
+      Map<BuildingType, DeferredItem<Item>> result = new HashMap<>();
+      for (DeferredHolder<BuildingType, ? extends BuildingType> buildingTypeEntry : BuildingTypes.BUILDING_TYPES
+            .getEntries()) {
+         result.put(buildingTypeEntry.get(), registerBuildingDeedItem(buildingTypeEntry.get()));
       }
       return result;
    }
@@ -53,9 +53,9 @@ public class ItemRegistry {
                      // The properties passed into the lambda, with any additional setup.
                      properties));
 
-   private static @NotNull DeferredItem<Item> registerBuildingDeedItem(BuildingTypeOld buildingType) {
+   private static @NotNull DeferredItem<Item> registerBuildingDeedItem(BuildingType buildingType) {
       return ITEMS.registerItem(
-            buildingType.name().toLowerCase(),
-            properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingTypeOld.BAKER_HOUSE));
+            buildingType.name(),
+            properties -> new BuildingDeedItem(properties.stacksTo(1), buildingType));
    }
 }

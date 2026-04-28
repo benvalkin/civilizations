@@ -3,7 +3,7 @@ package com.uncreated.civilized.ui.menu.building.worksite.animalfarm.tabs;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.uncreated.civilized.core.building.state.AnimalFarmState;
+import com.uncreated.civilized.core.building.state.animalfarm.AnimalFarmState;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;

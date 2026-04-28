@@ -101,7 +101,7 @@ public class ManageOccupantWidget extends AbstractContainerWidget {
 
    protected void onPressedAssign(Button button, VillagerInfo villagerInfo, Building building) {
       villagerInfo.setHomeBuildingId(building.getBuildingId());
-      villagerInfo.setOccupation(building.getBuildingType().getOccupation());
+      villagerInfo.setOccupation(building.getBuildingType().occupation());
       ClientVillagerStore.INSTANCE.replicateChange(villagerInfo, StoreOperation.UPDATE);
       ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
    }

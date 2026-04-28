@@ -6,7 +6,8 @@ import java.util.Optional;
 
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypes;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 import com.uncreated.civilized.core.building.entity.LoadedBuildings;
@@ -27,8 +28,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 /**
  * Dedicated client packet to nicely create buildings on the server.
  */
-public record CreateNewBuilding(BuildingTypeOld buildingType,
-                                BuildingBounds buildingBounds) implements CustomPacketPayload {
+public record CreateNewBuilding(BuildingType buildingType,
+      BuildingBounds buildingBounds) implements CustomPacketPayload {
 
    public static final CustomPacketPayload.Type<CreateNewBuilding> TYPE =
          new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, "create_new_building"));
@@ -37,11 +38,13 @@ public record CreateNewBuilding(BuildingTypeOld buildingType,
          StreamCodec.ofMember(CreateNewBuilding::encode, CreateNewBuilding::decode);
 
    public static CreateNewBuilding decode(FriendlyByteBuf buffer) {
-      return new CreateNewBuilding(buffer.readEnum(BuildingTypeOld.class), BuildingBounds.decode(buffer));
+      return new CreateNewBuilding(
+            BuildingTypes.getResourceLocation(buffer.readResourceLocation()),
+            BuildingBounds.decode(buffer));
    }
 
    public void encode(FriendlyByteBuf buffer) {
-      buffer.writeEnum(buildingType);
+      buffer.writeResourceLocation(buildingType.resourceLocation());
       buildingBounds.encode(buffer);
    }
 

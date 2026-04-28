@@ -46,7 +46,7 @@ public class Building {
                   .buildingId(buffer.readUUID())
                   .settlementId(buffer.readUUID())
                   .placerId(buffer.readUUID())
-                  .buildingType(buffer.readEnum(BuildingTypeOld.class))
+                  .buildingType(BuildingTypes.getResourceLocation(buffer.readResourceLocation()))
                   .bounds(BuildingBounds.decode(buffer))
                   .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
                   .build();
@@ -61,7 +61,7 @@ public class Building {
       buffer.writeUUID(buildingId);
       buffer.writeUUID(settlementId);
       buffer.writeUUID(placerId);
-      buffer.writeEnum(buildingType);
+      buffer.writeResourceLocation(buildingType.resourceLocation());
       bounds.encode(buffer);
       buffer.writeCollection(occupantIds, (buf, o) -> buf.writeUUID(o));
       buffer.writeNbt(state.toNbt(buffer.registryAccess()));
@@ -84,7 +84,7 @@ public class Building {
    private UUID buildingId;
    private UUID settlementId;
    private UUID placerId;
-   private BuildingTypeOld buildingType;
+   private BuildingType buildingType;
    private BuildingBounds bounds;
    @Builder.Default
    private List<UUID> occupantIds = Lists.newArrayList();
@@ -146,7 +146,7 @@ public class Building {
       public Building build() {
          var building = super.build();
          if (building.state == null) {
-            building.state = BuildingState.create(building);
+            building.state = building.getBuildingType().createState().apply(building);
          }
 
          // TECHDEBT: someone could still try to use builder#behaviour() to set the behaviour, and this will override

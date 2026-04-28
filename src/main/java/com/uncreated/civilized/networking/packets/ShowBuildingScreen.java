@@ -6,15 +6,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.uncreated.civilized.core.building.Building;
+import com.uncreated.civilized.core.building.BuildingType;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.settlement.ClientSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -50,12 +53,17 @@ public record ShowBuildingScreen(UUID buildingId, CompoundTag additionalData) im
 
       Settlement settlement = ClientSettlementsStore.INSTANCE.get(building.get().getSettlementId());
 
-      // BuildingMenu buildingMenu =
-      // new BuildingMenu(0, context.player().getInventory(), new SimpleContainer(9), settlement, building.get());
-
       BuildingScreenContext buildingScreenContext =
-            new BuildingScreenContext(building.get(), settlement, packet.additionalData(), context.player().registryAccess());
+            new BuildingScreenContext(
+                  building.get(),
+                  settlement,
+                  packet.additionalData(),
+                  context.player().registryAccess());
 
-      Minecraft.getInstance().setScreen(ABuildingScreen.factory(building.get(), settlement, buildingScreenContext));
+      BuildingType buildingType = building.get().getBuildingType();
+      Component heading = buildingType.translationDark().withStyle(ChatFormatting.UNDERLINE);
+
+      ABuildingScreen buildingScreen = buildingType.buildingScreenSupplier().apply(buildingScreenContext, heading);
+      Minecraft.getInstance().setScreen(buildingScreen);
    }
 }

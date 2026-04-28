@@ -8,7 +8,7 @@ import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 
 import com.uncreated.civilized.core.building.requirement.IBuildingRequirement;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingType;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -17,11 +17,11 @@ import lombok.Getter;
 public class BuildingRequirementList implements Iterable<IBuildingRequirement> {
    private final List<IBuildingRequirement> requirements;
    @Getter
-   private final BuildingTypeOld buildingType;
+   private final BuildingType buildingType;
    @Getter
    private final int upgradeLevel;
 
-   public static BuildingRequirementListBuilder forBuilding(BuildingTypeOld buildingType, int upgradeLevel) {
+   public static BuildingRequirementListBuilder forBuilding(BuildingType buildingType, int upgradeLevel) {
       return new BuildingRequirementListBuilder().buildingType(buildingType).upgradeLevel(upgradeLevel);
    }
 

@@ -23,7 +23,7 @@ public class ArtisanHouseBehaviour extends BuildingBehaviour {
    }
 
    protected void registerProductionMachines(RecipeProductionSystem recipeProductionSystem) {
-      for (ProductionType productionType : building.productionTypes) {
+      for (ProductionType productionType : getBuilding().getBuildingType().supportedProductionTypes()) {
          productionType.registerProductionMachine(recipeProductionSystem);
       }
    }

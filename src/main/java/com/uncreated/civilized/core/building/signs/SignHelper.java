@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingTypeOld;
+import com.uncreated.civilized.core.building.BuildingTypes;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
@@ -61,20 +61,20 @@ public class SignHelper {
    }
 
    private static Component[] getSignTextComponents(Building building) {
-      if (building.getBuildingType() == BuildingTypeOld.TOWN_HALL) {
+      if (building.getBuildingType().is(BuildingTypes.TOWN_HALL)) {
          Settlement settlement = ServerSettlementsStore.INSTANCE.get(building.getSettlementId());
          return new Component[] { building.getBuildingType().translation(),
                settlement.displayNameTranslation().withStyle(ChatFormatting.ITALIC), Component.empty(),
                Component.empty() };
-      } else if (building.getBuildingType().isPermanentResidence()) {
-         List<VillagerInfo> residents = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
-         return new Component[] { building.getBuildingType().translation(),
-               Component.translatable("menu.building.residence.residents.count", residents.size()), Component.empty(),
-               Component.empty() };
-      } else if (building.getBuildingType().isTemporaryResidence()) {
+      } else if (building.getBuildingType().is(BuildingTypes.INN)) {
          List<VillagerInfo> visitors = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
          return new Component[] { building.getBuildingType().translation(),
                Component.translatable("menu.building.inn.visitors.count", visitors.size()), Component.empty(),
+               Component.empty() };
+      } else if (building.getBuildingType().isResidence()) {
+         List<VillagerInfo> residents = BuildingUtil.getResidents(building, ServerVillagerStore.INSTANCE);
+         return new Component[] { building.getBuildingType().translation(),
+               Component.translatable("menu.building.residence.residents.count", residents.size()), Component.empty(),
                Component.empty() };
       } else if (building.getBuildingType().isWorksite()) {
          List<VillagerInfo> workers = BuildingUtil.getAssignedWorkers(building, ServerVillagerStore.INSTANCE);
