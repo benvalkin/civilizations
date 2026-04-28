@@ -39,7 +39,7 @@ public record CreateNewBuilding(BuildingType buildingType,
 
    public static CreateNewBuilding decode(FriendlyByteBuf buffer) {
       return new CreateNewBuilding(
-            BuildingTypes.getResourceLocation(buffer.readResourceLocation()),
+            BuildingTypes.getFromResourceLocation(buffer.readResourceLocation()),
             BuildingBounds.decode(buffer));
    }
 

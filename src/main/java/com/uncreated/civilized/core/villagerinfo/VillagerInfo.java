@@ -37,7 +37,7 @@ public class VillagerInfo {
                   .isDeceased(buffer.readBoolean())
                   .firstName(buffer.readUtf())
                   .lastName(buffer.readUtf())
-                  .occupation(buffer.readEnum(VillagerOccupation.class))
+                  .occupation(VillagerOccupations.getFromResourceLocation(buffer.readResourceLocation()))
                   .settlementId(buffer.readNullable((b -> b.readUUID())))
                   .homeBuildingId(buffer.readNullable((b -> b.readUUID())))
                   .primaryWorksiteId(buffer.readNullable((b -> b.readUUID())))
@@ -53,7 +53,7 @@ public class VillagerInfo {
       buffer.writeBoolean(isDeceased);
       buffer.writeUtf(firstName);
       buffer.writeUtf(lastName);
-      buffer.writeEnum(occupation);
+      buffer.writeResourceLocation(occupation.resourceLocation());
       buffer.writeNullable(settlementId, (b, v) -> b.writeUUID(v));
       buffer.writeNullable(homeBuildingId, (b, v) -> b.writeUUID(v));
       buffer.writeNullable(primaryWorksiteId, (b, v) -> b.writeUUID(v));
@@ -83,7 +83,7 @@ public class VillagerInfo {
    private String lastName = "";
    @Setter
    @Builder.Default
-   private VillagerOccupation occupation = VillagerOccupation.UNEMPLOYED;
+   private VillagerOccupation occupation = VillagerOccupations.UNEMPLOYED;
    @Builder.Default
    private List<VillagerNpcRole> npcRoles = new ArrayList<>();
    @Setter

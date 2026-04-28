@@ -1,47 +1,74 @@
 package com.uncreated.civilized.core.villagerinfo;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
+
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
+import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.entity.CivilizedVillager;
+import com.uncreated.civilized.ui.style.Colors;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 
-public enum VillagerOccupation {
-   UNEMPLOYED,
-   // resource gatherer
-   FARMER,
-   RANCHER,
-   WOODCUTTER,
-   STONECUTTER,
-   MINER,
-   BEEKEEPER,
-   FISHERMAN,
-   // artisan
-   BAKER,
-   BUTCHER,
-   BLACKSMITH,
-   TOOLSMITH,
-   WEAPONSMITH,
-   ARMORER,
-   FLETCHER,
-   CARPENTER,
-    MASON,
-   LEATHERWORKER,
-   WEAVER,
-   CARTOGRAPHER,
-   ARTIST,
-   // special
-   TAVERN_KEEPER,
-   PRIEST,
-   SOLDIER,
-   NOBLEMAN;
+@Getter
+@Accessors(fluent = true)
+@Builder(builderMethodName = "internalBuilder")
+public class VillagerOccupation {
 
-   public Component translation() {
-      return Component.translatable("villager.occupation." + name().toLowerCase());
+   private final ResourceLocation resourceLocation;
+   @Nullable
+   private final BuildingType homeType;
+   @Nullable
+   private final Predicate<BuildingType> validWorksite;
+   @Nullable
+   private final Supplier<ImmutableList<Pair<Integer, ? extends BehaviorControl<CivilizedVillager>>>> workBehaviourPackage;
+
+   public static VillagerOccupation.VillagerOccupationBuilder builder(ResourceLocation key) {
+      return internalBuilder().resourceLocation(key);
    }
 
-   public boolean isArtisan() {
-      return switch (this) {
-      case BAKER, BUTCHER, BLACKSMITH, TOOLSMITH, WEAPONSMITH, ARMORER, CARPENTER, MASON, LEATHERWORKER, WEAVER,
-           FLETCHER, CARTOGRAPHER, ARTIST ->
-         true;
-      default -> false;
-      };
+   public String name() {
+      return resourceLocation.getPath();
+   }
+
+   public boolean is(VillagerOccupation other) {
+      return this.equals(other);
+   }
+
+   public String translationKey() {
+      return resourceLocation.getNamespace() + ".villager.occupation." + resourceLocation.getPath();
+   }
+
+   public MutableComponent translation() {
+      return Component.translatableWithFallback(translationKey(), resourceLocation.getPath().replace("_", " "))
+            .withColor(Colors.BUILDING_LIGHT);
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (o == null || getClass() != o.getClass())
+         return false;
+      VillagerOccupation that = (VillagerOccupation) o;
+      return Objects.equals(resourceLocation, that.resourceLocation);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hashCode(resourceLocation);
+   }
+
+   @Override
+   public String toString() {
+      return resourceLocation.toString();
    }
 }

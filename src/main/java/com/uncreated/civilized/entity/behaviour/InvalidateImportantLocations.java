@@ -2,21 +2,20 @@ package com.uncreated.civilized.entity.behaviour;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 
-import com.uncreated.civilized.core.building.BuildingTypes;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import com.uncreated.civilized.core.StoreOperation;
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypes;
 import com.uncreated.civilized.core.building.ServerBuildingsStore;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupations;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.neoforge.registration.ai.AIRegistry;
 
@@ -53,12 +52,12 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
          villager.getBrain()
                .setMemory(MemoryModuleType.HOME, new GlobalPos(level.dimension(), home.get().getBlockPos()));
 
-         if (villagerInfo.getOccupation() != VillagerOccupation.UNEMPLOYED) // take care not to make villagers think
+         if (!villagerInfo.getOccupation().is(VillagerOccupations.UNEMPLOYED)) // take care not to make villagers think
                                                                             // they can work if they are unemployed
             villager.getBrain()
                   .setMemory(AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get(), villagerInfo.getOccupation());
       } else {
-         villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
+         villagerInfo.setOccupation(VillagerOccupations.UNEMPLOYED);
          villager.getBrain().eraseMemory(MemoryModuleType.HOME);
          villager.getBrain().eraseMemory(AIRegistry.MM_VILLAGER_WORKTIME_OCCUPATION.get());
       }
@@ -130,29 +129,9 @@ public class InvalidateImportantLocations extends RecurringIntervalBehaviour<Civ
       if (currentWorksite.isPresent())
          return currentWorksite;
 
-      Predicate<BuildingType> filter;
-      if (villagerInfo.getOccupation() == VillagerOccupation.FARMER) {
-         filter = b -> b.is(BuildingTypes.CROP_FARM);
-      } else if (villagerInfo.getOccupation() == VillagerOccupation.WOODCUTTER) {
-         filter = b -> b.is(BuildingTypes.GROVE);
-      } else if (villagerInfo.getOccupation() == VillagerOccupation.MINER) {
-         filter = b -> b.is(BuildingTypes.MINE);
-      } else if (villagerInfo.getOccupation() == VillagerOccupation.RANCHER) {
-         filter =
-               b -> b.is(BuildingTypes.COW_FARM) || b.is(BuildingTypes.CHICKEN_FARM) || b.is( BuildingTypes.SHEEP_FARM)
-                     || b.is(BuildingTypes.PIG_FARM);
-      } else if (villagerInfo.getOccupation() == VillagerOccupation.BEEKEEPER) {
-         filter = b -> b.is(BuildingTypes.BEE_FARM);
-      } else if (villagerInfo.getOccupation() == VillagerOccupation.FISHERMAN) {
-         filter = b -> b.is(BuildingTypes.FISHING_SPOT);
-      } else if (villagerInfo.getOccupation().isArtisan()) { // an artisan's worksite is their own home
-         return ServerBuildingsStore.INSTANCE.find(villagerInfo.getHomeBuildingId());
-      } else
-         return Optional.empty();
-
       return BuildingUtil.findUnoccupiedWorksite(
             villagerInfo.getSettlementId(),
-            filter,
+            villagerInfo.getOccupation().validWorksite(),
             ServerBuildingsStore.INSTANCE,
             ServerVillagerStore.INSTANCE);
    }

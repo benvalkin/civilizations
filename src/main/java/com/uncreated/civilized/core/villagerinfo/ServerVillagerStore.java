@@ -13,6 +13,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -53,7 +54,9 @@ public class ServerVillagerStore extends VillagerStore {
             item.putUUID(VillagerInfo.FIELD_HOME_BUILDING_ID, villagerInfo.getHomeBuildingId());
          item.putString(VillagerInfo.FIELD_FIRST_NAME, villagerInfo.getFirstName());
          item.putString(VillagerInfo.FIELD_LAST_NAME, villagerInfo.getLastName());
-         item.putString(VillagerInfo.FIELD_VILLAGER_OCCUPATION, villagerInfo.getOccupation().name());
+         item.putString(
+               VillagerInfo.FIELD_VILLAGER_OCCUPATION,
+               villagerInfo.getOccupation().resourceLocation().toString());
          item.putString(VillagerInfo.FIELD_VILLAGER_GENDER, villagerInfo.getGender().name());
 
          ListTag npcRoles = new ListTag();
@@ -86,7 +89,9 @@ public class ServerVillagerStore extends VillagerStore {
                      .isDeceased(itemTag.getBoolean(VillagerInfo.FIELD_IS_DECEASED))
                      .firstName(itemTag.getString(VillagerInfo.FIELD_FIRST_NAME))
                      .lastName(itemTag.getString(VillagerInfo.FIELD_LAST_NAME))
-                     .occupation(VillagerOccupation.valueOf(itemTag.getString(VillagerInfo.FIELD_VILLAGER_OCCUPATION)))
+                     .occupation(
+                           VillagerOccupations.getFromResourceLocation(
+                                 ResourceLocation.parse(itemTag.getString(VillagerInfo.FIELD_VILLAGER_OCCUPATION))))
                      .gender(Gender.valueOf(itemTag.getString(VillagerInfo.FIELD_VILLAGER_GENDER)));
 
          if (itemTag.hasUUID(VillagerInfo.FIELD_SETTLEMENT_ID))

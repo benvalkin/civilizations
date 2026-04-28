@@ -35,15 +35,12 @@ public class WorkActivities {
 
    public static ImmutableList<Pair<Integer, ? extends BehaviorControl<CivilizedVillager>>> getWorkPackage(
          VillagerOccupation occupation) {
-      return switch (occupation) {
-      case FARMER -> getFarmerWorkPackage();
-      case WOODCUTTER -> getWoodcutterWorkPackage();
-      case MINER -> getMinerWorkPackage();
-      case RANCHER -> getRancherWorkPackage();
-      case BAKER -> getArtisanWorkPackage();
-      default -> throw new IllegalStateException(
-            String.format("Villager occupation '%s' does not support working behaviour.", occupation));
-      };
+
+      if (occupation.workBehaviourPackage() == null)
+         throw new IllegalStateException(
+               String.format("Villager occupation '%s' does not support working behaviour.", occupation));
+
+      return occupation.workBehaviourPackage().get();
    }
 
    public static ImmutableList<Pair<Integer, ? extends BehaviorControl<CivilizedVillager>>> getFarmerWorkPackage() {

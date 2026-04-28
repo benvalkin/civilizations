@@ -3,7 +3,7 @@ package com.uncreated.civilized.entity.renderer;
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupations;
 import com.uncreated.civilized.entity.CivilizedVillager;
 import com.uncreated.civilized.entity.renderer.layer.ClothingLayer;
 import com.uncreated.civilized.entity.renderer.layer.HairLayer;
@@ -46,7 +46,7 @@ public class CivilizedVillagerRenderer extends
       state.hair = villager.getHair();
       state.clothing = villager.getClothing();
 
-      if (villager.getInfo().getOccupation() != VillagerOccupation.UNEMPLOYED)
+      if (villager.getInfo().getOccupation().is(VillagerOccupations.UNEMPLOYED))
          state.occupationName = villager.getInfo().getOccupation().translation();
       else
          state.occupationName = null;

@@ -25,7 +25,7 @@ import com.uncreated.civilized.core.dialogue.specialized.ItemDepotDialogue;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.ServerVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupations;
 import com.uncreated.civilized.entity.behaviour.StatefulBehaviourControl;
 import com.uncreated.civilized.entity.pathfinding.VillagerGroundPathNavigation;
 import com.uncreated.civilized.entity.renderer.CivilizedVillagerRenderer;
@@ -321,7 +321,7 @@ public class CivilizedVillager extends AgeableMob implements InventoryCarrier, I
       brain.setSchedule(AIRegistry.SCHED_CIVILIZED_VILLAGER_DEFAULT.get());
       brain.addActivity(Activity.CORE, getCorePackage(0.33f));
       brain.addActivity(Activity.IDLE, getIdlePackage(0.25f));
-      if (info.getOccupation() != VillagerOccupation.UNEMPLOYED) {
+      if (!info.getOccupation().is(VillagerOccupations.UNEMPLOYED)) {
          brain.addActivityWithConditions(
                Activity.WORK,
                getWorkPackage(info.getOccupation()),

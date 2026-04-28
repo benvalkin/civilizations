@@ -2,6 +2,7 @@ package com.uncreated.civilized.ui.menu.building.residence.tabs;
 
 import java.util.List;
 
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupations;
 import org.apache.commons.compress.utils.Lists;
 
 import com.uncreated.civilized.core.building.Building;
@@ -146,7 +147,7 @@ public class ManageResidentsTab extends ABuildingScreenTab {
    protected ManageOccupantWidget.ManagementOption getAssignButtonAction(VillagerInfo villager) {
       if (villager.isOccupantOf(context.building()))
          return ManageOccupantWidget.ManagementOption.UNASSIGN;
-      else if (villager.getOccupation() == VillagerOccupation.UNEMPLOYED)
+      else if (villager.getOccupation().is(VillagerOccupations.UNEMPLOYED))
          return ManageOccupantWidget.ManagementOption.ASSIGN;
 
       return ManageOccupantWidget.ManagementOption.NOT_APPLICABLE;

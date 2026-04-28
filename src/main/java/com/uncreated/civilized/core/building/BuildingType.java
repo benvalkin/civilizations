@@ -10,6 +10,7 @@ import com.uncreated.civilized.core.building.entity.behaviour.BuildingBehaviour;
 import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.state.BuildingState;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupations;
 import com.uncreated.civilized.ui.context.BuildingScreenContext;
 import com.uncreated.civilized.ui.menu.building.ABuildingScreen;
 import com.uncreated.civilized.ui.menu.building.residence.ResidenceBuildingScreen;
@@ -37,7 +38,7 @@ public class BuildingType {
    @Builder.Default
    private final List<ProductionType> supportedProductionTypes = List.of();
    @Builder.Default
-   private final VillagerOccupation occupation = VillagerOccupation.UNEMPLOYED;
+   private final VillagerOccupation occupation = VillagerOccupations.UNEMPLOYED;
    @Builder.Default
    private final BiFunction<BuildingScreenContext, Component, ABuildingScreen> buildingScreenSupplier =
          ResidenceBuildingScreen::new;

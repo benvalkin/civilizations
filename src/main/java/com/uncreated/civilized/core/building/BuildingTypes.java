@@ -56,11 +56,11 @@ public class BuildingTypes {
    public static final DeferredRegister<BuildingType> BUILDING_TYPES =
          DeferredRegister.create(BUILDING_TYPES_INTERNAL, CIVILIZED_MOD_ID);
 
-   public static ResourceLocation createResourceKey(String buildintTypeName) {
-      return ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, buildintTypeName);
+   public static ResourceLocation createResourceKey(String buildingTypeName) {
+      return ResourceLocation.fromNamespaceAndPath(CIVILIZED_MOD_ID, buildingTypeName);
    }
 
-   public static BuildingType getResourceLocation(ResourceLocation resourceLocation) {
+   public static BuildingType getFromResourceLocation(ResourceLocation resourceLocation) {
       return BuildingTypes.BUILDING_TYPES.getRegistry().get().getValue(resourceLocation);
    }
 
@@ -80,6 +80,7 @@ public class BuildingTypes {
          registerBuildingType(registry, GUARD_POST);
          registerBuildingType(registry, TAVERN);
          registerBuildingType(registry, FARMER_HOUSE);
+         registerBuildingType(registry, WOODCUTTER_HOUSE);
          registerBuildingType(registry, MINER_HOUSE);
          registerBuildingType(registry, STONECUTTER_HOUSE);
          registerBuildingType(registry, RANCHER_HOUSE);

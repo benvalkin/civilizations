@@ -46,7 +46,7 @@ public class Building {
                   .buildingId(buffer.readUUID())
                   .settlementId(buffer.readUUID())
                   .placerId(buffer.readUUID())
-                  .buildingType(BuildingTypes.getResourceLocation(buffer.readResourceLocation()))
+                  .buildingType(BuildingTypes.getFromResourceLocation(buffer.readResourceLocation()))
                   .bounds(BuildingBounds.decode(buffer))
                   .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
                   .build();

@@ -109,7 +109,7 @@ public class ServerBuildingsStore extends BuildingStore {
                      .placerId(itemTag.getUUID(Building.FIELD_PLACER_ID))
                      .buildingType(
                            BuildingTypes
-                                 .getResourceLocation(ResourceLocation.parse(itemTag.getString(Building.FIELD_BUILDING_TYPE))))
+                                 .getFromResourceLocation(ResourceLocation.parse(itemTag.getString(Building.FIELD_BUILDING_TYPE))))
                      .bounds(
                            new BuildingBounds(
                                  BlockPos.of(itemTag.getLong(Building.FIELD_CENTER_POS)),

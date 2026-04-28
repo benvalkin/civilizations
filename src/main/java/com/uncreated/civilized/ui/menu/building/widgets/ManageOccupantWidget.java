@@ -7,7 +7,7 @@ import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.ClientBuildingStore;
 import com.uncreated.civilized.core.villagerinfo.ClientVillagerStore;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
-import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
+import com.uncreated.civilized.core.villagerinfo.VillagerOccupations;
 import com.uncreated.civilized.ui.style.Colors;
 
 import net.minecraft.client.gui.Font;
@@ -108,7 +108,7 @@ public class ManageOccupantWidget extends AbstractContainerWidget {
 
    protected void onPressedUnassign(Button button, VillagerInfo villagerInfo, Building building) {
       villagerInfo.setHomeBuildingId(null);
-      villagerInfo.setOccupation(VillagerOccupation.UNEMPLOYED);
+      villagerInfo.setOccupation(VillagerOccupations.UNEMPLOYED);
       ClientVillagerStore.INSTANCE.replicateChange(villagerInfo, StoreOperation.UPDATE);
       ClientBuildingStore.INSTANCE.replicateChange(building, StoreOperation.UPDATE);
    }
