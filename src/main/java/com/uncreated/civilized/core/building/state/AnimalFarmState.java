@@ -17,7 +17,7 @@ public class AnimalFarmState extends BuildingState {
 
    public static final int NUMBER_OF_FOOD_SLOTS = 3;
 
-   protected AnimalFarmState(Building building) {
+   public AnimalFarmState(Building building) {
       super(building);
       foodSlots = new ItemStack[NUMBER_OF_FOOD_SLOTS];
       foodSlots[0] = ItemStack.EMPTY;

@@ -19,7 +19,7 @@ public class GroveState extends BuildingState {
    @Setter
    private ItemStack sapling;
 
-   protected GroveState(Building building) {
+   public GroveState(Building building) {
       super(building);
       sapling = DEFAULT_SAPLING;
    }

@@ -107,7 +107,7 @@ public class ServerBuildingsStore extends BuildingStore {
                      .buildingId(itemTag.getUUID(Building.FIELD_BUILDING_ID))
                      .settlementId(itemTag.getUUID(Building.FIELD_SETTLEMENT_ID))
                      .placerId(itemTag.getUUID(Building.FIELD_PLACER_ID))
-                     .buildingType(BuildingType.valueOf(itemTag.getString(Building.FIELD_BUILDING_TYPE)))
+                     .buildingType(BuildingTypeOld.valueOf(itemTag.getString(Building.FIELD_BUILDING_TYPE)))
                      .bounds(
                            new BuildingBounds(
                                  BlockPos.of(itemTag.getLong(Building.FIELD_CENTER_POS)),

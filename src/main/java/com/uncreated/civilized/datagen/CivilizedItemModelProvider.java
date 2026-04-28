@@ -1,7 +1,7 @@
 package com.uncreated.civilized.datagen;
 
 import com.uncreated.civilized.CivilizedMod;
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypeOld;
 import com.uncreated.civilized.neoforge.registration.ItemRegistry;
 
 import net.minecraft.client.data.models.BlockModelGenerators;
@@ -23,7 +23,7 @@ public class CivilizedItemModelProvider extends ModelProvider {
    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
       // Generate models and associated files here
       for (var item : ItemRegistry.BUILDING_DEEDS.entrySet()) {
-         if (item.getKey() == BuildingType.NONE)
+         if (item.getKey() == BuildingTypeOld.NONE)
             continue;
 
          itemModels.generateFlatItem(item.getValue().get(), ModelTemplates.FLAT_ITEM);

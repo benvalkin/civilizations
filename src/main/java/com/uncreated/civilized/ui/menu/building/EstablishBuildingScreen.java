@@ -5,7 +5,7 @@ import static com.uncreated.civilized.CivilizedMod.CIVILIZED_MOD_ID;
 import java.util.List;
 
 import com.uncreated.civilized.client.renderer.BuildingBoundsDragTool;
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypeOld;
 import com.uncreated.civilized.core.building.bounds.BuildingBounds;
 import com.uncreated.civilized.core.building.requirement.IBuildingRequirementResult;
 import com.uncreated.civilized.item.BuildingDeedItem;
@@ -53,13 +53,13 @@ public class EstablishBuildingScreen extends Screen {
    private Button cancel;
    private Button confirm;
 
-   private final BuildingType buildingType;
+   private final BuildingTypeOld buildingType;
    private final BuildingBounds bounds;
    private final List<IBuildingRequirementResult> requirements;
    private ScrollListView<IBuildingRequirementResult, BuildingRequirementWidget> scrollView;
 
    public EstablishBuildingScreen(
-         BuildingType buildingType,
+         BuildingTypeOld buildingType,
          BuildingBounds bounds,
          List<IBuildingRequirementResult> requirements) {
       super(Component.translatable("menu.building.management.create.heading", buildingType.translationDark()));

@@ -38,7 +38,7 @@ public abstract class BuildingStore extends SavedData {
          ResourceKey<Level> dimension,
          UUID settlementId,
          UUID placerId,
-         BuildingType buildingType,
+         BuildingTypeOld buildingType,
          BuildingBounds bounds) {
       Building building =
             Building.builder()
@@ -133,7 +133,7 @@ public abstract class BuildingStore extends SavedData {
 
    public Optional<Building> findStorehouse(UUID settlementId) {
       return findForSettlement(settlementId).stream()
-            .filter(b -> b.getBuildingType() == BuildingType.STOREHOUSE)
+            .filter(b -> b.getBuildingType() == BuildingTypeOld.STOREHOUSE)
             .findFirst();
    }
 }

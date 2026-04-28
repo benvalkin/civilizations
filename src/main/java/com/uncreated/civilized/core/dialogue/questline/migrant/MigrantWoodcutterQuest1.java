@@ -5,7 +5,7 @@ import static com.uncreated.civilized.core.dialogue.DialogueWithPages.dialogueWi
 import static com.uncreated.civilized.core.dialogue.ResponseOption.option;
 import static net.minecraft.network.chat.Component.translatable;
 
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypeOld;
 import com.uncreated.civilized.core.dialogue.IVillageDialogue;
 import com.uncreated.civilized.core.dialogue.context.DialogueContext;
 import com.uncreated.civilized.core.dialogue.controller.DialogueFlow;
@@ -22,7 +22,7 @@ public class MigrantWoodcutterQuest1 extends DialogueFlow {
 
    @Override
    public DialogueContext buildDialogueContext(CivilizedVillager villager, Player player, InteractionHand hand) {
-      return new JoinSettlementContext(villager, player, BuildingType.WOODCUTTER_HOUSE);
+      return new JoinSettlementContext(villager, player, BuildingTypeOld.WOODCUTTER_HOUSE);
    }
 
    @Override

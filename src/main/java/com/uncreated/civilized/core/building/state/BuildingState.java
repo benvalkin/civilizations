@@ -12,8 +12,8 @@ import com.uncreated.civilized.core.building.state.artisan.ButcheryState;
 import com.uncreated.civilized.core.building.state.artisan.CarpenterHouseState;
 import com.uncreated.civilized.core.building.state.artisan.CartographerHouseState;
 import com.uncreated.civilized.core.building.state.artisan.FletcherHouseState;
-import com.uncreated.civilized.core.building.state.artisan.MasonHouseState;
 import com.uncreated.civilized.core.building.state.artisan.LeatherworkerHouseState;
+import com.uncreated.civilized.core.building.state.artisan.MasonHouseState;
 import com.uncreated.civilized.core.building.state.artisan.ToolsmithHouseState;
 import com.uncreated.civilized.core.building.state.artisan.WeaponsmithHouseState;
 import com.uncreated.civilized.core.building.state.artisan.WeaverHouseState;
@@ -27,7 +27,7 @@ public class BuildingState {
    protected final Logger LOGGER = LogUtils.getLogger();
    protected final Building building;
 
-   protected BuildingState(Building building) {
+   public BuildingState(Building building) {
       this.building = building;
    }
 

@@ -130,7 +130,7 @@
   "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.blacksmith": "Blacksmiths can smelt most types of ores and raw resources. They also know how to craft various things using metal ingots.",
   "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.butcher": "Butchers can cook raw meat and other foods in the smoker. They can also create meals that contain meat.",
   "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.carpenter": "Carpenters can craft a variety of blocks and items using wooden logs and planks.",
-  "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.cartographer": "Cartoographers process paper from sugarcane, and can craft maps, compasses, and other things with paper.",
+  "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.cartographer": "Cartographers process paper from sugarcane, and can craft maps, compasses, and other things with paper.",
   "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.fletcher": "Fletchers specialize in crafting arrows, bows, and other items using feathers and string.",
   "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.mason": "Masons cut stone blocks into various forms. They can also smelt cobblestone, clay, and some craft items with these.",
   "menu.building.residence.production_bills.edit_recipe.tooltip.allowed_recipe_help.tannery": "Leatherworkers make things out of leather, such as leather armor, among other items.",
@@ -290,5 +290,7 @@
   "villager.occupation.unemployed": "Unemployed",
   "villager.occupation.weaponsmith": "Weaponsmith",
   "villager.occupation.weaver": "Weaver",
-  "villager.occupation.woodcutter": "Woodcutter"
+  "villager.occupation.woodcutter": "Woodcutter",
+  "menu.building.management.requirements.count.description.smokers": "Smoker",
+  "menu.building.management.requirements.count.description.blast_furnaces": "Blast Furnace"
 }

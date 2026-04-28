@@ -17,7 +17,7 @@ public class CropFarmState extends BuildingState {
 
    public static final int NUMBER_OF_CROP_SLOTS = 3;
 
-   protected CropFarmState(Building building) {
+   public CropFarmState(Building building) {
       super(building);
       cropSlots = new ItemStack[NUMBER_OF_CROP_SLOTS];
       cropSlots[0] = ItemStack.EMPTY;

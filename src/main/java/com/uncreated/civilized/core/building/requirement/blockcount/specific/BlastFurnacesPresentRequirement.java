@@ -6,12 +6,12 @@ import com.uncreated.civilized.core.building.requirement.blockcount.validators.B
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.FurnaceBlock;
 
-public class FurnacesPresentRequirement extends BlockCountRequirement {
-   public FurnacesPresentRequirement(int requiredBlocks, boolean hideIfSatisfied) {
+public class BlastFurnacesPresentRequirement extends BlockCountRequirement {
+   public BlastFurnacesPresentRequirement(int requiredBlocks, boolean hideIfSatisfied) {
       super(
             new BlockClassValidator(FurnaceBlock.class),
             requiredBlocks,
-            Component.translatable("menu.building.management.requirements.count.description.furnaces"),
+            Component.translatable("menu.building.management.requirements.count.description.blast_furnaces"),
             hideIfSatisfied);
    }
 }

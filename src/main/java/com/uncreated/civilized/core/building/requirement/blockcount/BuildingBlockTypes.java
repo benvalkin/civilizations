@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.Tags;
 
 public class BuildingBlockTypes {
 
@@ -30,4 +31,10 @@ public class BuildingBlockTypes {
                Component.translatable("menu.building.management.requirements.block_types.type.wood")
                      .withColor(Colors.RESOURCE_WOOD),
                List.of(BlockTags.LOGS, BlockTags.PLANKS, BlockTags.WOODEN_SLABS, BlockTags.WOODEN_STAIRS));
+
+   public static final BuildingBlockType STONE =
+           new BuildingBlockType(
+                   Component.translatable("menu.building.management.requirements.block_types.type.wood")
+                           .withColor(Colors.RESOURCE_STONE),
+                   List.of(Tags.Blocks.STONES, Tags.Blocks.COBBLESTONES));
 }

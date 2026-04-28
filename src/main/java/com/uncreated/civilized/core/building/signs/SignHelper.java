@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.uncreated.civilized.core.building.Building;
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypeOld;
 import com.uncreated.civilized.core.building.util.BuildingUtil;
 import com.uncreated.civilized.core.settlement.ServerSettlementsStore;
 import com.uncreated.civilized.core.settlement.Settlement;
@@ -61,7 +61,7 @@ public class SignHelper {
    }
 
    private static Component[] getSignTextComponents(Building building) {
-      if (building.getBuildingType() == BuildingType.TOWN_HALL) {
+      if (building.getBuildingType() == BuildingTypeOld.TOWN_HALL) {
          Settlement settlement = ServerSettlementsStore.INSTANCE.get(building.getSettlementId());
          return new Component[] { building.getBuildingType().translation(),
                settlement.displayNameTranslation().withStyle(ChatFormatting.ITALIC), Component.empty(),

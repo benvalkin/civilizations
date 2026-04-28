@@ -1,6 +1,6 @@
 package com.uncreated.civilized.ui.menu.building.worksite.animalfarm.items;
 
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypeOld;
 import com.uncreated.civilized.ui.menu.item.management.EyedropperSlot;
 
 import net.minecraft.tags.ItemTags;
@@ -8,9 +8,9 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
 public class AnimalFoodEyedropperSlot extends EyedropperSlot {
-   private final BuildingType buildingType;
+   private final BuildingTypeOld buildingType;
 
-   public AnimalFoodEyedropperSlot(BuildingType buildingType, Container container, int slot, int x, int y) {
+   public AnimalFoodEyedropperSlot(BuildingTypeOld buildingType, Container container, int slot, int x, int y) {
       super(container, slot, x, y);
       this.buildingType = buildingType;
    }

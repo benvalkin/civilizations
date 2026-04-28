@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 
 import com.uncreated.civilized.core.building.Building;
 import com.uncreated.civilized.core.building.BuildingStore;
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypeOld;
 import com.uncreated.civilized.core.villagerinfo.VillagerInfo;
 import com.uncreated.civilized.core.villagerinfo.VillagerStore;
 
@@ -50,7 +50,7 @@ public class BuildingUtil {
 
    public static Optional<Building> findUnoccupiedHome(
          UUID settlementId,
-         BuildingType requiredBuildingType,
+         BuildingTypeOld requiredBuildingType,
          BuildingStore buildingStore,
          VillagerStore villagerStore) {
 
@@ -64,7 +64,7 @@ public class BuildingUtil {
 
    public static Optional<Building> findUnoccupiedWorksite(
          UUID settlementId,
-         Predicate<BuildingType> filter,
+         Predicate<BuildingTypeOld> filter,
          BuildingStore buildingStore,
          VillagerStore villagerStore) {
 

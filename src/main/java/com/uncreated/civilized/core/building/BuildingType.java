@@ -1,139 +1,79 @@
 package com.uncreated.civilized.core.building;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+
+import com.uncreated.civilized.core.building.entity.LoadedBuilding;
+import com.uncreated.civilized.core.building.entity.behaviour.BuildingBehaviour;
+import com.uncreated.civilized.core.building.production.bills.ProductionType;
+import com.uncreated.civilized.core.building.state.BuildingState;
 import com.uncreated.civilized.core.villagerinfo.VillagerOccupation;
 import com.uncreated.civilized.ui.style.Colors;
 
+import lombok.Builder;
+import lombok.experimental.Accessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-public enum BuildingType {
-   NONE,
-   INN,
-   TOWN_HALL,
-   TOWN_SQUARE,
-   STOREHOUSE,
-   CHURCH,
-   TAVERN,
-   FARMER_HOUSE,
-   RANCHER_HOUSE,
-   WOODCUTTER_HOUSE,
-   STONECUTTER_HOUSE,
-   MINER_HOUSE,
-   FISHERMAN_HOUSE,
-   BEEKEEPER_HOUSE,
-   BAKER_HOUSE,
-   BUTCHER_HOUSE,
-   BLACKSMITH_HOUSE,
-   TOOLSMITH_HOUSE,
-   WEAPONSMITH_HOUSE,
-   ARMORER_HOUSE,
-   CARPENTER_HOUSE,
-   MASON_HOUSE,
-   LEATHERWORKER_HOUSE,
-   WEAVER_HOUSE,
-   FLETCHER_HOUSE,
-   CARTOGRAPHER_HOUSE,
-   ARTIST_HOUSE,
-   GROVE,
-   CROP_FARM,
-   CATTLE_FARM,
-   PIG_FARM,
-   SHEEP_FARM,
-   CHICKEN_FARM,
-   QUARRY,
-   MINE,
-   BEE_FARM,
-   FISHING_SPOT,
-   BARRACKS,
-   GUARD_POST,
-   FANCY_HOUSE;
+@Accessors(fluent = true)
+@Builder(builderMethodName = "internalBuilder")
+public abstract class BuildingType {
+   private final String value;
+   private final boolean isPermanentResidence;
+   private final boolean isTemporaryResidence;
+   private final boolean isWorksite;
+   private final boolean isAnimalFarm;
+   @Builder.Default
+   private final Function<Building, BuildingState> createState = BuildingState::new;
+   @Builder.Default
+   private final Function<LoadedBuilding, BuildingBehaviour> createBehaviour = BuildingBehaviour::new;
+   @Builder.Default
+   private final List<ProductionType> supportedProductionTypes = List.of();
+   @Builder.Default
+   private final VillagerOccupation occupation = VillagerOccupation.UNEMPLOYED;
+
+   public static BuildingTypeBuilder builder(String value) {
+      return internalBuilder().value(value);
+   }
+
+   public boolean isResidence() {
+      return isPermanentResidence || isTemporaryResidence;
+   }
+
+   public boolean isArtisanHouse() {
+      return !supportedProductionTypes.isEmpty();
+   }
 
    public String translationKey() {
-      return "building." + this.name().toLowerCase();
+      return "building." + value;
    }
 
    public MutableComponent translation() {
-      return Component.translatableWithFallback(translationKey(), this.name().toLowerCase().replace("_", " "))
+      return Component.translatableWithFallback(translationKey(), value.replace("_", " "))
             .withColor(Colors.BUILDING_LIGHT);
    }
 
    public MutableComponent translationDark() {
-      return Component.translatableWithFallback(translationKey(), this.name().toLowerCase().replace("_", " "))
+      return Component.translatableWithFallback(translationKey(), value.replace("_", " "))
             .withColor(Colors.BUILDING_DARK);
    }
 
-   public VillagerOccupation getOccupation() {
-      return switch (this) {
-      case FARMER_HOUSE, CROP_FARM -> VillagerOccupation.FARMER;
-      case WOODCUTTER_HOUSE, GROVE -> VillagerOccupation.WOODCUTTER;
-      case STONECUTTER_HOUSE, QUARRY -> VillagerOccupation.STONECUTTER;
-      case MINER_HOUSE, MINE -> VillagerOccupation.MINER;
-      case RANCHER_HOUSE, CATTLE_FARM, CHICKEN_FARM, SHEEP_FARM, PIG_FARM -> VillagerOccupation.RANCHER;
-      case BEEKEEPER_HOUSE -> VillagerOccupation.BEEKEEPER;
-      case FISHERMAN_HOUSE -> VillagerOccupation.FISHERMAN;
-      case BAKER_HOUSE -> VillagerOccupation.BAKER;
-      case BUTCHER_HOUSE -> VillagerOccupation.BUTCHER;
-      case BLACKSMITH_HOUSE -> VillagerOccupation.BLACKSMITH;
-      case TOOLSMITH_HOUSE -> VillagerOccupation.TOOLSMITH;
-      case WEAPONSMITH_HOUSE -> VillagerOccupation.WEAPONSMITH;
-      case ARMORER_HOUSE -> VillagerOccupation.ARMORER;
-      case CARPENTER_HOUSE -> VillagerOccupation.CARPENTER;
-      case MASON_HOUSE -> VillagerOccupation.MASON;
-      case LEATHERWORKER_HOUSE -> VillagerOccupation.LEATHERWORKER;
-      case WEAVER_HOUSE -> VillagerOccupation.WEAVER;
-      case CARTOGRAPHER_HOUSE -> VillagerOccupation.CARTOGRAPHER;
-      case ARTIST_HOUSE -> VillagerOccupation.ARTIST;
-      case CHURCH -> VillagerOccupation.PRIEST;
-      case BARRACKS, GUARD_POST -> VillagerOccupation.SOLDIER;
-      case TAVERN -> VillagerOccupation.TAVERN_KEEPER;
-      default -> VillagerOccupation.UNEMPLOYED;
-      };
-   }
-
-   public boolean isPermanentResidence() {
-
-      if (isWorksite())
+   @Override
+   public boolean equals(Object o) {
+      if (o == null || getClass() != o.getClass())
          return false;
-
-      return switch (this) {
-      case INN, STOREHOUSE, TOWN_SQUARE -> false;
-      default -> true;
-      };
+      BuildingType that = (BuildingType) o;
+      return Objects.equals(value, that.value);
    }
 
-   public boolean isArtisanBuilding() {
-      return switch (this) {
-      case BAKER_HOUSE, BUTCHER_HOUSE, LEATHERWORKER_HOUSE, WEAVER_HOUSE, BLACKSMITH_HOUSE, TOOLSMITH_HOUSE, WEAPONSMITH_HOUSE,
-           ARMORER_HOUSE, CARPENTER_HOUSE, MASON_HOUSE, ARTIST_HOUSE, CARTOGRAPHER_HOUSE ->
-         true;
-      default -> false;
-      };
+   @Override
+   public int hashCode() {
+      return Objects.hashCode(value);
    }
 
-   public boolean isTemporaryResidence() {
-      return this == INN;
-   }
-
-   public boolean isResidence() {
-      return isPermanentResidence() || isTemporaryResidence();
-   }
-
-   public boolean canHaveOccupants() {
-      return isResidence() || isWorksite();
-   }
-
-   public boolean isWorksite() {
-      return switch (this) {
-      case GROVE, CROP_FARM, CATTLE_FARM, PIG_FARM, SHEEP_FARM, CHICKEN_FARM, QUARRY, MINE, BEE_FARM, FISHING_SPOT ->
-         true;
-      default -> false;
-      };
-   }
-
-   public boolean isAnimalFarm() {
-      return switch (this) {
-      case CATTLE_FARM, PIG_FARM, SHEEP_FARM, CHICKEN_FARM, BEE_FARM -> true;
-      default -> false;
-      };
+   @Override
+   public String toString() {
+      return value;
    }
 }

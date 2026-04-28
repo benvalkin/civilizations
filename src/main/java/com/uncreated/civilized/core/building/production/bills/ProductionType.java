@@ -1,5 +1,11 @@
 package com.uncreated.civilized.core.building.production.bills;
 
+import com.uncreated.civilized.core.building.production.RecipeProductionSystem;
+import com.uncreated.civilized.core.building.production.lines.crafting.CraftingMachine;
+import com.uncreated.civilized.core.building.production.lines.singleitem.cooking.BlastingMachine;
+import com.uncreated.civilized.core.building.production.lines.singleitem.cooking.SmeltingMachine;
+import com.uncreated.civilized.core.building.production.lines.singleitem.cooking.SmokingMachine;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.crafting.RecipeType;
 
@@ -21,6 +27,15 @@ public enum ProductionType {
       case SMELTING -> RecipeType.SMELTING;
       case BLASTING -> RecipeType.BLASTING;
       case SMOKING -> RecipeType.SMOKING;
+      };
+   }
+
+   public void registerProductionMachine(RecipeProductionSystem system) {
+      switch (this) {
+      case CRAFTING -> system.registerMachine(CraftingMachine.class, new CraftingMachine());
+      case SMELTING -> system.registerMachine(SmeltingMachine.class, new SmeltingMachine());
+      case BLASTING -> system.registerMachine(BlastingMachine.class, new BlastingMachine());
+      case SMOKING -> system.registerMachine(SmokingMachine.class, new SmokingMachine());
       };
    }
 }

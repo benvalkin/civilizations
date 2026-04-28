@@ -46,7 +46,7 @@ public class Building {
                   .buildingId(buffer.readUUID())
                   .settlementId(buffer.readUUID())
                   .placerId(buffer.readUUID())
-                  .buildingType(buffer.readEnum(BuildingType.class))
+                  .buildingType(buffer.readEnum(BuildingTypeOld.class))
                   .bounds(BuildingBounds.decode(buffer))
                   .occupantIds(buffer.readCollection(ArrayList::new, b -> b.readUUID()))
                   .build();
@@ -84,7 +84,7 @@ public class Building {
    private UUID buildingId;
    private UUID settlementId;
    private UUID placerId;
-   private BuildingType buildingType;
+   private BuildingTypeOld buildingType;
    private BuildingBounds bounds;
    @Builder.Default
    private List<UUID> occupantIds = Lists.newArrayList();

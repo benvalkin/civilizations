@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.uncreated.civilized.core.building.BuildingType;
+import com.uncreated.civilized.core.building.BuildingTypeOld;
 import com.uncreated.civilized.item.BuildingDeedItem;
 import com.uncreated.civilized.item.CurrencyItem;
 import com.uncreated.civilized.item.SettlementMandateItem;
@@ -22,12 +22,12 @@ public class ItemRegistry {
    // Create a Deferred Register to hold Items which will all be registered under the "civilized" namespace
    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CIVILIZED_MOD_ID);
 
-   public static final Map<BuildingType, DeferredItem<Item>> BUILDING_DEEDS = registerBuildingDeeds();
+   public static final Map<BuildingTypeOld, DeferredItem<Item>> BUILDING_DEEDS = registerBuildingDeeds();
 
-   private static Map<BuildingType, DeferredItem<Item>> registerBuildingDeeds() {
-      Map<BuildingType, DeferredItem<Item>> result = new HashMap<>();
-      for (BuildingType buildingType : BuildingType.values()) {
-         if (buildingType == BuildingType.NONE)
+   private static Map<BuildingTypeOld, DeferredItem<Item>> registerBuildingDeeds() {
+      Map<BuildingTypeOld, DeferredItem<Item>> result = new HashMap<>();
+      for (BuildingTypeOld buildingType : BuildingTypeOld.values()) {
+         if (buildingType == BuildingTypeOld.NONE)
             continue;
 
          result.put(buildingType, registerBuildingDeedItem(buildingType));
@@ -53,9 +53,9 @@ public class ItemRegistry {
                      // The properties passed into the lambda, with any additional setup.
                      properties));
 
-   private static @NotNull DeferredItem<Item> registerBuildingDeedItem(BuildingType buildingType) {
+   private static @NotNull DeferredItem<Item> registerBuildingDeedItem(BuildingTypeOld buildingType) {
       return ITEMS.registerItem(
             buildingType.name().toLowerCase(),
-            properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingType.BAKER_HOUSE));
+            properties -> new BuildingDeedItem(properties.stacksTo(1), BuildingTypeOld.BAKER_HOUSE));
    }
 }

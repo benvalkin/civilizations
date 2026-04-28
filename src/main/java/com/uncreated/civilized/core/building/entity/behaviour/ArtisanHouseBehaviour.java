@@ -3,17 +3,18 @@ package com.uncreated.civilized.core.building.entity.behaviour;
 import com.uncreated.civilized.core.building.entity.LoadedBuilding;
 import com.uncreated.civilized.core.building.production.RecipeProductionMachine;
 import com.uncreated.civilized.core.building.production.RecipeProductionSystem;
+import com.uncreated.civilized.core.building.production.bills.ProductionType;
 import com.uncreated.civilized.core.building.state.artisan.ArtisanHouseState;
 
 import lombok.Getter;
 import net.minecraft.server.level.ServerLevel;
 
-public abstract class ArtisanHouseBehaviour extends BuildingBehaviour {
+public class ArtisanHouseBehaviour extends BuildingBehaviour {
 
    @Getter
    private RecipeProductionSystem recipeProductionSystem; // null on client
 
-   protected ArtisanHouseBehaviour(LoadedBuilding entity) {
+   public ArtisanHouseBehaviour(LoadedBuilding entity) {
       super(entity);
 
       if (!entity.getLevel().isClientSide()) {
@@ -21,7 +22,11 @@ public abstract class ArtisanHouseBehaviour extends BuildingBehaviour {
       }
    }
 
-   protected abstract void registerProductionMachines(RecipeProductionSystem recipeProductionSystem);
+   protected void registerProductionMachines(RecipeProductionSystem recipeProductionSystem) {
+      for (ProductionType productionType : building.productionTypes) {
+         productionType.registerProductionMachine(recipeProductionSystem);
+      }
+   }
 
    @Override
    public void start() {

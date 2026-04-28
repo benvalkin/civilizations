@@ -4,14 +4,14 @@ import com.uncreated.civilized.core.building.requirement.blockcount.BlockCountRe
 import com.uncreated.civilized.core.building.requirement.blockcount.validators.BlockClassValidator;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.FurnaceBlock;
+import net.minecraft.world.level.block.SmokerBlock;
 
-public class FurnacesPresentRequirement extends BlockCountRequirement {
-   public FurnacesPresentRequirement(int requiredBlocks, boolean hideIfSatisfied) {
+public class SmokersPresentRequirement extends BlockCountRequirement {
+   public SmokersPresentRequirement(int requiredBlocks, boolean hideIfSatisfied) {
       super(
-            new BlockClassValidator(FurnaceBlock.class),
+            new BlockClassValidator(SmokerBlock.class),
             requiredBlocks,
-            Component.translatable("menu.building.management.requirements.count.description.furnaces"),
+            Component.translatable("menu.building.management.requirements.count.description.smokers"),
             hideIfSatisfied);
    }
 }
